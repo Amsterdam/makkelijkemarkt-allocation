@@ -49,7 +49,7 @@ class AllocatorTest(unittest.TestCase):
         rsvp = self.sut.get_rsvp_for_merchant("5002001062")
         self.assertFalse(rsvp)
 
-    def test_get_mechants_with_evi(self):
+    def test_get_merchants_with_evi(self):
         evis = self.sut.get_merchants_with_evi()
         expected_evis = ['6040188042', '2000178040', '1020185000', '0020181040', '2000113080', 
                          '7000117002', '2002004040', '4022004040', '5022001050', '1002002000', 
