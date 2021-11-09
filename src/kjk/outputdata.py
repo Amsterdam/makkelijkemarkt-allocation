@@ -57,7 +57,7 @@ class Allocation:
         },
     """
 
-    def __init__(self)
+    def __init__(self):
         pass
 
 
@@ -108,7 +108,7 @@ class Rejection:
         },
     """
     
-    def __init__(self)
+    def __init__(self):
         pass
 
 
