@@ -1,22 +1,14 @@
 import json
 from pprint import pprint
 
-class BaseDataProvider:
-
-    # marktDate 
-    # marktId 
-    # paginas 
-    # rows
-    # branches 
-    # voorkeuren 
-    # naam
-    # obstakels
-    # aanmeldingen 
-    # markt
-    # aLijst 
-    # ondernemers 
-    # aanwezigheid 
-    # marktplaatsen
+class BaseDataprovider:
+    """
+    Defines an interface to provide data for the Allocator object (kjk.allocation.Allocator)
+    Market data should contain the following collections:
+        marktDate, marktId, paginas, rows, branches, voorkeuren, naam, obstakels, aanmeldingen 
+        markt, aLijst, ondernemers, aanwezigheid, marktplaatsen
+    see: 'fixtures/dapp_20211030/a_input.json' for an anonimyzed example of a real world scenario
+    """
 
     def load_data(self):
         raise NotImplementedError
@@ -27,8 +19,27 @@ class BaseDataProvider:
     def get_market_locations(self):
         raise NotImplementedError
 
+    def get_market_locations(self):
+        raise NotImplementedError
 
-class FixtureDataprovider(BaseDataProvider):
+    def get_rsvp(self):
+        raise NotImplementedError
+
+    def get_a_list(self):
+        raise NotImplementedError
+
+    def get_attending(self):
+        raise NotImplementedError
+
+    def get_branches(self):
+        raise NotImplementedError
+
+    def get_preferences(self):
+        raise NotImplementedError
+
+
+class FixtureDataprovider(BaseDataprovider):
+    """A fixture based dataprovider"""
     def __init__(self, json_file):
         self.input_file = json_file
 
@@ -58,6 +69,9 @@ class FixtureDataprovider(BaseDataProvider):
 
     def get_branches(self):
         return self.data['branches']
+
+    def get_preferences(self):
+        return self.data['voorkeuren']
 
         
 
