@@ -34,10 +34,40 @@ class Allocator:
         self.positions_df = pd.json_normalize(self.open_positions)
         self.prefs_df = pd.json_normalize(self.prefs)
         self.rsvp_df = pd.json_normalize(self.rsvp)
+        self.branches_df= pd.json_normalize(self.branches)
 
         # create a dataframe with merchants attending the market
-        self.merchants_df = self.df_for_attending_merchants()
+        # and create a positions dataframe
+        # these dataframes will be used in the allocation
+        self.prepare_merchants()
+        self.prepare_stands()
+
+    def prepare_merchants(self):
+        """prepare the merchants list for allocation"""
+        self.df_for_attending_merchants()
         self.add_prefs_for_merchant()
+
+    def prepare_stands(self):
+        """prepare the stands list for allocation"""
+        def required(x):
+            return self.get_required_for_branche(x)
+        is_required = self.positions_df['branches'].apply(required)
+        self.positions_df["required"] = is_required
+
+    def get_required_for_branche(self, b):
+        if len(b) == 0:
+            return "no"
+        # assumption:
+        # if more than one branche per stand alwyas means bak?
+        if len(b) >= 1:
+            if "bak" in b:
+                return "yes"
+            result = self.branches_df[self.branches_df["brancheId"] == b[0]]
+            if result.iloc[0]['verplicht']:
+                return "yes"
+            else:
+                return "no"
+        return "unknown"
 
     def get_prefs_for_merchant(self, merchant_number):
         """get position pref for merchant_number (erkenningsNummer)"""
@@ -70,7 +100,7 @@ class Allocator:
         d = self.merchants_df
         df_1 = d[(d['attending'] != "no") & (d['status'] == "vpl")]
         df_2 = d[(d['attending'] == "yes") & (d['status'] != "vpl")]
-        return pd.concat([df_1, df_2])
+        self.merchants_df = pd.concat([df_1, df_2])
 
     def get_vpl_for_position(self, position):
         """return a merchant number for a fixed position, reurn None is no merchant found"""
@@ -138,6 +168,28 @@ class Allocator:
         return result_df.to_list()
 
     def get_allocation(self):
+        """
+        1. Deel VPHs die niet willen verplaatsen in op hun eigen vaste plaatsen;
+        2. Deel VPH's in die willen verplaatsen (bereken door of dit succesvol verloopt,
+           anders terugvallen op eigen plaats; Als één of meerdere bestemmingsplaatsen van een ándere verplaatsende VPH zijn,
+           wordt eerst gecontroleerd of laatstgenoemde nog wel ingedeeld kan worden als eerstgenoemde daar wordt ingedeeld.);
+        3. Deel ondernemers in die opereren in dezelfde branche als de vrijgekomen plaatsen.
+           Deze groep kan bestaan uit VPHs die willen verplaatsen en sollicitanten.
+           Als er meer ondernemers zijn dan beschikbare plaatsen, dan worden de resterende ondernemers afgewezen.
+        4. Resterende verplichte brancheplaatsen worden vanaf nu behandeld als normale, branchevrije plaatsen.
+        5. Deel ondernemers in met een BAK. Ook dit kunnen zowel verplaatsende VPHs als sollicitanten zijn.
+           Als er meer BAK ondernemers zijn dan beschikbare BAK plaatsen, dan worden de resterende ondernemers afgewezen.
+        6. Resterende BAK plaatsen worden vanaf nu behandeld als normale plaatsen.
+        7. Deel ondernemers in met een EVI. Ook dit kunnen zowel verplaatsende VPHs als sollicitanten zijn.
+           Als er meer EVI ondernemers zijn dan beschikbare EVI plaatsen, dan worden de resterende ondernemers afgewezen.
+        8. Resterende EVI plaatsen worden vanaf nu behandeld als normale plaatsen.
+        9. Deel de overgebleven sollicitanten in.
+
+
+        En dan nog, de uitbreidingen, de plaatsvoorkeuren met prio, vervangers, afwezigheid voor periode.
+        """
+        print(self.positions_df)
+        print(self.merchants_df)
         return {}
 
 
@@ -146,4 +198,5 @@ if __name__ == "__main__":
     dp = FixtureDataprovider("../../fixtures/dapp_20211030/a_input.json")
     a = Allocator(dp)
     a.get_allocation()
+    a.prepare_stands()
 
