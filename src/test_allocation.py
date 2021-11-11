@@ -49,12 +49,23 @@ class AllocatorTest(unittest.TestCase):
         rsvp = self.sut.get_rsvp_for_merchant("5002001062")
         self.assertFalse(rsvp)
 
+    def test_add_prefs_for_merchant(self):
+        # column prefs should be added in the constructor of sut
+        columns = list(self.sut.merchants_df)
+        self.assertIn("pref", columns)
+
     def test_get_merchants_with_evi(self):
         evis = self.sut.get_merchants_with_evi()
         expected_evis = ['6040188042', '2000178040', '1020185000', '0020181040', '2000113080', 
                          '7000117002', '2002004040', '4022004040', '5022001050', '1002002000', 
                          '7022008040', '0042004002', '0002020002']
         self.assertListEqual(evis, expected_evis)
+
+    def test_get_pref_for_merchant(self):
+        m = self.sut.get_prefs_for_merchant('1022020060')
+        self.assertListEqual(m, [['193', '195', '204', '211', '221',
+                                  '222', '223', '225', '226', '228', '230'],
+                                 [2, 1, 7, 8, 10, 11, 9, 5, 6, 4, 3]])
         
 
 if __name__ == '__main__':

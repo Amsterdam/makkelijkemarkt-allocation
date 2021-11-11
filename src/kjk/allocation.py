@@ -37,6 +37,20 @@ class Allocator:
 
         # create a dataframe with merchants attending the market
         self.merchants_df = self.df_for_attending_merchants()
+        self.add_prefs_for_merchant()
+
+    def get_prefs_for_merchant(self, merchant_number):
+        """get position pref for merchant_number (erkenningsNummer)"""
+        result_df = self.prefs_df[self.prefs_df['erkenningsNummer'] == merchant_number]
+        plaats = result_df['plaatsId'].to_list()
+        prio = result_df['priority'].to_list()
+        return [plaats, prio]
+
+    def add_prefs_for_merchant(self):
+        """add position preferences to the merchant dataframe"""
+        def prefs(x):
+            return self.get_prefs_for_merchant(x)
+        self.merchants_df['pref'] = self.merchants_df['erkenningsNummer'].apply(prefs)
 
     def df_for_attending_merchants(self):
         """
@@ -125,4 +139,11 @@ class Allocator:
 
     def get_allocation(self):
         return {}
+
+
+if __name__ == "__main__":
+    from inputdata import FixtureDataprovider
+    dp = FixtureDataprovider("../../fixtures/dapp_20211030/a_input.json")
+    a = Allocator(dp)
+    a.get_allocation()
 
