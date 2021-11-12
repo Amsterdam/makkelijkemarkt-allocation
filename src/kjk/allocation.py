@@ -51,6 +51,7 @@ class Allocator:
         self.df_for_attending_merchants()
         self.add_prefs_for_merchant()
         self.merchants_df.set_index("erkenningsNummer", inplace=True)
+        self.merchants_df['erkenningsNummer'] = self.merchants_df.index
 
     def prepare_stands(self):
         """prepare the stands list for allocation"""
@@ -58,6 +59,17 @@ class Allocator:
             return self.get_required_for_branche(x)
         is_required = self.positions_df['branches'].apply(required)
         self.positions_df["required"] = is_required
+
+        try:
+            def is_inactive(x):
+                if x == True:
+                    return False
+                return True
+            active = self.positions_df['inactive'].apply(is_inactive)
+            self.positions_df = self.positions_df[active]
+        except KeyError as e:
+            # No inactive stand found in cofiguration
+            pass
 
     def get_required_for_branche(self, b):
         if len(b) == 0:
@@ -122,9 +134,8 @@ class Allocator:
             else:
                 return "na"
         self.merchants_df['attending'] = self.merchants_df['erkenningsNummer'].apply(is_attending_market)
-        d = self.merchants_df
-        df_1 = d[(d['attending'] != "no") & (d['status'] == "vpl")]
-        df_2 = d[(d['attending'] == "yes") & (d['status'] != "vpl")]
+        df_1 = self.merchants_df[(self.merchants_df['attending'] != "no") & (self.merchants_df['status'] == "vpl")]
+        df_2 = self.merchants_df[(self.merchants_df['attending'] == "yes") & (self.merchants_df['status'] != "vpl")]
         self.merchants_df = pd.concat([df_1, df_2])
 
         def check_absent(x):
@@ -231,11 +242,11 @@ class Allocator:
         df = self.merchants_df.query("status == 'vpl' & will_move == 'yes' & wants_expand == False")
         df = self.merchants_df.query("status == 'vpl' & wants_expand == True")
 
-        #print(df[["description", "will_move", "wants_expand", "plaatsen", "voorkeur.maximum", "voorkeur.minimum", "pref"]])
+        print(df[["description", "will_move", "wants_expand", "plaatsen", "voorkeur.maximum", "voorkeur.minimum", "pref"]])
         #df = self.merchants_df.query("status == 'vpl' & will_move == 'yes'")[["description", "will_move", "plaatsen", "pref"]]
         #print(df)
-        #self.merchants_df.drop("3000187072", inplace=True)
-        #print(self.merchants_df)
+        self.merchants_df.drop("3000187072", inplace=True)
+        print(self.merchants_df)
         #print(self.positions_df)
         return {}
 
@@ -245,5 +256,4 @@ if __name__ == "__main__":
     dp = FixtureDataprovider("../../fixtures/dapp_20211030/a_input.json")
     a = Allocator(dp)
     a.get_allocation()
-    a.prepare_stands()
 

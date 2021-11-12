@@ -63,9 +63,7 @@ class AllocatorTest(unittest.TestCase):
 
     def test_get_pref_for_merchant(self):
         m = self.sut.get_prefs_for_merchant('1022020060')
-        self.assertListEqual(m, [['193', '195', '204', '211', '221',
-                                  '222', '223', '225', '226', '228', '230'],
-                                 [2, 1, 7, 8, 10, 11, 9, 5, 6, 4, 3]])
+        self.assertListEqual(m, ['195', '193', '230', '228', '225', '226', '204', '211', '223', '221', '222'])
         
 
 if __name__ == '__main__':
