@@ -4,6 +4,7 @@ import json
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider
 from kjk.outputdata import MarketArrangement
+from kjk.outputdata import StandsTypeError
 
 class OutputLayoutTest(unittest.TestCase):
     def setUp(self):
@@ -15,18 +16,22 @@ class OutputLayoutTest(unittest.TestCase):
     def test_add_allocation(self):
         self.sut.add_allocation('3000187072', [101, 102, 103], self.mock_merchant_obj)
         output = self.sut.to_data()
-        self.assertFalse(True)
+        self.assertEqual(len(output['toewijzingen']), 1)
+        self.assertListEqual(output['toewijzingen'][0]['plaatsen'], [101, 102, 103])
 
     def test_raise_exception(self):
-        self.sut.add_allocation('3000187072', 101, self.mock_merchant_obj)
-        output = self.sut.to_data()
-        self.assertFalse(True)
+        try:
+            self.sut.add_allocation('3000187072', 101, self.mock_merchant_obj)
+            output = self.sut.to_data()
+        except StandsTypeError as e:
+            self.assertTrue(True)
     
     def test_add_multiple_allocation(self):
         self.sut.add_allocation('3000187072', [101, 102, 103], self.mock_merchant_obj)
         self.sut.add_allocation('3000187072', [4, 5], self.mock_merchant_obj)
         output = self.sut.to_data()
-        pprint(output)
+        self.assertEqual(len(output['toewijzingen']), 1)
+        self.assertListEqual(output['toewijzingen'][0]['plaatsen'], [101, 102, 103, 4, 5])
 
 
 class AllocatorTest(unittest.TestCase):

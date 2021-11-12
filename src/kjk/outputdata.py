@@ -48,7 +48,7 @@ class MarketArrangement:
         self.market_config = conf
     
     def to_data(self):
-        self.output['toewijzingen'] = self.allocation_dict
+        self.output['toewijzingen'] = list(self.allocation_dict.values())
         return self.output
 
 
