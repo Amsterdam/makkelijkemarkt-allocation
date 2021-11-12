@@ -1,6 +1,32 @@
 import unittest
+from pprint import pprint
+import json
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider
+from kjk.outputdata import MarketArrangement
+
+class OutputLayoutTest(unittest.TestCase):
+    def setUp(self):
+        f = open('../fixtures/merchant_3000187072.json', 'r')
+        self.mock_merchant_obj = json.load(f)
+        f.close()
+        self.sut = MarketArrangement(market_id="16", market_date="2021-10-30")
+
+    def test_add_allocation(self):
+        self.sut.add_allocation('3000187072', [101, 102, 103], self.mock_merchant_obj)
+        output = self.sut.to_data()
+        self.assertFalse(True)
+
+    def test_raise_exception(self):
+        self.sut.add_allocation('3000187072', 101, self.mock_merchant_obj)
+        output = self.sut.to_data()
+        self.assertFalse(True)
+    
+    def test_add_multiple_allocation(self):
+        self.sut.add_allocation('3000187072', [101, 102, 103], self.mock_merchant_obj)
+        self.sut.add_allocation('3000187072', [4, 5], self.mock_merchant_obj)
+        output = self.sut.to_data()
+        pprint(output)
 
 
 class AllocatorTest(unittest.TestCase):

@@ -1,0 +1,31 @@
+{
+    "description": "van Kasteelen",
+    "erkenningsNummer": "3000187072",
+    "plaatsen": [
+        "183",
+        "185"
+    ],
+    "voorkeur": {
+        "marktId": 16,
+        "erkenningsNummer": "3000187072",
+        "maximum": 2,
+        "id": 1462,
+        "marktDate": null,
+        "anywhere": true,
+        "minimum": 2,
+        "brancheId": "101-agf-exotische-groenten",
+        "parentBrancheId": null,
+        "inrichting": null,
+        "absentFrom": null,
+        "absentUntil": null,
+        "createdAt": "2019-12-12T21:11:37.502Z",
+        "updatedAt": "2019-12-12T21:11:37.502Z",
+        "branches": [
+            "101-agf-exotische-groenten"
+        ],
+        "verkoopinrichting": []
+    },
+    "sollicitatieNummer": 573,
+    "status": "vpl"
+}
+
