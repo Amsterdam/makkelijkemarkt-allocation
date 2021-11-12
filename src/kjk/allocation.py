@@ -2,6 +2,7 @@ from pprint import pprint
 import pandas as pd
 from datetime import date
 
+pd.options.mode.chained_assignment = 'raise'
 
 class VPLCollisionError(BaseException):
     """this will be raised id two VPL merchants claim the same market position. (should never happen)"""
@@ -88,7 +89,7 @@ class Allocator:
 
     def get_prefs_for_merchant(self, merchant_number):
         """get position pref for merchant_number (erkenningsNummer)"""
-        result_df = self.prefs_df[self.prefs_df['erkenningsNummer'] == merchant_number]
+        result_df = self.prefs_df[self.prefs_df['erkenningsNummer'] == merchant_number].copy()
         result_df.sort_values(by=['priority'], inplace=True)
         plaats = result_df['plaatsId'].to_list()
         return plaats
