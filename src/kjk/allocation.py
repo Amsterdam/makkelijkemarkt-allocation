@@ -34,6 +34,9 @@ class Allocator:
         # we need a python date for checking periodic absence of vpl's
         self.market_date = date.fromisoformat(dp.get_market_date())
 
+        # merchants objects by erkennings nummer
+        self.merchants_dict = self.create_merchant_dict()
+
         # dataframes for easy access
         self.merchants_df = pd.json_normalize(self.merchants)
         self.positions_df = pd.json_normalize(self.open_positions)
@@ -46,6 +49,12 @@ class Allocator:
         # these dataframes will be used in the allocation
         self.prepare_merchants()
         self.prepare_stands()
+
+    def create_merchant_dict(self):
+        d = {}
+        for m in self.merchants:
+            d[m['erkenningsNummer']] = m;
+        return d
 
     def prepare_merchants(self):
         """prepare the merchants list for allocation"""

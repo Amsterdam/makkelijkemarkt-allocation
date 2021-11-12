@@ -1,117 +1,48 @@
+class StandsTypeError:
+    pass
+
 class MarketArangement:
     """
     A MarketArangement is responsible for producing the output JSON structure for KjK.
     For anexample see: 'fixtures/dapp_20211030/a_indeling.json'
     """
-    def add_allocation(self):
-        pass
 
-    def add_rejection(self):
-        pass
+    def __init__(self, market_id=None, market_date=None):
+        self.market_config = {}
+        self.market_id = market_id
+        self.market_date = market_date
+        self.allocation_dict = {}
+        self.rejection_list = {}
 
-    def set_config(self):
-        pass
-
-
-class Allocation:
-    """
-    An allocation object encapsulates this datastructure:
-        {
-            "marktId": "16",
-            "marktDate": "2021-10-30",
-            "plaatsen": [
-                "183",
-                "185"
-            ],
-            "ondernemer": {
-                "description": "van Kasteelen",
-                "erkenningsNummer": "3000187072",
-                "plaatsen": [
-                    "183",
-                    "185"
-                ],
-                "voorkeur": {
-                    "marktId": 16,
-                    "erkenningsNummer": "3000187072",
-                    "maximum": 2,
-                    "id": 1462,
-                    "marktDate": null,
-                    "anywhere": true,
-                    "minimum": 2,
-                    "brancheId": "101-agf-exotische-groenten",
-                    "parentBrancheId": null,
-                    "inrichting": null,
-                    "absentFrom": null,
-                    "absentUntil": null,
-                    "createdAt": "2019-12-12T21:11:37.502Z",
-                    "updatedAt": "2019-12-12T21:11:37.502Z",
-                    "branches": [
-                        "101-agf-exotische-groenten"
-                    ],
-                    "verkoopinrichting": []
-                },
-                "sollicitatieNummer": 573,
-                "status": "vpl"
-            },
-            "erkenningsNummer": "3000187072"
-        },
-    """
-
-    def __init__(self):
-        pass
-
-
-    def to_json(self):
-        pass
-
-
-class Rejection:
-    """
-    A Rejection object encapsulates this datastrcture
-        {
-            "marktId": "16",
-            "marktDate": "2021-10-30",
-            "erkenningsNummer": "0002020002",
-            "reason": {
-                "code": 2,
-                "message": "Geen geschikte locatie gevonden met huidige voorkeuren."
-            },
-            "ondernemer": {
-                "description": "Die Bont",
-                "erkenningsNummer": "0002020002",
-                "plaatsen": [],
-                "voorkeur": {
-                    "marktId": 16,
-                    "erkenningsNummer": "0002020002",
-                    "maximum": 3,
-                    "id": 1131,
-                    "marktDate": null,
-                    "anywhere": true,
-                    "minimum": 2,
-                    "brancheId": "109-zuivel-eieren",
-                    "parentBrancheId": null,
-                    "inrichting": "eigen-materieel",
-                    "absentFrom": null,
-                    "absentUntil": null,
-                    "createdAt": "2020-02-03T19:30:46.248Z",
-                    "updatedAt": "2021-10-29T13:47:43.373Z",
-                    "branches": [
-                        "109-zuivel-eieren"
-                    ],
-                    "verkoopinrichting": [
-                        "eigen-materieel"
-                    ]
-                },
-                "sollicitatieNummer": 10340,
-                "status": "soll"
+    def add_allocation(self, merchant_id=None, stand_ids=None, merchant_object=None):
+        if type(stand_ids) != "list":
+            raise StandsTypeError('market stands must be of type list') 
+        if merchant_id in self.allocation_dict:
+            allocation_obj = self.allocation_dict[merchant_id]
+            allocation_obj['plaatsen'] + stand_ids
+        else:
+            allocation_obj = {
+                "marktId": self.market_id,
+                "ondernemer": merchant_object,
+                "plaatsen": stand_ids,
+                "marktDate": self.market_date,
+                "erkenningsNummer": merchant_id
             }
-        },
-    """
-    
-    def __init__(self):
-        pass
+            self.allocation_dict[merchant_id] = allocation_obj
 
+    def add_rejection(self, merchant_id=None, reason_code=None, reason_txt=None, merchant_object=None):
+        rejection_obj = {
+            "marktId": self.market_id,
+            "ondernemer": merchant_object,
+            "reason": {
+                "code": reason_code,
+                "message": reason_txt
+            },
+            "marktDate": self.market_date,
+            "erkenningsNummer": merchant_id
+        }
+        self.rejection_list.append(rejection_obj)
 
-    def to_json(self):
-        pass
+    def set_config(self, conf=None):
+        self.market_config = conf
 
