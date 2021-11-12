@@ -11,7 +11,7 @@ class Allocator:
     Allocator object will take a single dataprovider argument and produce a market.
     Injected dadaproviders should implement the inputdata.BaseDataprovider interface
     to ensure compatibility.
-    Mock-dataproviders can be userd for testing and API-based dataprovider fpor ACC and PRD envs.
+    Mock-dataproviders can be userd for testing and API-based dataprovider for ACC and PRD envs.
     """
 
     def __init__(self, data_provider):
@@ -46,6 +46,7 @@ class Allocator:
         """prepare the merchants list for allocation"""
         self.df_for_attending_merchants()
         self.add_prefs_for_merchant()
+        self.merchants_df.set_index("erkenningsNummer", inplace=True)
 
     def prepare_stands(self):
         """prepare the stands list for allocation"""
@@ -72,15 +73,35 @@ class Allocator:
     def get_prefs_for_merchant(self, merchant_number):
         """get position pref for merchant_number (erkenningsNummer)"""
         result_df = self.prefs_df[self.prefs_df['erkenningsNummer'] == merchant_number]
+        result_df.sort_values(by=['priority'], inplace=True)
         plaats = result_df['plaatsId'].to_list()
-        prio = result_df['priority'].to_list()
-        return [plaats, prio]
+        return plaats
+
+    def get_willmove_for_merchant(self, merchant_number):
+        """check if this merchant wants to move (only relevant for vpl) . merchant_number (erkenningsNummer)"""
+        result_df = self.prefs_df[self.prefs_df['erkenningsNummer'] == merchant_number]
+        plaats = result_df['plaatsId'].to_list()
+        if len(plaats) > 0:
+            return "yes"
+        else:
+            return "no"
 
     def add_prefs_for_merchant(self):
         """add position preferences to the merchant dataframe"""
         def prefs(x):
             return self.get_prefs_for_merchant(x)
         self.merchants_df['pref'] = self.merchants_df['erkenningsNummer'].apply(prefs)
+
+        def will_move(x):
+            return self.get_willmove_for_merchant(x)
+        self.merchants_df['will_move'] = self.merchants_df['erkenningsNummer'].apply(will_move)
+
+        def wants_to_expand(x):
+            if x['status'] == "vpl":
+                return len(x['plaatsen']) < x['voorkeur.maximum']
+            else:
+                return None
+        self.merchants_df['wants_expand'] = self.merchants_df.apply(wants_to_expand, axis=1)
 
     def df_for_attending_merchants(self):
         """
@@ -188,8 +209,19 @@ class Allocator:
 
         En dan nog, de uitbreidingen, de plaatsvoorkeuren met prio, vervangers, afwezigheid voor periode.
         """
-        print(self.positions_df)
         print(self.merchants_df)
+
+
+        df = self.merchants_df.query("status == 'vpl' & will_move == 'no' & wants_expand == False")
+        df = self.merchants_df.query("status == 'vpl' & will_move == 'yes' & wants_expand == False")
+        df = self.merchants_df.query("status == 'vpl' & wants_expand == True")
+
+        print(df[["description", "will_move", "wants_expand", "plaatsen", "voorkeur.maximum", "voorkeur.minimum", "pref"]])
+        #df = self.merchants_df.query("status == 'vpl' & will_move == 'yes'")[["description", "will_move", "plaatsen", "pref"]]
+        #print(df)
+        #self.merchants_df.drop("3000187072", inplace=True)
+        #print(self.merchants_df)
+        #print(self.positions_df)
         return {}
 
 
