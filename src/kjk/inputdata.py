@@ -37,6 +37,9 @@ class BaseDataprovider:
     def get_preferences(self):
         raise NotImplementedError
 
+    def get_market_date(self):
+        raise NotImplementedError
+
 
 class FixtureDataprovider(BaseDataprovider):
     """A fixture based dataprovider"""
@@ -48,6 +51,9 @@ class FixtureDataprovider(BaseDataprovider):
         self.data = json.load(f)
         f.close()
         return self.data
+
+    def get_market_date(self):
+        return self.data['marktDate']
 
     def get_market(self):
         return self.data['markt']

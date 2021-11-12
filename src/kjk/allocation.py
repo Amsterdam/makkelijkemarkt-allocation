@@ -1,5 +1,6 @@
 from pprint import pprint
 import pandas as pd
+from datetime import date
 
 
 class VPLCollisionError(BaseException):
@@ -28,6 +29,9 @@ class Allocator:
         self.branches = dp.get_branches()
         self.prefs = dp.get_preferences()
         self.open_positions = dp.get_market_locations()
+
+        # we need a python date for checking periodic absence of vpl's
+        self.market_date = date.fromisoformat(dp.get_market_date())
 
         # dataframes for easy access
         self.merchants_df = pd.json_normalize(self.merchants)
@@ -123,6 +127,18 @@ class Allocator:
         df_2 = d[(d['attending'] == "yes") & (d['status'] != "vpl")]
         self.merchants_df = pd.concat([df_1, df_2])
 
+        def check_absent(x):
+            if x['voorkeur.absentUntil'] != None and x['voorkeur.absentFrom']:
+                from_str = x['voorkeur.absentFrom']
+                from_date = date.fromisoformat(from_str)
+                until_str = x['voorkeur.absentUntil']
+                until_date = date.fromisoformat(until_str)
+                if from_date <= self.market_date <= until_date:
+                    return False
+            return True
+        df = self.merchants_df[['voorkeur.absentFrom', 'voorkeur.absentUntil']].apply(check_absent, axis=1)
+        self.merchants_df = self.merchants_df[df]
+
     def get_vpl_for_position(self, position):
         """return a merchant number for a fixed position, reurn None is no merchant found"""
         def num_positions(x):
@@ -207,16 +223,15 @@ class Allocator:
         9. Deel de overgebleven sollicitanten in.
 
 
-        En dan nog, de uitbreidingen, de plaatsvoorkeuren met prio, vervangers, afwezigheid voor periode.
+        En dan nog, alijst, de uitbreidingen, de plaatsvoorkeuren met prio, vervangers, afwezigheid voor periode.
         """
-        print(self.merchants_df)
-
+        print(self.merchants_df.info())
 
         df = self.merchants_df.query("status == 'vpl' & will_move == 'no' & wants_expand == False")
         df = self.merchants_df.query("status == 'vpl' & will_move == 'yes' & wants_expand == False")
         df = self.merchants_df.query("status == 'vpl' & wants_expand == True")
 
-        print(df[["description", "will_move", "wants_expand", "plaatsen", "voorkeur.maximum", "voorkeur.minimum", "pref"]])
+        #print(df[["description", "will_move", "wants_expand", "plaatsen", "voorkeur.maximum", "voorkeur.minimum", "pref"]])
         #df = self.merchants_df.query("status == 'vpl' & will_move == 'yes'")[["description", "will_move", "plaatsen", "pref"]]
         #print(df)
         #self.merchants_df.drop("3000187072", inplace=True)
