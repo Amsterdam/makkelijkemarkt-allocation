@@ -46,7 +46,7 @@ class OutputLayoutTest(unittest.TestCase):
 class AllocatorTest(unittest.TestCase):
 
     def setUp(self):
-        dp = FixtureDataprovider("../fixtures/dapp_20211030/a_input.json")
+        dp = FixtureDataprovider("../fixtures/test_input.json")
         self.sut = Allocator(dp)
 
     def test_get_baking_positions(self):

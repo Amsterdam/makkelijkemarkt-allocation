@@ -1,7 +1,7 @@
 from pprint import pprint
 import pandas as pd
 from datetime import date
-from outputdata import MarketArrangement
+from kjk.outputdata import MarketArrangement
 
 pd.options.mode.chained_assignment = 'raise'
 
@@ -50,17 +50,14 @@ class Allocator:
 
         # dataframes for easy access
         self.merchants_df = pd.json_normalize(self.merchants)
-
-        df = self.merchants_df
-        ids = df["erkenningsNummer"]
-        dubb = df[ids.isin(ids[ids.duplicated()])]
-        print(">>>> ", dubb)
-        print("len ", len(dubb))
-
         self.positions_df = pd.json_normalize(self.open_positions)
         self.prefs_df = pd.json_normalize(self.prefs)
         self.rsvp_df = pd.json_normalize(self.rsvp)
         self.branches_df= pd.json_normalize(self.branches)
+
+        # remove duplicate erkenningsNummers from nerchants df
+        # not sure but we just keep the first?
+        self.merchants_df.drop_duplicates(subset="erkenningsNummer", keep="first", inplace=True)
 
         # create a dataframe with merchants attending the market
         # and create a positions dataframe

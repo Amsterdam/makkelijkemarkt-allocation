@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+input.json
+indeling.json
+anonymizer.py
+
 # Distribution / packaging
 .Python
 build/
