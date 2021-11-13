@@ -69,6 +69,8 @@ class Allocator:
             return self.get_required_for_branche(x)
         is_required = self.positions_df['branches'].apply(required)
         self.positions_df["required"] = is_required
+        self.positions_df.set_index("plaatsId", inplace=True)
+        self.positions_df['plaatsId'] = self.positions_df.index
 
         try:
             def is_inactive(x):
@@ -225,8 +227,21 @@ class Allocator:
         result_df = result_df["erkenningsNummer"]
         return result_df.to_list()
 
+    def dequeue_marchant(self, merchant_id):
+        self.merchants_df.drop(merchant_id, inplace=True)
+
+    def dequeue_market_stand(self, stand_id):
+        self.positions_df.drop(stand_id, inplace=True)
+
+    def num_merchants_in_queue(self):
+        return len(self.merchants_df)
+
+    def num_stands_in_queue(self):
+        return len(self.positions_df)
+
     def get_allocation(self):
         """
+        Indelen:
         1. Deel VPHs die niet willen verplaatsen in op hun eigen vaste plaatsen;
         2. Deel VPH's in die willen verplaatsen (bereken door of dit succesvol verloopt,
            anders terugvallen op eigen plaats; Als één of meerdere bestemmingsplaatsen van een ándere verplaatsende VPH zijn,
@@ -243,8 +258,16 @@ class Allocator:
         8. Resterende EVI plaatsen worden vanaf nu behandeld als normale plaatsen.
         9. Deel de overgebleven sollicitanten in.
 
+        Uitbreiden volgens de verordening:
+        1. Uitbreiden vindt plaats in genummerde iteraties: in iteratie 2 wordt gekeken of er nog ondernemers zijn die een tweede plaats willen,
+           in iteratie 3 komen ondernemers die een derde plaats willen aan bod, enz.
+        2. De uitbreidingsfase eindigt indien er geen geschikte marktplaatsen meer zijn, of als elke ondernemer tevreden is.
+        3. Voor alle ondernemers wordt nu gecontroleerd of aan hun minimum eis wordt voldaan.
+           Als ze niet het minimum aantal plaatsen toegewezen hebben gekregen worden ze afgewezen op deze grond.
+        4. Tot slot wordt geprobeerd om tot nu toe niet ingedeelde ondernemers alsnog in te delen.
+           Vanwege afwijzingen in de voorgaande stap is er wellicht ruimte vrijgekomen voor andere ondernemers met een lagere sorteringsprioriteit.
 
-        En dan nog, alijst, de uitbreidingen, de plaatsvoorkeuren met prio, vervangers, afwezigheid voor periode.
+           reminder: aLijst, vervangers, plaatsvoorkeur
         """
         print(self.merchants_df.info())
 
@@ -255,8 +278,9 @@ class Allocator:
         print(df[["description", "will_move", "wants_expand", "plaatsen", "voorkeur.maximum", "voorkeur.minimum", "pref"]])
         #df = self.merchants_df.query("status == 'vpl' & will_move == 'yes'")[["description", "will_move", "plaatsen", "pref"]]
         #print(df)
-        self.merchants_df.drop("3000187072", inplace=True)
-        print(self.merchants_df)
+        print(len(self.merchants_df))
+        self.dequeue_marchant("3000187072")
+        print(len(self.merchants_df))
         #print(self.positions_df)
         return {}
 

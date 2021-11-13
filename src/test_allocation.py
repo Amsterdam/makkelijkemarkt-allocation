@@ -105,6 +105,17 @@ class AllocatorTest(unittest.TestCase):
         m = self.sut.get_prefs_for_merchant('1022020060')
         self.assertListEqual(m, ['195', '193', '230', '228', '225', '226', '204', '211', '223', '221', '222'])
 
+    def test_dequeue_merchant(self):
+        l1 = self.sut.num_merchants_in_queue()
+        self.sut.dequeue_marchant("3000187072")
+        l2 = self.sut.num_merchants_in_queue()
+        self.assertEqual(l1, l2+1)
+
+    def test_dequeque_stand(self):
+        l1 = self.sut.num_stands_in_queue()
+        self.sut.dequeue_market_stand("1")
+        l2 = self.sut.num_stands_in_queue()
+        self.assertEqual(l1, l2+1)
 
 if __name__ == '__main__':
     unittest.main()
