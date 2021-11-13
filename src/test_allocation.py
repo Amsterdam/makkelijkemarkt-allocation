@@ -117,6 +117,15 @@ class AllocatorTest(unittest.TestCase):
         l2 = self.sut.num_stands_in_queue()
         self.assertEqual(l1, l2+1)
 
+    def test_get_branhes_fro_stand(self):
+        res = self.sut.get_branches_for_stand(1)
+        self.assertListEqual(res, ['401 - Overig markt - Experimentele zone'])
+        res = self.sut.get_branches_for_stand(999)
+        self.assertListEqual(res, [])
+        res = self.sut.get_branches_for_stand(245)
+        self.assertListEqual(res, [])
+
+
 if __name__ == '__main__':
     unittest.main()
 

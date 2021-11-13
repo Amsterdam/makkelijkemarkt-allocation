@@ -14,6 +14,9 @@ class MerchantNotFoundError(BaseException):
     """this will be raised id a merchant id can not be found in the input data. (should never happen)"""
     pass
 
+class MerchantDequeueError(BaseException):
+    """this will be raised id a merchant id can not be removed from the queue (should never happen)"""
+    pass
 
 class Allocator:
     """
@@ -41,6 +44,9 @@ class Allocator:
         # market id and date
         self.market_id = dp.get_market_id()
         self.market_date = dp.get_market_date()
+
+        # output object
+        self.market_output = MarketArrangement(market_id=self.market_id, market_date=self.market_date)
 
         # we need a python date for checking periodic absence of vpl's
         self.market_date = date.fromisoformat(dp.get_market_date())
@@ -261,6 +267,56 @@ class Allocator:
     def num_stands_in_queue(self):
         return len(self.positions_df)
 
+    def get_branches_for_stand(self, stand_id):
+        stand = self.positions_df.query(f"plaatsId == '{stand_id}'")
+        if len(stand) != 1:
+            return []
+        return stand['branches'].iloc[0]
+
+    def allocation_fase_1(self):
+        print("\n--- START ALLOCATION FASE 1")
+        print("ondenemers (vpl) die niet willen verplaatsen of uitbreiden:")
+        print("nog open plaatsen: ", len(self.positions_df))
+        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+        df = self.merchants_df.query("status == 'vpl' & will_move == 'no' & wants_expand == False")
+        for index, row in df.iterrows():
+            erk = row['erkenningsNummer']
+            stands = row['plaatsen']
+            self.market_output.add_allocation(erk, stands, self.merchant_object_by_id(erk))
+            try:
+                self.dequeue_marchant(erk)
+            except KeyError as e:
+                raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+            for st in stands:
+                self.dequeue_market_stand(st)
+
+    def allocation_fase_2(self):
+        print("\n--- FASE 2")
+        print("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
+        print("nog open plaatsen: ", len(self.positions_df))
+        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+        df = self.merchants_df.query("status == 'vpl' & will_move == 'yes' & wants_expand == False").copy()
+        df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
+        print(df)
+        for index, row in df.iterrows():
+            erk = row['erkenningsNummer']
+            stands = row['plaatsen']
+            pref = row['pref']
+            branches = row['voorkeur.branches']
+            maxi = row['voorkeur.maximum']
+            print(erk, branches)
+            for i, p in enumerate(pref):
+                stand = self.positions_df.query(f"plaatsId == '{p}'")
+                if len(stand) > 0:
+                    branches = self.get_branches_for_stand(p)
+                    print(branches)
+                else: # stand already taken
+                    pass
+
+            print("- - - - ")
+
     def get_allocation(self):
         """
         Indelen:
@@ -292,37 +348,12 @@ class Allocator:
            reminder: aLijst, vervangers, plaatsvoorkeur
         """
 
-        market_output = MarketArrangement(market_id=self.market_id, market_date=self.market_date)
         print(self.merchants_df.info())
-
-        print("open plaatsen: ", len(self.positions_df))
-        print("ondenemers niet ingedeeld: ", len(self.merchants_df))
-
-        df = self.merchants_df.query("erkenningsNummer == '4000186000'")
-        print(df)
-
-        df = self.merchants_df.query("status == 'vpl' & will_move == 'no' & wants_expand == False")
-        for index, row in df.iterrows():
-            erk = row['erkenningsNummer']
-            stands = row['plaatsen']
-            market_output.add_allocation(erk, stands, self.merchant_object_by_id(erk))
-            try:
-                self.dequeue_marchant(erk)
-            except KeyError as e:
-                print("dubbel ?", erk)
-            for st in stands:
-                self.dequeue_market_stand(st)
-
-        print("open plaatsen: ", len(self.positions_df))
-        print("ondenemers niet ingedeeld: ", len(self.merchants_df))
+        self.allocation_fase_1()
+        self.allocation_fase_2()
 
         return {}
-        print("ondenemers (vpl) die niet willen verplaatsen of uitbreiden:")
-        print(df)
 
-        df = self.merchants_df.query("status == 'vpl' & will_move == 'yes' & wants_expand == False")
-        print("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
-        print(df)
 
         df = self.merchants_df.query("status == 'vpl' & wants_expand == True")
         print("ondenemers (vpl) die WEL willen uitbreiden:")
