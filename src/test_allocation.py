@@ -5,6 +5,8 @@ from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider
 from kjk.outputdata import MarketArrangement
 from kjk.outputdata import StandsTypeError
+from kjk.outputdata import MINIMUM_UNAVAILABLE, MARKET_FULL, BRANCHE_FULL, ADJACENT_UNAVAILABLE
+
 
 class OutputLayoutTest(unittest.TestCase):
     def setUp(self):
@@ -25,7 +27,7 @@ class OutputLayoutTest(unittest.TestCase):
             output = self.sut.to_data()
         except StandsTypeError as e:
             self.assertTrue(True)
-    
+
     def test_add_multiple_allocation(self):
         self.sut.add_allocation('3000187072', [101, 102, 103], self.mock_merchant_obj)
         self.sut.add_allocation('3000187072', [4, 5], self.mock_merchant_obj)
@@ -33,9 +35,16 @@ class OutputLayoutTest(unittest.TestCase):
         self.assertEqual(len(output['toewijzingen']), 1)
         self.assertListEqual(output['toewijzingen'][0]['plaatsen'], [101, 102, 103, 4, 5])
 
+    def test_add_rejection(self):
+        self.sut.add_rejection('3000187072', MINIMUM_UNAVAILABLE, self.mock_merchant_obj)
+        output = self.sut.to_data()
+        code = output['afwijzingen'][0]['reason']['code']
+        self.assertEqual(1, len(output['afwijzingen']))
+        self.assertEqual(3, code)
+
 
 class AllocatorTest(unittest.TestCase):
-    
+
     def setUp(self):
         dp = FixtureDataprovider("../fixtures/dapp_20211030/a_input.json")
         self.sut = Allocator(dp)
@@ -70,7 +79,7 @@ class AllocatorTest(unittest.TestCase):
         expected_merchants = ['1020185000', '0000181012', '2000113080', '7000117002', '8032002080', 
                               '7002002000', '2002004040', '4022004040', '1062008080', '5022001050']
         self.assertListEqual(merchants, expected_merchants)
-    
+
     def test_get_merchant_for_branche_soll_empty(self):
         merchants = self.sut.get_merchant_for_branche('101-agf', status="soll")
         expected_merchants = []
@@ -95,7 +104,7 @@ class AllocatorTest(unittest.TestCase):
     def test_get_pref_for_merchant(self):
         m = self.sut.get_prefs_for_merchant('1022020060')
         self.assertListEqual(m, ['195', '193', '230', '228', '225', '226', '204', '211', '223', '221', '222'])
-        
+
 
 if __name__ == '__main__':
     unittest.main()

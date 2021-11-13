@@ -1,6 +1,23 @@
 class StandsTypeError(BaseException):
     pass
 
+BRANCHE_FULL = {
+    "code": 1,
+    "message": 'Alle marktplaatsen voor deze branche zijn reeds ingedeeld.'
+}
+ADJACENT_UNAVAILABLE = {
+    "code": 2,
+    "message": 'Geen geschikte locatie gevonden met huidige voorkeuren.'
+};
+MINIMUM_UNAVAILABLE = {
+    "code": 3,
+    "message": 'Minimum aantal plaatsen niet beschikbaar.'
+}
+MARKET_FULL  = {
+    "code": 4,
+    "message": 'Alle marktplaatsen zijn reeds ingedeeld.'
+}
+
 class MarketArrangement:
     """
     A MarketArangement is responsible for producing the output JSON structure for KjK.
@@ -13,7 +30,7 @@ class MarketArrangement:
         self.market_id = market_id
         self.market_date = market_date
         self.allocation_dict = {}
-        self.rejection_list = {}
+        self.rejection_list = []
 
     def add_allocation(self, merchant_id=None, stand_ids=None, merchant_object=None):
         if type(stand_ids) is not list:
@@ -31,14 +48,11 @@ class MarketArrangement:
             }
             self.allocation_dict[merchant_id] = allocation_obj
 
-    def add_rejection(self, merchant_id=None, reason_code=None, reason_txt=None, merchant_object=None):
+    def add_rejection(self, merchant_id=None, reason=None, merchant_object=None):
         rejection_obj = {
             "marktId": self.market_id,
             "ondernemer": merchant_object,
-            "reason": {
-                "code": reason_code,
-                "message": reason_txt
-            },
+            "reason": reason,
             "marktDate": self.market_date,
             "erkenningsNummer": merchant_id
         }
@@ -49,6 +63,7 @@ class MarketArrangement:
     
     def to_data(self):
         self.output['toewijzingen'] = list(self.allocation_dict.values())
+        self.output['afwijzingen'] = self.rejection_list
         return self.output
 
 
