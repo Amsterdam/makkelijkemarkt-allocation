@@ -15,7 +15,7 @@ class BaseDataprovider:
 
     def get_market(self):
         raise NotImplementedError
-    
+
     def get_market_locations(self):
         raise NotImplementedError
 
@@ -35,6 +35,12 @@ class BaseDataprovider:
         raise NotImplementedError
 
     def get_preferences(self):
+        raise NotImplementedError
+
+    def get_market_date(self):
+        raise NotImplementedError
+
+    def get_market_id(self):
         raise NotImplementedError
 
     def get_market_date(self):
@@ -79,21 +85,13 @@ class FixtureDataprovider(BaseDataprovider):
     def get_preferences(self):
         return self.data['voorkeuren']
 
-        
+    def get_market_id(self):
+        return self.data['marktId']
+
+    def get_market_date(self):
+        return self.data['marktDate']
+
 
 if __name__ == "__main__":
     dp = FixtureDataprovider('fixtures/dapp_20211030/a_input.json')
-
-
-
-
-
-
-
-
-
-
-
-
-
 

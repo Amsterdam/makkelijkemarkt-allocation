@@ -20,7 +20,7 @@ MARKET_FULL  = {
 
 class MarketArrangement:
     """
-    A MarketArangement is responsible for producing the output JSON structure for KjK.
+    A MarketArrangement is responsible for producing the output JSON structure for KjK.
     For anexample see: 'fixtures/dapp_20211030/a_indeling.json'
     """
 
@@ -60,7 +60,7 @@ class MarketArrangement:
 
     def set_config(self, conf=None):
         self.market_config = conf
-    
+
     def to_data(self):
         self.output['toewijzingen'] = list(self.allocation_dict.values())
         self.output['afwijzingen'] = self.rejection_list

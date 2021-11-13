@@ -1,12 +1,19 @@
 from pprint import pprint
 import pandas as pd
 from datetime import date
+from outputdata import MarketArrangement
 
 pd.options.mode.chained_assignment = 'raise'
 
 class VPLCollisionError(BaseException):
     """this will be raised id two VPL merchants claim the same market position. (should never happen)"""
     pass
+
+
+class MerchantNotFoundError(BaseException):
+    """this will be raised id a merchant id can not be found in the input data. (should never happen)"""
+    pass
+
 
 class Allocator:
     """
@@ -31,6 +38,10 @@ class Allocator:
         self.prefs = dp.get_preferences()
         self.open_positions = dp.get_market_locations()
 
+        # market id and date
+        self.market_id = dp.get_market_id()
+        self.market_date = dp.get_market_date()
+
         # we need a python date for checking periodic absence of vpl's
         self.market_date = date.fromisoformat(dp.get_market_date())
 
@@ -39,6 +50,13 @@ class Allocator:
 
         # dataframes for easy access
         self.merchants_df = pd.json_normalize(self.merchants)
+
+        df = self.merchants_df
+        ids = df["erkenningsNummer"]
+        dubb = df[ids.isin(ids[ids.duplicated()])]
+        print(">>>> ", dubb)
+        print("len ", len(dubb))
+
         self.positions_df = pd.json_normalize(self.open_positions)
         self.prefs_df = pd.json_normalize(self.prefs)
         self.rsvp_df = pd.json_normalize(self.rsvp)
@@ -55,6 +73,13 @@ class Allocator:
         for m in self.merchants:
             d[m['erkenningsNummer']] = m;
         return d
+
+    def merchant_object_by_id(self, merchant_id):
+        try:
+            return self.merchants_dict[merchant_id]
+        except KeyError as e:
+            raise MerchantNotFoundError(f"mechant not found: {merchant_id}")
+
 
     def prepare_merchants(self):
         """prepare the merchants list for allocation"""
@@ -269,19 +294,44 @@ class Allocator:
 
            reminder: aLijst, vervangers, plaatsvoorkeur
         """
+
+        market_output = MarketArrangement(market_id=self.market_id, market_date=self.market_date)
         print(self.merchants_df.info())
 
+        print("open plaatsen: ", len(self.positions_df))
+        print("ondenemers niet ingedeeld: ", len(self.merchants_df))
+
+        df = self.merchants_df.query("erkenningsNummer == '4000186000'")
+        print(df)
+
         df = self.merchants_df.query("status == 'vpl' & will_move == 'no' & wants_expand == False")
+        for index, row in df.iterrows():
+            erk = row['erkenningsNummer']
+            stands = row['plaatsen']
+            market_output.add_allocation(erk, stands, self.merchant_object_by_id(erk))
+            try:
+                self.dequeue_marchant(erk)
+            except KeyError as e:
+                print("dubbel ?", erk)
+            for st in stands:
+                self.dequeue_market_stand(st)
+
+        print("open plaatsen: ", len(self.positions_df))
+        print("ondenemers niet ingedeeld: ", len(self.merchants_df))
+
+        return {}
+        print("ondenemers (vpl) die niet willen verplaatsen of uitbreiden:")
+        print(df)
+
         df = self.merchants_df.query("status == 'vpl' & will_move == 'yes' & wants_expand == False")
+        print("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
+        print(df)
+
         df = self.merchants_df.query("status == 'vpl' & wants_expand == True")
+        print("ondenemers (vpl) die WEL willen uitbreiden:")
+        print(df)
 
         print(df[["description", "will_move", "wants_expand", "plaatsen", "voorkeur.maximum", "voorkeur.minimum", "pref"]])
-        #df = self.merchants_df.query("status == 'vpl' & will_move == 'yes'")[["description", "will_move", "plaatsen", "pref"]]
-        #print(df)
-        print(len(self.merchants_df))
-        self.dequeue_marchant("3000187072")
-        print(len(self.merchants_df))
-        #print(self.positions_df)
         return {}
 
 
