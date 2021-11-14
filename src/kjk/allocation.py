@@ -293,29 +293,75 @@ class Allocator:
 
     def allocation_fase_2(self):
         print("\n--- FASE 2")
+        print("ondenemers (vpl) die NIET willen verplaatsen maar WEL uitbreiden:")
+        print("nog open plaatsen: ", len(self.positions_df))
+        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+        # NOTE: save the expanders df for later, we need them for the extra stands iterations
+        self.expanders_df = self.merchants_df.query("status == 'vpl' & will_move == 'no' & wants_expand == True").copy()
+        self.expanders_df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
+        for index, row in self.expanders_df.iterrows():
+            erk = row['erkenningsNummer']
+            stands = row['plaatsen']
+            self.market_output.add_allocation(erk, stands, self.merchant_object_by_id(erk))
+            try:
+                self.dequeue_marchant(erk)
+            except KeyError as e:
+                raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+            for st in stands:
+                self.dequeue_market_stand(st)
+
+
+    def allocation_fase_3(self):
+        print("\n--- FASE 3")
         print("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
         df = self.merchants_df.query("status == 'vpl' & will_move == 'yes' & wants_expand == False").copy()
         df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
-        print(df)
         for index, row in df.iterrows():
+
             erk = row['erkenningsNummer']
             stands = row['plaatsen']
             pref = row['pref']
-            branches = row['voorkeur.branches']
+            merchant_branches = row['voorkeur.branches']
             maxi = row['voorkeur.maximum']
-            print(erk, branches)
+
+            valid_pref_stands = []
             for i, p in enumerate(pref):
                 stand = self.positions_df.query(f"plaatsId == '{p}'")
                 if len(stand) > 0:
-                    branches = self.get_branches_for_stand(p)
-                    print(branches)
-                else: # stand already taken
-                    pass
+                    stand_branches = self.get_branches_for_stand(p)
+                    if len(stand_branches) == 0:
+                        # no branched stand, allocate!
+                        valid_pref_stands.append(p)
+                    else:
+                        # stand has branches, check compatible
+                        branche_overlap = list(set(merchant_branches).intersection(set(stand_branches)))
+                        if len(branche_overlap) > 0:
+                            valid_pref_stands.append(p)
+                if len(valid_pref_stands) == maxi:
+                    break
 
-            print("- - - - ")
+            if len(valid_pref_stands) < len(stands):
+                stands_to_alloc = stands
+            else:
+                stands_to_alloc = valid_pref_stands
+
+            self.market_output.add_allocation(erk, stands_to_alloc, self.merchant_object_by_id(erk))
+            try:
+                self.dequeue_marchant(erk)
+            except KeyError as e:
+                raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+            for st in stands:
+                self.dequeue_market_stand(st)
+
+    def allocation_fase_4(self):
+        print("\n--- FASE 4")
+        print("Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrj zijn verdelen")
+        print("nog open plaatsen: ", len(self.positions_df))
+        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
     def get_allocation(self):
         """
@@ -351,15 +397,12 @@ class Allocator:
         print(self.merchants_df.info())
         self.allocation_fase_1()
         self.allocation_fase_2()
+        self.allocation_fase_3()
+        self.allocation_fase_4()
 
-        return {}
-
-
-        df = self.merchants_df.query("status == 'vpl' & wants_expand == True")
-        print("ondenemers (vpl) die WEL willen uitbreiden:")
+        df = self.merchants_df.query("status == 'vpl' & wants_expand == True & will_move == 'yes'")
         print(df)
 
-        print(df[["description", "will_move", "wants_expand", "plaatsen", "voorkeur.maximum", "voorkeur.minimum", "pref"]])
         return {}
 
 
