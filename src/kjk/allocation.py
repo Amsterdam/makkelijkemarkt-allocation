@@ -471,7 +471,7 @@ class Allocator:
         self.expanders_df = pd.concat([self.expanders_df, df])
 
     def allocation_fase_5(self):
-        print("\n--- FASE 5")
+        print("\n--- FASE 5-a")
         print("Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrij zijn verdelen")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
@@ -526,6 +526,7 @@ class Allocator:
                         # create fixtures and test!
                         pass
 
+            print("\n--- FASE 5-b")
             print("Alist ingedeeld voor verplichte branches")
             print("nog open plaatsen: ", len(self.positions_df))
             print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
@@ -540,11 +541,14 @@ class Allocator:
                 maxi = row['voorkeur.maximum']
                 mini = row['voorkeur.minimum']
 
-                break
+                # cast prefs to actually vailable prefs
+                res = self.positions_df['plaatsId'].isin(pref)
+                pref = self.positions_df[res]['plaatsId'].to_list()
+
                 stands_available = self.get_stand_for_branche(merchant_branches[0])
                 stands_available_list = stands_available['plaatsId'].to_list()
-                print(erk, pref, maxi, mini, merchant_branches)
-                print(stands_available_list)
+                # print(erk, pref, maxi, mini, merchant_branches)
+                # print(stands_available_list)
 
                 if len(pref) == 0:
                     stds = stands_available_list[0:maxi]
@@ -565,17 +569,24 @@ class Allocator:
                             raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
                         for st in stds:
                             self.dequeue_market_stand(st)
+                    else:
+                        print("pref not available")
+                        # TODD: what to do if not all pref are available
+                        # create fixtures and test!
+                        pass
 
-            return
-
-            alist_2 = self.merchants_df.query("alist == True & branche_required == 'no'")
-            print(alist_2[ALIST_VIEW])
+            print("\n--- FASE 5-c")
+            print("Alist ingedeeld voor NIET verplichte branches")
+            print("nog open plaatsen: ", len(self.positions_df))
+            print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
             blist = self.merchants_df.query("alist == False & branche_required == 'yes'")
             print(blist[ALIST_VIEW])
 
             blist_2 = self.merchants_df.query("alist == False & branche_required == 'no'")
             print(blist_2[ALIST_VIEW])
+
+            print(self.merchants_df)
 
         else:
             # TODO: allocation does not fit adjust strategy!
