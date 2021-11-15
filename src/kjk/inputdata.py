@@ -46,6 +46,8 @@ class BaseDataprovider:
     def get_market_date(self):
         raise NotImplementedError
 
+    def get_market_blocks(self):
+        raise NotImplementedError
 
 class FixtureDataprovider(BaseDataprovider):
     """A fixture based dataprovider"""
@@ -57,6 +59,9 @@ class FixtureDataprovider(BaseDataprovider):
         self.data = json.load(f)
         f.close()
         return self.data
+
+    def get_market_blocks(self):
+        return self.data['paginas']
 
     def get_market_date(self):
         return self.data['marktDate']

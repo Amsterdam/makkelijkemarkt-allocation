@@ -6,7 +6,22 @@ from kjk.inputdata import FixtureDataprovider
 from kjk.outputdata import MarketArrangement
 from kjk.outputdata import StandsTypeError
 from kjk.outputdata import MINIMUM_UNAVAILABLE, MARKET_FULL, BRANCHE_FULL, ADJACENT_UNAVAILABLE
+from kjk.utils import MarketStandClusterFinder
 
+
+class ClusterFinderTestCase(unittest.TestCase):
+    def setUp(self):
+        dp = FixtureDataprovider("../fixtures/test_input.json")
+        dp.load_data()
+        self.sut = MarketStandClusterFinder(dp.get_market_blocks())
+
+    def test_find_cluster(self):
+        res = self.sut.find_valid_cluster(['2', '4', '123', '22', '7', '9', '11'], size=3)
+        self.assertListEqual([['7', '9', '11']], res)
+        res = self.sut.find_valid_cluster(['197', '153', '151', '157', '155', '199', '201', '200', '198'], size=2)
+        self.assertListEqual([['151', '153'], ['153', '155'], ['155', '157'], ['198', '200'], ['197', '199'], ['199', '201']], res)
+        res = self.sut.find_valid_cluster(['197', '153', '151', '157', '155', '199', '201', '200', '198'], size=2, preferred=True)
+        self.assertListEqual(['197', '199'], res)
 
 class OutputLayoutTest(unittest.TestCase):
     def setUp(self):

@@ -2,6 +2,7 @@ from pprint import pprint
 import pandas as pd
 from datetime import date
 from kjk.outputdata import MarketArrangement
+from kjk.utils import MarketStandClusterFinder
 
 pd.options.mode.chained_assignment = 'raise'
 
@@ -49,6 +50,7 @@ class Allocator:
         self.branches = dp.get_branches()
         self.prefs = dp.get_preferences()
         self.open_positions = dp.get_market_locations()
+        self.market_blocks = dp.get_market_blocks()
 
         # market id and date
         self.market_id = dp.get_market_id()
@@ -84,6 +86,7 @@ class Allocator:
         # create a dataframe with merchants attending the market
         # and create a positions dataframe
         # these dataframes will be used in the allocation
+        self.cluster_finder = MarketStandClusterFinder(dp.get_market_blocks())
         self.prepare_merchants()
         self.prepare_stands()
 
@@ -562,7 +565,8 @@ class Allocator:
                 else:
                     all_prefs_available =  all(stand in pref for stand in stands_available_list)
                     if all_prefs_available:
-                        stds = pref
+                        stds = pref[0:maxi]
+                        self.market_output.add_allocation(erk, stds, self.merchant_object_by_id(erk))
                         try:
                             self.dequeue_marchant(erk)
                         except KeyError as e:
