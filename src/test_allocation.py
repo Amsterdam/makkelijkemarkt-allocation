@@ -132,6 +132,11 @@ class AllocatorTest(unittest.TestCase):
         self.assertTrue(alist[0])
         self.assertFalse(alist[3])
 
+    def test_get_stand_for_branche(self):
+        res = self.sut.get_stand_for_branche('101-agf')
+        br = res.iloc[0]['branches']
+        self.assertIn('101-agf', br)
+
 
 if __name__ == '__main__':
     unittest.main()

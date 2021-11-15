@@ -8,10 +8,11 @@ pd.options.mode.chained_assignment = 'raise'
 
 # dataframe views for debugging
 EXPANDERS_VIEW = ["erkenningsNummer", "description", "voorkeur.maximum", "voorkeur.minimum", "plaatsen", "pref"]
-MERCHANTS_SORTED_VIEW = ["erkenningsNummer", "description", "sollicitatieNummer", 
-                         "pref", "status", "voorkeur.branches", 
+MERCHANTS_SORTED_VIEW = ["erkenningsNummer", "sollicitatieNummer", 
+                         "pref", "voorkeur.branches", 
                          "voorkeur.minimum", "voorkeur.maximum"]
 ALIST_VIEW = ["erkenningsNummer", "description" ,"alist", "sollicitatieNummer"]
+BRANCHE_VIEW = ["erkenningsNummer", "description" ,"voorkeur.branches", "branche_required"]
 
 class VPLCollisionError(BaseException):
     """this will be raised id two VPL merchants claim the same market position. (should never happen)"""
@@ -103,6 +104,7 @@ class Allocator:
         self.df_for_attending_merchants()
         self.add_prefs_for_merchant()
         self.add_alist_status_for_merchant()
+        self.add_required_branche_for_merchant()
         self.merchants_df.set_index("erkenningsNummer", inplace=True)
         self.merchants_df['erkenningsNummer'] = self.merchants_df.index
 
@@ -127,15 +129,18 @@ class Allocator:
             pass
 
     def get_required_for_branche(self, b):
-        if len(b) == 0:
+        try:
+            if len(b) == 0:
+                return "no"
+        except TypeError as e:
             return "no"
         # assumption:
-        # if more than one branche per stand alwyas means bak?
+        # if more than one branche per stand always means bak?
         if len(b) >= 1:
             if "bak" in b:
                 return "yes"
             result = self.branches_df[self.branches_df["brancheId"] == b[0]]
-            if result.iloc[0]['verplicht']:
+            if len(result) > 0 and result.iloc[0]['verplicht'] == True:
                 return "yes"
             else:
                 return "no"
@@ -162,6 +167,12 @@ class Allocator:
             result_df = self.a_list_df[self.a_list_df['erkenningsNummer'] == x].copy()
             return len(result_df) > 0
         self.merchants_df['alist'] = self.merchants_df['erkenningsNummer'].apply(prefs)
+
+    def add_required_branche_for_merchant(self):
+        def required(x):
+            return self.get_required_for_branche(x)
+        is_required = self.merchants_df['voorkeur.branches'].apply(required)
+        self.merchants_df["branche_required"] = is_required
 
     def add_prefs_for_merchant(self):
         """add position preferences to the merchant dataframe"""
@@ -359,6 +370,13 @@ class Allocator:
             for st in stands:
                 self.dequeue_market_stand(st)
 
+    def get_stand_for_branche(self, branche):
+        def is_branche(x):
+            if branche in x:
+                return True
+            return False
+        stands = self.positions_df['branches'].apply(is_branche)
+        return self.positions_df[stands]
 
     def allocation_fase_3(self):
         print("\n--- FASE 3")
@@ -412,7 +430,7 @@ class Allocator:
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
         df = self.merchants_df.query("status == 'vpl' & wants_expand == True & will_move == 'yes'")
-        print(df[EXPANDERS_VIEW])
+        # print(df[EXPANDERS_VIEW])
         for index, row in df.iterrows():
 
             erk = row['erkenningsNummer']
@@ -467,14 +485,102 @@ class Allocator:
 
         # make sure merchants are sorted
         self.merchants_df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
-        print(self.merchants_df[MERCHANTS_SORTED_VIEW])
 
-        alist = self.merchants_df.query("alist == True")
-        print(alist[ALIST_VIEW])
+        demand = self.merchants_df['voorkeur.maximum'].sum()
+        available = len(self.positions_df)
+        allocation_will_fit = demand <= available
 
-        blist = self.merchants_df.query("alist == False")
-        print(blist[ALIST_VIEW])
+        if allocation_will_fit:
+            alist = self.merchants_df.query("alist == True & branche_required == 'yes'")
+            for index, row in alist.iterrows():
+                erk = row['erkenningsNummer']
+                pref = row['pref']
+                merchant_branches = row['voorkeur.branches']
+                maxi = row['voorkeur.maximum']
+                mini = row['voorkeur.minimum']
 
+                stands_available = self.get_stand_for_branche(merchant_branches[0])
+                stands_available_list = stands_available['plaatsId'].to_list()
+
+                if len(pref) == 0:
+                    stds = stands_available_list[0:maxi]
+                    self.market_output.add_allocation(erk, stds, self.merchant_object_by_id(erk))
+                    try:
+                        self.dequeue_marchant(erk)
+                    except KeyError as e:
+                        raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+                    for st in stds:
+                        self.dequeue_market_stand(st)
+                else:
+                    all_prefs_available =  all(stand in pref[0:maxi] for stand in stands_available_list)
+                    if all_prefs_available:
+                        stds = pref
+                        try:
+                            self.dequeue_marchant(erk)
+                        except KeyError as e:
+                            raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+                        for st in stds:
+                            self.dequeue_market_stand(st)
+                    else:
+                        # TODD: what to do if not all pref are available
+                        # create fixtures and test!
+                        pass
+
+            print("Alist ingedeeld voor verplichte branches")
+            print("nog open plaatsen: ", len(self.positions_df))
+            print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+            alist_2 = self.merchants_df.query("alist == True & branche_required == 'no'")
+            print(alist_2[ALIST_VIEW])
+            print(alist_2[MERCHANTS_SORTED_VIEW])
+            for index, row in alist_2.iterrows():
+                erk = row['erkenningsNummer']
+                pref = row['pref']
+                merchant_branches = row['voorkeur.branches']
+                maxi = row['voorkeur.maximum']
+                mini = row['voorkeur.minimum']
+
+                break
+                stands_available = self.get_stand_for_branche(merchant_branches[0])
+                stands_available_list = stands_available['plaatsId'].to_list()
+                print(erk, pref, maxi, mini, merchant_branches)
+                print(stands_available_list)
+
+                if len(pref) == 0:
+                    stds = stands_available_list[0:maxi]
+                    self.market_output.add_allocation(erk, stds, self.merchant_object_by_id(erk))
+                    try:
+                        self.dequeue_marchant(erk)
+                    except KeyError as e:
+                        raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+                    for st in stds:
+                        self.dequeue_market_stand(st)
+                else:
+                    all_prefs_available =  all(stand in pref for stand in stands_available_list)
+                    if all_prefs_available:
+                        stds = pref
+                        try:
+                            self.dequeue_marchant(erk)
+                        except KeyError as e:
+                            raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+                        for st in stds:
+                            self.dequeue_market_stand(st)
+
+            return
+
+            alist_2 = self.merchants_df.query("alist == True & branche_required == 'no'")
+            print(alist_2[ALIST_VIEW])
+
+            blist = self.merchants_df.query("alist == False & branche_required == 'yes'")
+            print(blist[ALIST_VIEW])
+
+            blist_2 = self.merchants_df.query("alist == False & branche_required == 'no'")
+            print(blist_2[ALIST_VIEW])
+
+        else:
+            # TODO: allocation does not fit adjust strategy!
+            # create proper testing fixtures
+            pass
 
     def get_allocation(self):
         """
