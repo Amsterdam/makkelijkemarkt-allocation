@@ -5,6 +5,14 @@ from kjk.outputdata import MarketArrangement
 
 pd.options.mode.chained_assignment = 'raise'
 
+
+# dataframe views for debugging
+EXPANDERS_VIEW = ["erkenningsNummer", "description", "voorkeur.maximum", "voorkeur.minimum", "plaatsen", "pref"]
+MERCHANTS_SORTED_VIEW = ["erkenningsNummer", "description", "sollicitatieNummer", 
+                         "pref", "status", "voorkeur.branches", 
+                         "voorkeur.minimum", "voorkeur.maximum"]
+ALIST_VIEW = ["erkenningsNummer", "description" ,"alist", "sollicitatieNummer"]
+
 class VPLCollisionError(BaseException):
     """this will be raised id two VPL merchants claim the same market position. (should never happen)"""
     pass
@@ -56,10 +64,17 @@ class Allocator:
 
         # dataframes for easy access
         self.merchants_df = pd.json_normalize(self.merchants)
+        self.raw_merchants_df = pd.json_normalize(self.merchants)
         self.positions_df = pd.json_normalize(self.open_positions)
         self.prefs_df = pd.json_normalize(self.prefs)
         self.rsvp_df = pd.json_normalize(self.rsvp)
-        self.branches_df= pd.json_normalize(self.branches)
+        self.branches_df = pd.json_normalize(self.branches)
+        self.a_list_df = pd.json_normalize(self.a_list)
+
+        # data frame to hold merchants wo want extra stands
+        # they will be popped from teh main qeueu when allocated
+        # this data will be used for later itterations
+        self.expanders_df = None
 
         # remove duplicate erkenningsNummers from nerchants df
         # not sure but we just keep the first?
@@ -83,11 +98,11 @@ class Allocator:
         except KeyError as e:
             raise MerchantNotFoundError(f"mechant not found: {merchant_id}")
 
-
     def prepare_merchants(self):
         """prepare the merchants list for allocation"""
         self.df_for_attending_merchants()
         self.add_prefs_for_merchant()
+        self.add_alist_status_for_merchant()
         self.merchants_df.set_index("erkenningsNummer", inplace=True)
         self.merchants_df['erkenningsNummer'] = self.merchants_df.index
 
@@ -141,6 +156,12 @@ class Allocator:
             return "yes"
         else:
             return "no"
+
+    def add_alist_status_for_merchant(self):
+        def prefs(x):
+            result_df = self.a_list_df[self.a_list_df['erkenningsNummer'] == x].copy()
+            return len(result_df) > 0
+        self.merchants_df['alist'] = self.merchants_df['erkenningsNummer'].apply(prefs)
 
     def add_prefs_for_merchant(self):
         """add position preferences to the merchant dataframe"""
@@ -221,6 +242,23 @@ class Allocator:
         result_df = result_df["erkenningsNummer"]
         return result_df.to_list()
 
+    def get_expander_for_branche(self, branche, status=None):
+        """get all expander for a given branche for this market"""
+        def has_branch(x):
+            try:
+                if branche in x:
+                    return True
+            except TypeError as e:
+                # nobranches == nan in dataframe
+                pass
+            return False
+        has_branch = self.expanders_df['voorkeur.branches'].apply(has_branch)
+        result_df = self.expanders_df[has_branch][["erkenningsNummer", "status"]]
+        if status is not None:
+            result_df = result_df[result_df["status"] == status]
+        result_df = result_df["erkenningsNummer"]
+        return result_df.to_list()
+
     def get_baking_positions(self):
         """get all baking positions for this market """
         def has_bak(x):
@@ -230,6 +268,16 @@ class Allocator:
         has_bak_df = self.positions_df['branches'].apply(has_bak)
         result_df = self.positions_df[has_bak_df]['plaatsId']
         return result_df.to_list()
+
+    def get_baking_positions_df(self):
+        """get all baking positions for this market """
+        def has_bak(x):
+            if "bak" in x:
+                return True
+            return False
+        has_bak_df = self.positions_df['branches'].apply(has_bak)
+        result_df = self.positions_df[has_bak_df]
+        return result_df
 
     def get_rsvp_for_merchant(self, merchant_number):
         """boolean, Is this mechant attending this market?"""
@@ -341,7 +389,7 @@ class Allocator:
                         branche_overlap = list(set(merchant_branches).intersection(set(stand_branches)))
                         if len(branche_overlap) > 0:
                             valid_pref_stands.append(p)
-                if len(valid_pref_stands) == maxi:
+                if len(valid_pref_stands) == len(stands):
                     break
 
             if len(valid_pref_stands) < len(stands):
@@ -359,9 +407,74 @@ class Allocator:
 
     def allocation_fase_4(self):
         print("\n--- FASE 4")
-        print("Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrj zijn verdelen")
+        print("de vpl's die willen uitbreiden en verplaatsen")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+        df = self.merchants_df.query("status == 'vpl' & wants_expand == True & will_move == 'yes'")
+        print(df[EXPANDERS_VIEW])
+        for index, row in df.iterrows():
+
+            erk = row['erkenningsNummer']
+            stands = row['plaatsen']
+            pref = row['pref']
+            merchant_branches = row['voorkeur.branches']
+            maxi = row['voorkeur.maximum']
+
+            valid_pref_stands = []
+            for i, p in enumerate(pref):
+                stand = self.positions_df.query(f"plaatsId == '{p}'")
+                if len(stand) > 0:
+                    stand_branches = self.get_branches_for_stand(p)
+                    if len(stand_branches) == 0:
+                        # no branched stand, allocate!
+                        valid_pref_stands.append(p)
+                    else:
+                        # stand has branches, check compatible
+                        branche_overlap = list(set(merchant_branches).intersection(set(stand_branches)))
+                        if len(branche_overlap) > 0:
+                            valid_pref_stands.append(p)
+                if len(valid_pref_stands) == len(stands):
+                    break
+
+            if len(valid_pref_stands) < len(stands):
+                stands_to_alloc = stands
+            else:
+                stands_to_alloc = valid_pref_stands
+
+            self.market_output.add_allocation(erk, stands_to_alloc, self.merchant_object_by_id(erk))
+            try:
+                self.dequeue_marchant(erk)
+            except KeyError as e:
+                raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+            for st in stands:
+                self.dequeue_market_stand(st)
+
+        self.expanders_df = pd.concat([self.expanders_df, df])
+
+    def allocation_fase_5(self):
+        print("\n--- FASE 5")
+        print("Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrij zijn verdelen")
+        print("nog open plaatsen: ", len(self.positions_df))
+        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+        # double check all vpls allocated
+        df = self.merchants_df.query("status == 'vpl'")
+        if len(df) == 0:
+            print("check status OK all vpl's allocated.")
+        else:
+            print("check status ERROR not all vpl's allocated.")
+
+        # make sure merchants are sorted
+        self.merchants_df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
+        print(self.merchants_df[MERCHANTS_SORTED_VIEW])
+
+        alist = self.merchants_df.query("alist == True")
+        print(alist[ALIST_VIEW])
+
+        blist = self.merchants_df.query("alist == False")
+        print(blist[ALIST_VIEW])
+
 
     def get_allocation(self):
         """
@@ -391,7 +504,7 @@ class Allocator:
         4. Tot slot wordt geprobeerd om tot nu toe niet ingedeelde ondernemers alsnog in te delen.
            Vanwege afwijzingen in de voorgaande stap is er wellicht ruimte vrijgekomen voor andere ondernemers met een lagere sorteringsprioriteit.
 
-           reminder: aLijst, vervangers, plaatsvoorkeur
+           reminder: aLijst, vervangers
         """
 
         print(self.merchants_df.info())
@@ -399,9 +512,9 @@ class Allocator:
         self.allocation_fase_2()
         self.allocation_fase_3()
         self.allocation_fase_4()
+        self.allocation_fase_5()
 
-        df = self.merchants_df.query("status == 'vpl' & wants_expand == True & will_move == 'yes'")
-        print(df)
+        self.market_output.to_json_file()
 
         return {}
 

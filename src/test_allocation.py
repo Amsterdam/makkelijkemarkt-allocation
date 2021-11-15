@@ -125,6 +125,13 @@ class AllocatorTest(unittest.TestCase):
         res = self.sut.get_branches_for_stand(245)
         self.assertListEqual(res, [])
 
+    def test_add_alist_status_for_merchant(self):
+        res = self.sut.add_alist_status_for_merchant()
+        alist = self.sut.merchants_df['alist']
+        self.assertEqual(116, len(alist))
+        self.assertTrue(alist[0])
+        self.assertFalse(alist[3])
+
 
 if __name__ == '__main__':
     unittest.main()

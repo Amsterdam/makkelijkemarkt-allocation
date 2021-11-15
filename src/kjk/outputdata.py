@@ -1,3 +1,5 @@
+import json
+
 class StandsTypeError(BaseException):
     pass
 
@@ -65,6 +67,13 @@ class MarketArrangement:
         self.output['toewijzingen'] = list(self.allocation_dict.values())
         self.output['afwijzingen'] = self.rejection_list
         return self.output
+
+    def to_json_file(self, file_name="test_output.json"):
+        self.output['toewijzingen'] = list(self.allocation_dict.values())
+        self.output['afwijzingen'] = self.rejection_list
+        f = open(file_name, "w")
+        json.dump(self.output, f, indent = 4)
+        f.close()
 
 
 
