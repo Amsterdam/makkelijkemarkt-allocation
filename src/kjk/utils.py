@@ -44,6 +44,7 @@ class MarketStandClusterFinder:
             for option in valid_options:
                 if std in option:
                     return option
+        return []
 
     def find_valid_cluster(self, stand_list, size=2, preferred=False):
         """

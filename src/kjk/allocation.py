@@ -7,9 +7,41 @@ from kjk.base import *
 
 class Allocator(BaseAllocator):
     """
-    The base allocator object takes care of teh datapreparation fase
+    The base allocator object takes care of the data preparation phase
+    and implements query methods
     So we can focus on the actual allocation phases here
     """
+    def allocation_phase_0(self):
+        print("\n--- START ALLOCATION FASE 1")
+        print("analyseer de markt en kijk of er genoeg plaatsen zijn:")
+        print("nog open plaatsen: ", len(self.positions_df))
+        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        
+        max_demand = self.merchants_df['voorkeur.maximum'].sum()
+        min_demand = self.merchants_df['voorkeur.minimum'].sum()
+        num_available = len(self.positions_df)
+        
+        print("max ",max_demand)
+        print("min ", int(min_demand))
+        print("beschikbaar ", num_available)
+
+        df = self.branches_df.query("verplicht == True")
+        print(df.info())
+        for index, row in df.iterrows():
+            br_id = row['brancheId']
+            br = self.get_merchant_for_branche(br_id)
+            std = self.get_stand_for_branche(br_id)
+            print("branche: ", br_id)
+            print("maximaal:", int(row['maximumPlaatsen']))
+            print("aantal ondernemers", len(br))
+            print("aantal standplaatsen: ", len(std))
+            print(" - - - ")
+
+        evi_stands = self.get_evi_stands()
+        print(evi_stands)
+        num_evi = self.get_merchants_with_evi() 
+        print(num_evi)
+        
 
     def allocation_phase_1(self):
         print("\n--- START ALLOCATION FASE 1")
@@ -143,8 +175,8 @@ class Allocator(BaseAllocator):
         self.expanders_df = pd.concat([self.expanders_df, df])
 
     def allocation_phase_5(self):
+        print("\n## Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrij zijn verdelen")
         print("\n--- FASE 5-a")
-        print("Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrij zijn verdelen")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
@@ -164,6 +196,7 @@ class Allocator(BaseAllocator):
 
         if allocation_will_fit:
             alist = self.merchants_df.query("alist == True & branche_required == 'yes'")
+            print(alist[EXPANDERS_VIEW+["status"]])
             for index, row in alist.iterrows():
                 erk = row['erkenningsNummer']
                 pref = row['pref']
@@ -175,7 +208,9 @@ class Allocator(BaseAllocator):
                 stands_available_list = stands_available['plaatsId'].to_list()
 
                 if len(pref) == 0:
-                    stds = stands_available_list[0:maxi]
+                    stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=maxi, preferred=True)
+                    if len(stds) == 0:
+                        stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=int(mini), preferred=True)
                     self.market_output.add_allocation(erk, stds, self.merchant_object_by_id(erk))
                     try:
                         self.dequeue_marchant(erk)
@@ -184,24 +219,29 @@ class Allocator(BaseAllocator):
                     for st in stds:
                         self.dequeue_market_stand(st)
                 else:
-                    all_prefs_available =  all(stand in pref[0:maxi] for stand in stands_available_list)
-                    if all_prefs_available:
-                        stds = pref
-                        try:
-                            self.dequeue_marchant(erk)
-                        except KeyError as e:
-                            raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
-                        for st in stds:
-                            self.dequeue_market_stand(st)
-                    else:
-                        # TODD: what to do if not all pref are available
-                        # create fixtures and test!
-                        pass
+                    #all_prefs_available =  all(stand in pref[0:maxi] for stand in stands_available_list)
+                    ip = stands_available_list+['222', '3333']
+                    l = set(pref).intersection(ip)
+                    print(list(l))
+                    print(pref)
+                    print(ip)
+                    print("*"*80)
+                    stds = self.cluster_finder.find_valid_cluster(pref, size=maxi, preferred=True)
+                    if len(stds) == 0:
+                        stds = self.cluster_finder.find_valid_cluster(pref, size=int(mini), preferred=True)
+                    try:
+                        self.dequeue_marchant(erk)
+                    except KeyError as e:
+                        raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+                    for st in stds:
+                        self.dequeue_market_stand(st)
 
             print("\n--- FASE 5-b")
             print("Alist ingedeeld voor verplichte branches")
             print("nog open plaatsen: ", len(self.positions_df))
             print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+            return
 
             alist_2 = self.merchants_df.query("alist == True & branche_required == 'no'")
             print(alist_2[ALIST_VIEW])
@@ -298,6 +338,7 @@ class Allocator(BaseAllocator):
         """
 
         print(self.merchants_df.info())
+        self.allocation_phase_0()
         self.allocation_phase_1()
         self.allocation_phase_2()
         self.allocation_phase_3()

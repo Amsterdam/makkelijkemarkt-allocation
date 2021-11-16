@@ -29,6 +29,12 @@ class ClusterFinderTestCase(unittest.TestCase):
         res = self.sut.get_neighbours_for_stand_id('15599')
         self.assertTrue(res is None)
 
+    def test_max_not_available(self):
+        res = self.sut.find_valid_cluster(['207 - 209'], size=2, preferred=True)
+        self.assertListEqual([], res)
+        res = self.sut.find_valid_cluster(['207 - 209'], size=1, preferred=True)
+        self.assertListEqual(['207 - 209'], res)
+
 
 class OutputLayoutTest(unittest.TestCase):
     def setUp(self):

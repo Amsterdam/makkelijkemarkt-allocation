@@ -8,7 +8,7 @@ pd.options.mode.chained_assignment = 'raise'
 
 
 # dataframe views for debugging
-EXPANDERS_VIEW = ["erkenningsNummer", "description", "voorkeur.maximum", "voorkeur.minimum", "plaatsen", "pref"]
+EXPANDERS_VIEW = [ "description", "voorkeur.maximum", "voorkeur.minimum", "plaatsen", "pref", "voorkeur.anywhere"]
 MERCHANTS_SORTED_VIEW = ["erkenningsNummer", "sollicitatieNummer", 
                          "pref", "voorkeur.branches", 
                          "voorkeur.minimum", "voorkeur.maximum"]
@@ -299,6 +299,16 @@ class BaseAllocator:
         if len(result_df) == 1:
             return result_df.iloc[0]['attending']
         return None
+
+    def get_evi_stands(self):
+        """ return a dataframe with evi stands"""
+        def has_evi(x):
+            if 'eigen-materieel' in x:
+                return True
+            else:
+                return False
+        hasevi = self.positions_df['verkoopinrichting'].apply(has_evi)
+        return self.positions_df[hasevi]
 
     def get_merchants_with_evi(self, status=None):
         """return list of merchant numbers with evi, optionally filtered by status ('soll', 'vpl', etc)"""
