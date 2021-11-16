@@ -26,6 +26,16 @@ class MarketStandClusterFinder:
                     self.stands_linked_list[_mid] = {"prev": _prev, "next": _next}
         self.flattened_list.append(None)
 
+    def get_neighbours_for_stand_id(self, stand_id):
+        """
+        Get the neighbouring stand for a stand_id.
+        Can be used to validate an allocation of multiple stands.
+        """
+        try:
+            return self.stands_linked_list[stand_id]
+        except KeyError as e:
+            return None
+
     def filter_preferred(self, valid_options, stand_list):
         """
         return the option containing the highest prio stand (lowest list index)

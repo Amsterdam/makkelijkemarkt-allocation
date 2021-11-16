@@ -23,6 +23,13 @@ class ClusterFinderTestCase(unittest.TestCase):
         res = self.sut.find_valid_cluster(['197', '153', '151', '157', '155', '199', '201', '200', '198'], size=2, preferred=True)
         self.assertListEqual(['197', '199'], res)
 
+    def test_get_neighbours(self):
+        res = self.sut.get_neighbours_for_stand_id('155')
+        self.assertDictEqual(res, {'prev': '153', 'next': '157'})
+        res = self.sut.get_neighbours_for_stand_id('15599')
+        self.assertTrue(res is None)
+
+
 class OutputLayoutTest(unittest.TestCase):
     def setUp(self):
         f = open('../fixtures/merchant_3000187072.json', 'r')
