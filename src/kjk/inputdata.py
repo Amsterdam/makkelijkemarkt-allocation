@@ -49,6 +49,10 @@ class BaseDataprovider:
     def get_market_blocks(self):
         raise NotImplementedError
 
+    def get_obstacles(self):
+        raise NotImplementedError
+
+
 class FixtureDataprovider(BaseDataprovider):
     """A fixture based dataprovider"""
     def __init__(self, json_file):
@@ -59,6 +63,9 @@ class FixtureDataprovider(BaseDataprovider):
         self.data = json.load(f)
         f.close()
         return self.data
+
+    def get_obstacles(self):
+        return self.data['obstakels']
 
     def get_market_blocks(self):
         return self.data['paginas']

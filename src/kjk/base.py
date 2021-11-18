@@ -51,6 +51,7 @@ class BaseAllocator:
         self.prefs = dp.get_preferences()
         self.open_positions = dp.get_market_locations()
         self.market_blocks = dp.get_market_blocks()
+        self.obstacles= dp.get_obstacles()
 
         # market id and date
         self.market_id = dp.get_market_id()
@@ -58,6 +59,13 @@ class BaseAllocator:
 
         # output object
         self.market_output = MarketArrangement(market_id=self.market_id, market_date=self.market_date)
+        self.market_output.set_config(self.market)
+        self.market_output.set_branches(self.branches)
+        self.market_output.set_market_positions(self.open_positions)
+        self.market_output.set_merchants(self.merchants)
+        self.market_output.set_market_blocks(self.market_blocks)
+        self.market_output.set_obstacles(self.obstacles)
+        self.market_output.set_rsvp(self.rsvp)
 
         # we need a python date for checking periodic absence of vpl's
         self.market_date = date.fromisoformat(dp.get_market_date())

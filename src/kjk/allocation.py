@@ -3,7 +3,10 @@ import pandas as pd
 from datetime import date
 from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder
+from kjk.utils import DebugRedisClient
 from kjk.base import *
+
+DEBUG = True
 
 class Allocator(BaseAllocator):
     """
@@ -220,12 +223,6 @@ class Allocator(BaseAllocator):
                         self.dequeue_market_stand(st)
                 else:
                     #all_prefs_available =  all(stand in pref[0:maxi] for stand in stands_available_list)
-                    ip = stands_available_list+['222', '3333']
-                    l = set(pref).intersection(ip)
-                    print(list(l))
-                    print(pref)
-                    print(ip)
-                    print("*"*80)
                     stds = self.cluster_finder.find_valid_cluster(pref, size=maxi, preferred=True)
                     if len(stds) == 0:
                         stds = self.cluster_finder.find_valid_cluster(pref, size=int(mini), preferred=True)
@@ -240,8 +237,6 @@ class Allocator(BaseAllocator):
             print("Alist ingedeeld voor verplichte branches")
             print("nog open plaatsen: ", len(self.positions_df))
             print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
-
-            return
 
             alist_2 = self.merchants_df.query("alist == True & branche_required == 'no'")
             print(alist_2[ALIST_VIEW])
@@ -345,7 +340,10 @@ class Allocator(BaseAllocator):
         self.allocation_phase_4()
         self.allocation_phase_5()
 
-        self.market_output.to_json_file()
+        if DEBUG:
+            json_file = self.market_output.to_json_file()
+            debug_redis = DebugRedisClient()
+            debug_redis.insert_test_result(json_file)
 
         return {}
 

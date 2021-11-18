@@ -1,3 +1,6 @@
+import json
+import redis
+
 class MarketStandClusterFinder:
 
     """
@@ -62,3 +65,27 @@ class MarketStandClusterFinder:
         else:
             return valid_options
 
+
+class DebugRedisClient:
+    """
+    This a debug only object, it will insert the json file into a local redis
+    so the allocation result can be displayed in the KjK application as a concept allocation
+    this class will use the redis KEY 'RESULT_1' and the result url http://127.0.0.1:8080/job/1/
+    """
+    def __init__(self):
+        REDIS_HOST="127.0.0.1"
+        REDIS_PORT=6379
+        REDIS_PASSWORD="Salmagundi"
+
+        self.r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, password=REDIS_PASSWORD)
+        res = self.r.delete('RESULT_1')
+
+    def insert_test_result(self, allocation_json):
+        f = open(allocation_json, "r")
+        data = f.read()
+        self.r.set('RESULT_1', data)
+        f.close()
+        print("-"*60)
+        print("View the results here:")
+        print("http://127.0.0.1:8080/job/1/")
+        print("-"*60)
