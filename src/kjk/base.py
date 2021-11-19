@@ -82,6 +82,8 @@ class BaseAllocator:
         self.branches_df = pd.json_normalize(self.branches)
         self.a_list_df = pd.json_normalize(self.a_list)
 
+        self.merchants_df.to_csv("merchants.csv")
+
         # data frame to hold merchants wo want extra stands
         # they will be popped from teh main qeueu when allocated
         # this data will be used for later itterations

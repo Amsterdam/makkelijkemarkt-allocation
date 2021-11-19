@@ -8,15 +8,21 @@ class MarketStandClusterFinder:
     The list is sorted by priority. (most desirable first) We do not want to allocate merchants if stands are not
     adjacent, in another market row or have an obstakel in between.
     """
-    def __init__(self, data):
+    def __init__(self, data, obstacles):
+        self.obstacle_dict = self._process_obstacle_dict(obstacles)
         self.flattened_list = []
         self.stands_linked_list = {}
         for k in data:
             for gr in k['indelingslijstGroup']:
                 pl = gr['plaatsList']
                 self.flattened_list.append(None)
-                self.flattened_list += pl
                 for i, stand_nr in enumerate(pl):
+                    self.flattened_list.append(stand_nr)
+                    try:
+                        obs = self.obstacle_dict[str(stand_nr)]
+                        self.flattened_list.append(obs)
+                    except KeyError as e:
+                        pass
                     if i-1 >= 0:
                         _prev = pl[i-1]
                     else:
@@ -28,6 +34,12 @@ class MarketStandClusterFinder:
                         _next = None
                     self.stands_linked_list[_mid] = {"prev": _prev, "next": _next}
         self.flattened_list.append(None)
+
+    def _process_obstacle_dict(self, obs):
+        d = {}
+        for ob in obs:
+            d[ob['kraamA']] = ob['obstakel']
+        return d
 
     def get_neighbours_for_stand_id(self, stand_id):
         """

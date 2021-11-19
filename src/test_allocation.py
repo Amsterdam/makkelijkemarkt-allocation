@@ -13,15 +13,17 @@ class ClusterFinderTestCase(unittest.TestCase):
     def setUp(self):
         dp = FixtureDataprovider("../fixtures/test_input.json")
         dp.load_data()
-        self.sut = MarketStandClusterFinder(dp.get_market_blocks())
+        self.sut = MarketStandClusterFinder(dp.get_market_blocks(), dp.get_obstacles())
 
     def test_find_cluster(self):
         res = self.sut.find_valid_cluster(['2', '4', '123', '22', '7', '9', '11'], size=3)
-        self.assertListEqual([['7', '9', '11']], res)
+        self.assertListEqual([], res)
+        res = self.sut.find_valid_cluster(['2', '4', '123', '22', '5', '7', '9', '11'], size=3)
+        self.assertListEqual([['5', '7', '9']], res)
         res = self.sut.find_valid_cluster(['197', '153', '151', '157', '155', '199', '201', '200', '198'], size=2)
-        self.assertListEqual([['151', '153'], ['153', '155'], ['155', '157'], ['198', '200'], ['197', '199'], ['199', '201']], res)
+        self.assertListEqual([['151', '153'], ['155', '157'], ['198', '200'], ['199', '201']], res)
         res = self.sut.find_valid_cluster(['197', '153', '151', '157', '155', '199', '201', '200', '198'], size=2, preferred=True)
-        self.assertListEqual(['197', '199'], res)
+        self.assertListEqual(['151', '153'], res)
 
     def test_get_neighbours(self):
         res = self.sut.get_neighbours_for_stand_id('155')
