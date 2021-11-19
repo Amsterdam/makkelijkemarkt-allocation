@@ -202,14 +202,14 @@ class BaseAllocator:
             if x['status'] == "vpl":
                 return len(x['plaatsen']) < x['voorkeur.maximum']
             else:
-                return None
+                return False
         self.merchants_df['wants_expand'] = self.merchants_df.apply(wants_to_expand, axis=1)
 
     def df_for_attending_merchants(self):
         """
         Wich merchants are actually attending the market?
-        - vpl only have to tell when they are NOT attending
-        - non vpl (soll and exp) do have to attend.
+        - vpl and tvpl only have to tell when they are NOT attending
+        - non vpl (tvplz, soll and exp) do have to attend.
         """
         def is_attending_market(x):
             att = self.get_rsvp_for_merchant(x)
@@ -220,8 +220,8 @@ class BaseAllocator:
             else:
                 return "na"
         self.merchants_df['attending'] = self.merchants_df['erkenningsNummer'].apply(is_attending_market)
-        df_1 = self.merchants_df[(self.merchants_df['attending'] != "no") & (self.merchants_df['status'] == "vpl")]
-        df_2 = self.merchants_df[(self.merchants_df['attending'] == "yes") & (self.merchants_df['status'] != "vpl")]
+        df_1 = self.merchants_df.query("attending != 'no' & (status == 'vpl' | status == 'tvlp')")
+        df_2 = self.merchants_df.query("attending == 'yes' & (status != 'vpl' & status != 'tvlp')")
         self.merchants_df = pd.concat([df_1, df_2])
 
         def check_absent(x):
