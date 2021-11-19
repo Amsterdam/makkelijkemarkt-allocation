@@ -82,8 +82,6 @@ class BaseAllocator:
         self.branches_df = pd.json_normalize(self.branches)
         self.a_list_df = pd.json_normalize(self.a_list)
 
-        self.merchants_df.to_csv("merchants.csv")
-
         # data frame to hold merchants wo want extra stands
         # they will be popped from teh main qeueu when allocated
         # this data will be used for later itterations
@@ -96,9 +94,12 @@ class BaseAllocator:
         # create a dataframe with merchants attending the market
         # and create a positions dataframe
         # these dataframes will be used in the allocation
-        self.cluster_finder = MarketStandClusterFinder(dp.get_market_blocks())
+        self.cluster_finder = MarketStandClusterFinder(dp.get_market_blocks(), dp.get_obstacles())
         self.prepare_merchants()
         self.prepare_stands()
+
+        # save to text for manual debugging
+        self.merchants_df.to_markdown("merchants.md")
 
     def create_merchant_dict(self):
         d = {}
