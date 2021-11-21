@@ -8,6 +8,11 @@ from kjk.base import *
 
 DEBUG = True
 
+STRATEGY_EXP_FULL = 1
+STRATEGY_EXP_SOME = 2
+STRATEGY_EXP_NONE = 3
+
+
 class Allocator(BaseAllocator):
     """
     The base allocator object takes care of the data preparation phase
@@ -15,36 +20,47 @@ class Allocator(BaseAllocator):
     So we can focus on the actual allocation phases here
     """
     def allocation_phase_0(self):
-        print("\n--- START ALLOCATION FASE 1")
-        print("analyseer de markt en kijk of er genoeg plaatsen zijn:")
+        print("\n--- START ALLOCATION FASE 0")
+        print("analyseer de markt en kijk (globaal) of er genoeg plaatsen zijn:")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
         
         max_demand = self.merchants_df['voorkeur.maximum'].sum()
         min_demand = self.merchants_df['voorkeur.minimum'].sum()
         num_available = len(self.positions_df)
-        
+
+        self.strategy = STRATEGY_EXP_NONE
+        if max_demand < num_available:
+            self.strategy = STRATEGY_EXP_FULL
+        elif min_demand < num_available:
+            self.strategy = STRATEGY_EXP_SOME;
+
         print("max ",max_demand)
         print("min ", int(min_demand))
         print("beschikbaar ", num_available)
+        print("strategie: ",self.strategy)
 
+        # branche positions vs merchants rsvp
+        self.branches_strategy = {}
         df = self.branches_df.query("verplicht == True")
-        #print(df.info())
         for index, row in df.iterrows():
             br_id = row['brancheId']
             br = self.get_merchant_for_branche(br_id)
             std = self.get_stand_for_branche(br_id)
-            #print("branche: ", br_id)
-            #print("maximaal:", int(row['maximumPlaatsen']))
-            #print("aantal ondernemers", len(br))
-            #print("aantal standplaatsen: ", len(std))
-            #print(" - - - ")
+            self.branches_strategy[br_id] = {
+                "max": int(row['maximumPlaatsen']),
+                "num_stands": len(std),
+                "num_merchants": len(br),
+                "will_fit": len(std) > len(br)
+            }
 
+        # evi positions vs merchants rsvp
         evi_stands = self.get_evi_stands()
-        # print(evi_stands)
-        num_evi = self.get_merchants_with_evi() 
-        # print(num_evi)
-        
+        evi_merchants = self.get_merchants_with_evi()
+        self.evi_strategy = {
+            "num_stands": len(evi_stands),
+            "num_merchants": len(evi_merchants)
+        }
 
     def allocation_phase_1(self):
         print("\n--- START ALLOCATION FASE 1")
@@ -53,7 +69,6 @@ class Allocator(BaseAllocator):
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
         df = self.merchants_df.query("(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'no' & wants_expand == False")
-        print(df.query("status == 'exp'"))
         for index, row in df.iterrows():
             erk = row['erkenningsNummer']
             stands = row['plaatsen']
