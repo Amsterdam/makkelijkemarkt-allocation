@@ -61,6 +61,25 @@ class MarketStandClusterFinder:
                     return option
         return []
 
+    def find_valid_expansion(self, fixed_positions, total_size=0, prefs=[], preferred=False):
+        """
+        check all adjacent clusters of the requested size,
+        and check if the fixed positions are contained in the
+        slice. This will be a valid expansion cluster
+        """
+        valid_options = []
+        for i, elem in enumerate(self.flattened_list):
+            # an option is valid if it contains the fixed positions
+            option = self.flattened_list[i:i+total_size]
+            valid = all(elem in option for elem in fixed_positions) and\
+                    all(isinstance(x, str) for x in option)
+            if valid:
+                valid_options.append(option)
+        if preferred:
+            return self.filter_preferred(valid_options, prefs)
+        else:
+            return valid_options
+
     def find_valid_cluster(self, stand_list, size=2, preferred=False):
         """
         check all adjacent clusters of the requested size
