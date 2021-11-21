@@ -28,6 +28,59 @@ class MerchantDequeueError(BaseException):
     """this will be raised id a merchant id can not be removed from the queue (should never happen)"""
     pass
 
+
+class BaseDataprovider:
+    """
+    Defines an interface to provide data for the Allocator object (kjk.allocation.Allocator)
+    Market data should contain the following collections:
+        marktDate, marktId, paginas, rows, branches, voorkeuren, naam, obstakels, aanmeldingen 
+        markt, aLijst, ondernemers, aanwezigheid, marktplaatsen
+    see: 'fixtures/dapp_20211030/a_input.json' for an anonimyzed example of a real world scenario
+    """
+
+    def load_data(self):
+        raise NotImplementedError
+
+    def get_market(self):
+        raise NotImplementedError
+
+    def get_market_locations(self):
+        raise NotImplementedError
+
+    def get_market_locations(self):
+        raise NotImplementedError
+
+    def get_rsvp(self):
+        raise NotImplementedError
+
+    def get_a_list(self):
+        raise NotImplementedError
+
+    def get_attending(self):
+        raise NotImplementedError
+
+    def get_branches(self):
+        raise NotImplementedError
+
+    def get_preferences(self):
+        raise NotImplementedError
+
+    def get_market_date(self):
+        raise NotImplementedError
+
+    def get_market_id(self):
+        raise NotImplementedError
+
+    def get_market_date(self):
+        raise NotImplementedError
+
+    def get_market_blocks(self):
+        raise NotImplementedError
+
+    def get_obstacles(self):
+        raise NotImplementedError
+
+
 class BaseAllocator:
     """
     Allocator object will take a single dataprovider argument and produce a market.

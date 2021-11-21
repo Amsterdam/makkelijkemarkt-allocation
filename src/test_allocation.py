@@ -2,11 +2,41 @@ import unittest
 from pprint import pprint
 import json
 from kjk.allocation import Allocator
-from kjk.inputdata import FixtureDataprovider
+from kjk.inputdata import FixtureDataprovider, MockDataprovider
 from kjk.outputdata import MarketArrangement
 from kjk.outputdata import StandsTypeError
 from kjk.outputdata import MINIMUM_UNAVAILABLE, MARKET_FULL, BRANCHE_FULL, ADJACENT_UNAVAILABLE
 from kjk.utils import MarketStandClusterFinder
+
+
+class MockDataproviderTestCase(unittest.TestCase):
+    def setUp(self):
+        self.sut = MockDataprovider("../fixtures/test_input.json")
+
+    def test_add_merchant(self):
+        self.sut.add_merchants(erkenningsNummer='1123456',
+                               plaatsen=['1', '2'],
+                               status='vpl',
+                               sollicatatieNummer="123",
+                               description='Frank Zappa',
+                               voorkeur={"branches": ['101-afg']})
+        print(self.sut.get_merchants())
+
+        self.sut.add_stand(plaatsId='1', branches=['101-agf'], properties=['boom'], verkoopinrichting=[])
+        self.sut.add_stand(plaatsId='2', branches=['101-agf'], properties=['boom'], verkoopinrichting=[])
+        print(self.sut.get_market_locations())
+
+        self.sut.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
+        print(self.sut.get_branches())
+
+        self.sut.mock()
+        print(self.sut.get_branches())
+
+        self.sut.add_rsvp(erkenningsNummer='112345', attending=True)
+
+        allocator = Allocator(self.sut)
+        market_allocation = allocation = allocator.get_allocation()
+        pprint(market_allocation)
 
 
 class ClusterFinderTestCase(unittest.TestCase):

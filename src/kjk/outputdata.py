@@ -82,12 +82,6 @@ class MarketArrangement:
         self.rsvp = rsvp
 
     def to_data(self):
-        self.output['markt'] = self.market_config
-        self.output['toewijzingen'] = list(self.allocation_dict.values())
-        self.output['afwijzingen'] = self.rejection_list
-        return self.output
-
-    def to_json_file(self, file_name="test_output.json"):
         self.output['naam'] = "?"
         self.output['marktId'] = self.market_id
         self.output['marktDate'] = self.market_date
@@ -100,8 +94,11 @@ class MarketArrangement:
         self.output['markt'] = self.market_config
         self.output['toewijzingen'] = list(self.allocation_dict.values())
         self.output['afwijzingen'] = self.rejection_list
+        return self.output
+
+    def to_json_file(self, file_name="test_output.json"):
         f = open(file_name, "w")
-        json.dump(self.output, f, indent = 4)
+        json.dump(self.to_data(), f, indent = 4)
         f.close()
         return file_name
 

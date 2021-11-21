@@ -1,68 +1,9 @@
 import json
 from pprint import pprint
-
-class BaseDataprovider:
-    """
-    Defines an interface to provide data for the Allocator object (kjk.allocation.Allocator)
-    Market data should contain the following collections:
-        marktDate, marktId, paginas, rows, branches, voorkeuren, naam, obstakels, aanmeldingen 
-        markt, aLijst, ondernemers, aanwezigheid, marktplaatsen
-    see: 'fixtures/dapp_20211030/a_input.json' for an anonimyzed example of a real world scenario
-    """
-
-    def load_data(self):
-        raise NotImplementedError
-
-    def get_market(self):
-        raise NotImplementedError
-
-    def get_market_locations(self):
-        raise NotImplementedError
-
-    def get_market_locations(self):
-        raise NotImplementedError
-
-    def get_rsvp(self):
-        raise NotImplementedError
-
-    def get_a_list(self):
-        raise NotImplementedError
-
-    def get_attending(self):
-        raise NotImplementedError
-
-    def get_branches(self):
-        raise NotImplementedError
-
-    def get_preferences(self):
-        raise NotImplementedError
-
-    def get_market_date(self):
-        raise NotImplementedError
-
-    def get_market_id(self):
-        raise NotImplementedError
-
-    def get_market_date(self):
-        raise NotImplementedError
-
-    def get_market_blocks(self):
-        raise NotImplementedError
-
-    def get_obstacles(self):
-        raise NotImplementedError
+from kjk.base import BaseDataprovider
 
 
-class FixtureDataprovider(BaseDataprovider):
-    """A fixture based dataprovider"""
-    def __init__(self, json_file):
-        self.input_file = json_file
-
-    def load_data(self):
-        f = open(self.input_file, 'r')
-        self.data = json.load(f)
-        f.close()
-        return self.data
+class DataproviderGetterMixin:
 
     def get_obstacles(self):
         return self.data['obstakels']
@@ -103,6 +44,67 @@ class FixtureDataprovider(BaseDataprovider):
     def get_market_date(self):
         return self.data['marktDate']
 
+
+class MockDataprovider(DataproviderGetterMixin):
+
+    def __init__(self, json_file):
+        self.input_file = json_file
+        f = open(self.input_file, 'r')
+        self.data = json.load(f)
+        f.close()
+
+        # start with an empty market config
+        self.data['ondernemers'] = []
+        self.data['branches'] = []
+        self.data['marktplaatsen'] = []
+        self.data['paginas'] = []
+        self.data['obstakels'] = []
+        self.data['aanmeldingen'] = []
+        self.data['aLijst'] = []
+        self.data['voorkeuren'] = []
+
+        # mock data not loaded yet
+        self.mocked = False
+
+    def mock(self):
+        self.mocked = True
+
+    def load_data(self):
+        if not self.mocked:
+            print("WARNING: mock objects not loaded!")
+
+    def add_rsvp(self, **kwargs):
+        self.data['aanmeldingen'].append(kwargs)
+
+    def add_merchants(self, **kwargs):
+        kwargs['voorkeur'].update({"absentFrom":"", "absentUntil":""})
+        self.data['ondernemers'].append(kwargs)
+
+    def add_stand(self, **kwargs):
+        self.data['marktplaatsen'].append(kwargs)
+
+    def add_branche(self, **kwargs):
+        """
+        brancheId : str
+        number : int
+        description : str
+        color : str
+        verplicht : bool
+        maximumPlaatsen : int
+        """
+        self.data['branches'].append(kwargs)
+
+
+class FixtureDataprovider(BaseDataprovider, DataproviderGetterMixin):
+    """A fixture based dataprovider"""
+    def __init__(self, json_file):
+        self.input_file = json_file
+
+    def load_data(self):
+        f = open(self.input_file, 'r')
+        self.data = json.load(f)
+        f.close()
+        return self.data
 
 if __name__ == "__main__":
     dp = FixtureDataprovider('fixtures/dapp_20211030/a_input.json')

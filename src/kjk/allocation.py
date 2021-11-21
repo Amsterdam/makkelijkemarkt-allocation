@@ -6,7 +6,7 @@ from kjk.utils import MarketStandClusterFinder
 from kjk.utils import DebugRedisClient
 from kjk.base import *
 
-DEBUG = True
+DEBUG = False
 
 STRATEGY_EXP_FULL = 1
 STRATEGY_EXP_SOME = 2
@@ -358,7 +358,7 @@ class Allocator(BaseAllocator):
             debug_redis = DebugRedisClient()
             debug_redis.insert_test_result(json_file)
 
-        return {}
+        return self.market_output.to_data()
 
 
 if __name__ == "__main__":
