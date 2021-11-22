@@ -87,12 +87,19 @@ class Allocator(BaseAllocator):
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
-        # NOTE: save the expanders df for later, we need them for the extra stands iterations
+        # NOTE: save the expanders df for later, we need them for the extra stands iterations in tight strateies
         self.expanders_df = self.merchants_df.query("(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'no' & wants_expand == True").copy()
         self.expanders_df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
         for index, row in self.expanders_df.iterrows():
             erk = row['erkenningsNummer']
             stands = row['plaatsen']
+            # if we have plenty space on the merket reward the expansion now
+            if self.strategy == STRATEGY_EXP_FULL:
+                stands = self.cluster_finder.find_valid_expansion(row['plaatsen'], total_size=int(row['voorkeur.maximum']))
+                if len(stands) > 0:
+                    stands = stands[0]
+                else:
+                    stands = row['plastsen'] # no expansion possible
             self.market_output.add_allocation(erk, stands, self.merchant_object_by_id(erk))
             try:
                 self.dequeue_marchant(erk)
@@ -101,11 +108,13 @@ class Allocator(BaseAllocator):
             for st in stands:
                 self.dequeue_market_stand(st)
 
+
     def allocation_phase_3(self):
         print("\n--- FASE 3")
         print("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
         df = self.merchants_df.query("(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'yes' & wants_expand == False").copy()
         df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
         for index, row in df.iterrows():
@@ -116,21 +125,7 @@ class Allocator(BaseAllocator):
             merchant_branches = row['voorkeur.branches']
             maxi = row['voorkeur.maximum']
 
-            valid_pref_stands = []
-            for i, p in enumerate(pref):
-                stand = self.positions_df.query(f"plaatsId == '{p}'")
-                if len(stand) > 0:
-                    stand_branches = self.get_branches_for_stand(p)
-                    if len(stand_branches) == 0:
-                        # no branched stand, allocate!
-                        valid_pref_stands.append(p)
-                    else:
-                        # stand has branches, check compatible
-                        branche_overlap = list(set(merchant_branches).intersection(set(stand_branches)))
-                        if len(branche_overlap) > 0:
-                            valid_pref_stands.append(p)
-                if len(valid_pref_stands) == len(stands):
-                    break
+            valid_pref_stands = self.cluster_finder.find_valid_cluster(pref, size=len(stands), preferred=True, merchant_branche=merchant_branches)
 
             if len(valid_pref_stands) < len(stands):
                 stands_to_alloc = stands
@@ -351,7 +346,7 @@ class Allocator(BaseAllocator):
         self.allocation_phase_1()
         self.allocation_phase_2()
         self.allocation_phase_3()
-        #self.allocation_phase_4()
+        self.allocation_phase_4()
         #self.allocation_phase_5()
 
         if DEBUG:

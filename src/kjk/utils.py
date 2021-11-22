@@ -8,7 +8,8 @@ class MarketStandClusterFinder:
     The list is sorted by priority. (most desirable first) We do not want to allocate merchants if stands are not
     adjacent, in another market row or have an obstakel in between.
     """
-    def __init__(self, data, obstacles):
+    def __init__(self, data, obstacles, branches_dict):
+        self.branches_dict = branches_dict
         self.obstacle_dict = self._process_obstacle_dict(obstacles)
         self.flattened_list = []
         self.stands_linked_list = {}
@@ -61,7 +62,23 @@ class MarketStandClusterFinder:
                     return option
         return []
 
-    def find_valid_expansion(self, fixed_positions, total_size=0, prefs=[], preferred=False):
+    def option_is_valid_branche(self, option, merchant_branche):
+        """
+        check if a merchant is trying to move to a branche incompatible stand
+        """
+        try:
+            for std in option:
+                branches = self.branches_dict[std]
+                if len(branches) > 0 and len(merchant_branche) > 0:
+                    if merchant_branche[0] not in branches:
+                        return False
+        except KeyError as e:
+            pass
+        except TypeError as e:
+            pass
+        return True
+
+    def find_valid_expansion(self, fixed_positions, total_size=0, prefs=[], preferred=False, merchant_branche=None):
         """
         check all adjacent clusters of the requested size,
         and check if the fixed positions are contained in the
@@ -74,13 +91,17 @@ class MarketStandClusterFinder:
             valid = all(elem in option for elem in fixed_positions) and\
                     all(isinstance(x, str) for x in option)
             if valid:
-                valid_options.append(option)
+                branche_valid_for_option = True
+                if merchant_branche:
+                    branche_valid_for_option = self.option_is_valid_branche(option, merchant_branche)
+                if branche_valid_for_option:
+                    valid_options.append(option)
         if preferred:
             return self.filter_preferred(valid_options, prefs)
         else:
             return valid_options
 
-    def find_valid_cluster(self, stand_list, size=2, preferred=False):
+    def find_valid_cluster(self, stand_list, size=2, preferred=False, merchant_branche=None):
         """
         check all adjacent clusters of the requested size
         """
@@ -90,7 +111,11 @@ class MarketStandClusterFinder:
             option = self.flattened_list[i:i+size]
             valid =  all(elem in stand_list for elem in option)
             if valid:
-                valid_options.append(option)
+                branche_valid_for_option = True
+                if merchant_branche:
+                    branche_valid_for_option = self.option_is_valid_branche(option, merchant_branche)
+                if branche_valid_for_option:
+                    valid_options.append(option)
         if preferred:
             return self.filter_preferred(valid_options, stand_list)
         else:

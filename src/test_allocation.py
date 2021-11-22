@@ -28,10 +28,10 @@ class MockDataproviderTestCase(unittest.TestCase):
 
         self.sut.add_stand(plaatsId='1', branches=['101-agf'], properties=['boom'], verkoopinrichting=[])
         self.sut.add_stand(plaatsId='2', branches=['101-agf'], properties=['boom'], verkoopinrichting=[])
-        self.assertEquals(len(self.sut.get_market_locations()), 2)
+        self.assertEqual(len(self.sut.get_market_locations()), 2)
 
         self.sut.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
-        self.assertEquals(len(self.sut.get_branches()), 1)
+        self.assertEqual(len(self.sut.get_branches()), 1)
         self.sut.add_rsvp(erkenningsNummer='1123456', attending=True)
 
         self.sut.mock()
@@ -39,7 +39,7 @@ class MockDataproviderTestCase(unittest.TestCase):
         market_allocation = allocation = allocator.get_allocation()
         stands = market_allocation['toewijzingen'][0]['plaatsen']
         erk = market_allocation['toewijzingen'][0]['erkenningsNummer']
-        self.assertEquals(erk, '1123456')
+        self.assertEqual(erk, '1123456')
         self.assertListEqual(stands, ['1', '2'])
 
 
@@ -47,7 +47,7 @@ class ClusterFinderTestCase(unittest.TestCase):
     def setUp(self):
         dp = FixtureDataprovider("../fixtures/test_input.json")
         dp.load_data()
-        self.sut = MarketStandClusterFinder(dp.get_market_blocks(), dp.get_obstacles())
+        self.sut = MarketStandClusterFinder(dp.get_market_blocks(), dp.get_obstacles(), {'1': ['101-agf']})
 
     def test_find_cluster(self):
         res = self.sut.find_valid_cluster(['2', '4', '123', '22', '7', '9', '11'], size=3)

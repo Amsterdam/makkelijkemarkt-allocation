@@ -144,10 +144,15 @@ class BaseAllocator:
         # not sure but we just keep the first?
         self.merchants_df.drop_duplicates(subset="erkenningsNummer", keep="first", inplace=True)
 
+        # create a sparse datastructure for branche lookup per tsnad id
+        plaats_ids = self.positions_df['plaatsId'].to_list()
+        branches = self.positions_df['branches'].to_list()
+        stand_branche_dict = dict(zip(plaats_ids, branches))
+
         # create a dataframe with merchants attending the market
         # and create a positions dataframe
         # these dataframes will be used in the allocation
-        self.cluster_finder = MarketStandClusterFinder(dp.get_market_blocks(), dp.get_obstacles())
+        self.cluster_finder = MarketStandClusterFinder(dp.get_market_blocks(), dp.get_obstacles(), stand_branche_dict)
         self.prepare_merchants()
         self.prepare_stands()
 
