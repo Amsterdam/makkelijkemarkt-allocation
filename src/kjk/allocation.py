@@ -3,13 +3,65 @@ import pandas as pd
 from datetime import date
 from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder
+from kjk.utils import DebugRedisClient
 from kjk.base import *
+
+DEBUG = False
+
+STRATEGY_EXP_FULL = 1
+STRATEGY_EXP_SOME = 2
+STRATEGY_EXP_NONE = 3
+
 
 class Allocator(BaseAllocator):
     """
-    The base allocator object takes care of teh datapreparation fase
+    The base allocator object takes care of the data preparation phase
+    and implements query methods
     So we can focus on the actual allocation phases here
     """
+    def allocation_phase_0(self):
+        print("\n--- START ALLOCATION FASE 0")
+        print("analyseer de markt en kijk (globaal) of er genoeg plaatsen zijn:")
+        print("nog open plaatsen: ", len(self.positions_df))
+        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        
+        max_demand = self.merchants_df['voorkeur.maximum'].sum()
+        min_demand = self.merchants_df['voorkeur.minimum'].sum()
+        num_available = len(self.positions_df)
+
+        self.strategy = STRATEGY_EXP_NONE
+        if max_demand < num_available:
+            self.strategy = STRATEGY_EXP_FULL
+        elif min_demand < num_available:
+            self.strategy = STRATEGY_EXP_SOME;
+
+        print("max ",max_demand)
+        print("min ", int(min_demand))
+        print("beschikbaar ", num_available)
+        print("strategie: ",self.strategy)
+
+        # branche positions vs merchants rsvp
+        self.branches_strategy = {}
+        if len(self.branches_df) > 0:
+            df = self.branches_df.query("verplicht == True")
+            for index, row in df.iterrows():
+                br_id = row['brancheId']
+                br = self.get_merchant_for_branche(br_id)
+                std = self.get_stand_for_branche(br_id)
+                self.branches_strategy[br_id] = {
+                    "max": int(row['maximumPlaatsen']),
+                    "num_stands": len(std),
+                    "num_merchants": len(br),
+                    "will_fit": len(std) > len(br)
+                }
+
+        # evi positions vs merchants rsvp
+        evi_stands = self.get_evi_stands()
+        evi_merchants = self.get_merchants_with_evi()
+        self.evi_strategy = {
+            "num_stands": len(evi_stands),
+            "num_merchants": len(evi_merchants)
+        }
 
     def allocation_phase_1(self):
         print("\n--- START ALLOCATION FASE 1")
@@ -17,7 +69,7 @@ class Allocator(BaseAllocator):
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
-        df = self.merchants_df.query("status == 'vpl' & will_move == 'no' & wants_expand == False")
+        df = self.merchants_df.query("(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'no' & wants_expand == False")
         for index, row in df.iterrows():
             erk = row['erkenningsNummer']
             stands = row['plaatsen']
@@ -36,7 +88,7 @@ class Allocator(BaseAllocator):
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
         # NOTE: save the expanders df for later, we need them for the extra stands iterations
-        self.expanders_df = self.merchants_df.query("status == 'vpl' & will_move == 'no' & wants_expand == True").copy()
+        self.expanders_df = self.merchants_df.query("(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'no' & wants_expand == True").copy()
         self.expanders_df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
         for index, row in self.expanders_df.iterrows():
             erk = row['erkenningsNummer']
@@ -49,14 +101,12 @@ class Allocator(BaseAllocator):
             for st in stands:
                 self.dequeue_market_stand(st)
 
-
     def allocation_phase_3(self):
         print("\n--- FASE 3")
         print("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
-
-        df = self.merchants_df.query("status == 'vpl' & will_move == 'yes' & wants_expand == False").copy()
+        df = self.merchants_df.query("(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'yes' & wants_expand == False").copy()
         df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
         for index, row in df.iterrows():
 
@@ -143,8 +193,8 @@ class Allocator(BaseAllocator):
         self.expanders_df = pd.concat([self.expanders_df, df])
 
     def allocation_phase_5(self):
+        print("\n## Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrij zijn verdelen")
         print("\n--- FASE 5-a")
-        print("Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrij zijn verdelen")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
@@ -164,6 +214,7 @@ class Allocator(BaseAllocator):
 
         if allocation_will_fit:
             alist = self.merchants_df.query("alist == True & branche_required == 'yes'")
+            print(alist[EXPANDERS_VIEW+["status"]])
             for index, row in alist.iterrows():
                 erk = row['erkenningsNummer']
                 pref = row['pref']
@@ -175,7 +226,9 @@ class Allocator(BaseAllocator):
                 stands_available_list = stands_available['plaatsId'].to_list()
 
                 if len(pref) == 0:
-                    stds = stands_available_list[0:maxi]
+                    stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=maxi, preferred=True)
+                    if len(stds) == 0:
+                        stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=int(mini), preferred=True)
                     self.market_output.add_allocation(erk, stds, self.merchant_object_by_id(erk))
                     try:
                         self.dequeue_marchant(erk)
@@ -184,19 +237,16 @@ class Allocator(BaseAllocator):
                     for st in stds:
                         self.dequeue_market_stand(st)
                 else:
-                    all_prefs_available =  all(stand in pref[0:maxi] for stand in stands_available_list)
-                    if all_prefs_available:
-                        stds = pref
-                        try:
-                            self.dequeue_marchant(erk)
-                        except KeyError as e:
-                            raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
-                        for st in stds:
-                            self.dequeue_market_stand(st)
-                    else:
-                        # TODD: what to do if not all pref are available
-                        # create fixtures and test!
-                        pass
+                    #all_prefs_available =  all(stand in pref[0:maxi] for stand in stands_available_list)
+                    stds = self.cluster_finder.find_valid_cluster(pref, size=maxi, preferred=True)
+                    if len(stds) == 0:
+                        stds = self.cluster_finder.find_valid_cluster(pref, size=int(mini), preferred=True)
+                    try:
+                        self.dequeue_marchant(erk)
+                    except KeyError as e:
+                        raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+                    for st in stds:
+                        self.dequeue_market_stand(st)
 
             print("\n--- FASE 5-b")
             print("Alist ingedeeld voor verplichte branches")
@@ -204,8 +254,8 @@ class Allocator(BaseAllocator):
             print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
             alist_2 = self.merchants_df.query("alist == True & branche_required == 'no'")
-            print(alist_2[ALIST_VIEW])
-            print(alist_2[MERCHANTS_SORTED_VIEW])
+            # print(alist_2[ALIST_VIEW])
+            # print(alist_2[MERCHANTS_SORTED_VIEW])
             for index, row in alist_2.iterrows():
                 erk = row['erkenningsNummer']
                 pref = row['pref']
@@ -254,12 +304,12 @@ class Allocator(BaseAllocator):
             print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
             blist = self.merchants_df.query("alist == False & branche_required == 'yes'")
-            print(blist[ALIST_VIEW])
+            #print(blist[ALIST_VIEW])
 
             blist_2 = self.merchants_df.query("alist == False & branche_required == 'no'")
-            print(blist_2[ALIST_VIEW])
+            #print(blist_2[ALIST_VIEW])
 
-            print(self.merchants_df)
+            #print(self.merchants_df)
 
         else:
             # TODO: allocation does not fit adjust strategy!
@@ -297,16 +347,19 @@ class Allocator(BaseAllocator):
            reminder: aLijst, vervangers
         """
 
-        print(self.merchants_df.info())
+        self.allocation_phase_0()
         self.allocation_phase_1()
         self.allocation_phase_2()
         self.allocation_phase_3()
-        self.allocation_phase_4()
-        self.allocation_phase_5()
+        #self.allocation_phase_4()
+        #self.allocation_phase_5()
 
-        self.market_output.to_json_file()
+        if DEBUG:
+            json_file = self.market_output.to_json_file()
+            debug_redis = DebugRedisClient()
+            debug_redis.insert_test_result(json_file)
 
-        return {}
+        return self.market_output.to_data()
 
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+import json
+import redis
+
 class MarketStandClusterFinder:
 
     """
@@ -5,15 +8,21 @@ class MarketStandClusterFinder:
     The list is sorted by priority. (most desirable first) We do not want to allocate merchants if stands are not
     adjacent, in another market row or have an obstakel in between.
     """
-    def __init__(self, data):
+    def __init__(self, data, obstacles):
+        self.obstacle_dict = self._process_obstacle_dict(obstacles)
         self.flattened_list = []
         self.stands_linked_list = {}
         for k in data:
             for gr in k['indelingslijstGroup']:
                 pl = gr['plaatsList']
                 self.flattened_list.append(None)
-                self.flattened_list += pl
                 for i, stand_nr in enumerate(pl):
+                    self.flattened_list.append(stand_nr)
+                    try:
+                        obs = self.obstacle_dict[str(stand_nr)]
+                        self.flattened_list.append(obs)
+                    except KeyError as e:
+                        pass
                     if i-1 >= 0:
                         _prev = pl[i-1]
                     else:
@@ -25,6 +34,12 @@ class MarketStandClusterFinder:
                         _next = None
                     self.stands_linked_list[_mid] = {"prev": _prev, "next": _next}
         self.flattened_list.append(None)
+
+    def _process_obstacle_dict(self, obs):
+        d = {}
+        for ob in obs:
+            d[ob['kraamA']] = ob['obstakel']
+        return d
 
     def get_neighbours_for_stand_id(self, stand_id):
         """
@@ -44,6 +59,26 @@ class MarketStandClusterFinder:
             for option in valid_options:
                 if std in option:
                     return option
+        return []
+
+    def find_valid_expansion(self, fixed_positions, total_size=0, prefs=[], preferred=False):
+        """
+        check all adjacent clusters of the requested size,
+        and check if the fixed positions are contained in the
+        slice. This will be a valid expansion cluster
+        """
+        valid_options = []
+        for i, elem in enumerate(self.flattened_list):
+            # an option is valid if it contains the fixed positions
+            option = self.flattened_list[i:i+total_size]
+            valid = all(elem in option for elem in fixed_positions) and\
+                    all(isinstance(x, str) for x in option)
+            if valid:
+                valid_options.append(option)
+        if preferred:
+            return self.filter_preferred(valid_options, prefs)
+        else:
+            return valid_options
 
     def find_valid_cluster(self, stand_list, size=2, preferred=False):
         """
@@ -61,3 +96,27 @@ class MarketStandClusterFinder:
         else:
             return valid_options
 
+
+class DebugRedisClient:
+    """
+    This a debug only object, it will insert the json file into a local redis
+    so the allocation result can be displayed in the KjK application as a concept allocation
+    this class will use the redis KEY 'RESULT_1' and the result url http://127.0.0.1:8080/job/1/
+    """
+    def __init__(self):
+        REDIS_HOST="127.0.0.1"
+        REDIS_PORT=6379
+        REDIS_PASSWORD="Salmagundi"
+
+        self.r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, password=REDIS_PASSWORD)
+        res = self.r.delete('RESULT_1')
+
+    def insert_test_result(self, allocation_json):
+        f = open(allocation_json, "r")
+        data = f.read()
+        self.r.set('RESULT_1', data)
+        f.close()
+        print("-"*60)
+        print("View the results here:")
+        print("http://127.0.0.1:8080/job/1/")
+        print("-"*60)
