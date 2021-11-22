@@ -431,7 +431,7 @@ class BaseAllocator:
         if len(stand) != 1:
             return []
         return stand['branches'].iloc[0]
-    
+
     def get_stand_for_branche(self, branche):
         def is_branche(x):
             if branche in x:
@@ -439,3 +439,38 @@ class BaseAllocator:
             return False
         stands = self.positions_df['branches'].apply(is_branche)
         return self.positions_df[stands]
+
+    def _allocate_stands_to_merchant(self, stands_to_alloc, erk):
+        self.market_output.add_allocation(erk, stands_to_alloc, self.merchant_object_by_id(erk))
+        try:
+            self.dequeue_marchant(erk)
+        except KeyError as e:
+            raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+        for st in stands_to_alloc:
+            try:
+                self.dequeue_market_stand(st)
+            except KeyError as e:
+                print(st, "failed")
+
+    def _allocate_solls_for_query(self, query):
+        result_list = self.merchants_df.query(query)
+        for index, row in result_list.iterrows():
+            erk = row['erkenningsNummer']
+            pref = row['pref']
+            merchant_branches = row['voorkeur.branches']
+            maxi = row['voorkeur.maximum']
+            mini = row['voorkeur.minimum']
+
+            if len(pref) == 0:
+                stands_available = self.get_stand_for_branche(merchant_branches[0])
+                stands_available_list = stands_available['plaatsId'].to_list()
+                stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=maxi, preferred=True)
+                if len(stds) == 0:
+                    stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=int(mini), preferred=True)
+                self._allocate_stands_to_merchant(stands_to_alloc, erk)
+            else:
+                stds = self.cluster_finder.find_valid_cluster(pref, size=maxi, preferred=True, merchant_branche=merchant_branches)
+                if len(stds) == 0:
+                    stds = self.cluster_finder.find_valid_cluster(pref, size=int(mini), preferred=True, merchant_branche=merchant_branches)
+                self._allocate_stands_to_merchant(stds, erk)
+
