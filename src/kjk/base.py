@@ -178,7 +178,10 @@ class BaseAllocator:
     def prepare_stands(self):
         """prepare the stands list for allocation"""
         def required(x):
-            return self.get_required_for_branche(x)
+            try:
+                return self.get_required_for_branche(x)
+            except KeyError as e:
+                return "unknown"
         is_required = self.positions_df['branches'].apply(required)
         self.positions_df["required"] = is_required
         self.positions_df.set_index("plaatsId", inplace=True)
@@ -231,24 +234,36 @@ class BaseAllocator:
 
     def add_alist_status_for_merchant(self):
         def prefs(x):
-            result_df = self.a_list_df[self.a_list_df['erkenningsNummer'] == x].copy()
-            return len(result_df) > 0
+            try:
+                result_df = self.a_list_df[self.a_list_df['erkenningsNummer'] == x].copy()
+                return len(result_df) > 0
+            except KeyError as e:
+                return False
         self.merchants_df['alist'] = self.merchants_df['erkenningsNummer'].apply(prefs)
 
     def add_required_branche_for_merchant(self):
         def required(x):
-            return self.get_required_for_branche(x)
+            try:
+                return self.get_required_for_branche(x)
+            except KeyError as e:
+                return "unknown"
         is_required = self.merchants_df['voorkeur.branches'].apply(required)
         self.merchants_df["branche_required"] = is_required
 
     def add_prefs_for_merchant(self):
         """add position preferences to the merchant dataframe"""
         def prefs(x):
-            return self.get_prefs_for_merchant(x)
+            try:
+                return self.get_prefs_for_merchant(x)
+            except KeyError as e:
+                return []
         self.merchants_df['pref'] = self.merchants_df['erkenningsNummer'].apply(prefs)
 
         def will_move(x):
-            return self.get_willmove_for_merchant(x)
+            try:
+                return self.get_willmove_for_merchant(x)
+            except KeyError as e:
+                return "unknown"
         self.merchants_df['will_move'] = self.merchants_df['erkenningsNummer'].apply(will_move)
 
         def wants_to_expand(x):
@@ -265,12 +280,15 @@ class BaseAllocator:
         - non vpl (tvplz, soll and exp) do have to attend.
         """
         def is_attending_market(x):
-            att = self.get_rsvp_for_merchant(x)
-            if att == True:
-                return "yes"
-            elif att == False:
-                return "no"
-            else:
+            try:
+                att = self.get_rsvp_for_merchant(x)
+                if att == True:
+                    return "yes"
+                elif att == False:
+                    return "no"
+                else:
+                    return "na"
+            except KeyError as e:
                 return "na"
         self.merchants_df['attending'] = self.merchants_df['erkenningsNummer'].apply(is_attending_market)
         df_1 = self.merchants_df.query("attending != 'no' & (status == 'vpl' | status == 'tvlp')")

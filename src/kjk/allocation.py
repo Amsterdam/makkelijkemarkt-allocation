@@ -42,17 +42,18 @@ class Allocator(BaseAllocator):
 
         # branche positions vs merchants rsvp
         self.branches_strategy = {}
-        df = self.branches_df.query("verplicht == True")
-        for index, row in df.iterrows():
-            br_id = row['brancheId']
-            br = self.get_merchant_for_branche(br_id)
-            std = self.get_stand_for_branche(br_id)
-            self.branches_strategy[br_id] = {
-                "max": int(row['maximumPlaatsen']),
-                "num_stands": len(std),
-                "num_merchants": len(br),
-                "will_fit": len(std) > len(br)
-            }
+        if len(self.branches_df) > 0:
+            df = self.branches_df.query("verplicht == True")
+            for index, row in df.iterrows():
+                br_id = row['brancheId']
+                br = self.get_merchant_for_branche(br_id)
+                std = self.get_stand_for_branche(br_id)
+                self.branches_strategy[br_id] = {
+                    "max": int(row['maximumPlaatsen']),
+                    "num_stands": len(std),
+                    "num_merchants": len(br),
+                    "will_fit": len(std) > len(br)
+                }
 
         # evi positions vs merchants rsvp
         evi_stands = self.get_evi_stands()

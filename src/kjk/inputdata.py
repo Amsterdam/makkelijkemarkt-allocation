@@ -46,7 +46,38 @@ class DataproviderGetterMixin:
 
 
 class MockDataprovider(DataproviderGetterMixin):
+    """
+    Use this class to build mocked markets for unit/scenario testing
 
+    # start with a market based on fixture:
+    mock_market = MockDataprovider("../fixtures/test_input.json")
+
+    # add merchants to the market:
+    mock_market.add_merchant(erkenningsNummer='1123456',
+                           plaatsen=['1', '2'],
+                           status='vpl',
+                           sollicitatieNummer="123",
+                           description='Frank Zappa',
+                           voorkeur={"branches": ['101-afg'], "maximum": 3, "minimum": 2, "verkoopinrichting":[], "absentFrom":"", "absentUntil": ""})
+
+    # add market stands to the mock:
+    mock_market.add_stand(plaatsId='1', branches=['101-agf'], properties=['boom'], verkoopinrichting=[])
+
+    # add branches if required:
+    mock_market.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
+
+    # add rsvp if rquired:
+    mock_market.add_rsvp(erkenningsNummer='112345', attending=True)
+
+    # commit the mock data
+    mock_market.sut.mock()
+
+    # use it to test the Allocator
+    allocator = Allocator(mock_market)
+    market_allocation = allocation = allocator.get_allocation()
+    # assert market_allocation now
+
+    """
     def __init__(self, json_file):
         self.input_file = json_file
         f = open(self.input_file, 'r')
@@ -76,8 +107,7 @@ class MockDataprovider(DataproviderGetterMixin):
     def add_rsvp(self, **kwargs):
         self.data['aanmeldingen'].append(kwargs)
 
-    def add_merchants(self, **kwargs):
-        kwargs['voorkeur'].update({"absentFrom":"", "absentUntil":""})
+    def add_merchant(self, **kwargs):
         self.data['ondernemers'].append(kwargs)
 
     def add_stand(self, **kwargs):
