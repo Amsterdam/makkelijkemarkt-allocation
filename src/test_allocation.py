@@ -37,7 +37,10 @@ class MockDataproviderTestCase(unittest.TestCase):
         self.sut.mock()
         allocator = Allocator(self.sut)
         market_allocation = allocation = allocator.get_allocation()
-        pprint(market_allocation)
+        stands = market_allocation['toewijzingen'][0]['plaatsen']
+        erk = market_allocation['toewijzingen'][0]['erkenningsNummer']
+        self.assertEquals(erk, '1123456')
+        self.assertListEqual(stands, ['1', '2'])
 
 
 class ClusterFinderTestCase(unittest.TestCase):

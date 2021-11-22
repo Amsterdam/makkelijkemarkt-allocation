@@ -263,7 +263,7 @@ class BaseAllocator:
             try:
                 return self.get_willmove_for_merchant(x)
             except KeyError as e:
-                return "unknown"
+                return "no"
         self.merchants_df['will_move'] = self.merchants_df['erkenningsNummer'].apply(will_move)
 
         def wants_to_expand(x):
