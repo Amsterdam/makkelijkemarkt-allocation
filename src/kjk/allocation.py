@@ -105,6 +105,8 @@ class Allocator(BaseAllocator):
 
         df = self.merchants_df.query("(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'yes' & wants_expand == False").copy()
         df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
+        print(df[EXPANDERS_VIEW])
+        print()
         for index, row in df.iterrows():
 
             erk = row['erkenningsNummer']
