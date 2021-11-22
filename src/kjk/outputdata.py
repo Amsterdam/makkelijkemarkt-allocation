@@ -33,6 +33,12 @@ class MarketArrangement:
         self.market_date = market_date
         self.allocation_dict = {}
         self.rejection_list = []
+        self.branches = []
+        self.market_blocks = []
+        self.rsvp = []
+        self.obstacles = []
+        self.market_positions = []
+        self.merchants = []
 
     def add_allocation(self, merchant_id=None, stand_ids=None, merchant_object=None):
         if type(stand_ids) is not list:

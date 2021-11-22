@@ -45,7 +45,7 @@ class DataproviderGetterMixin:
         return self.data['marktDate']
 
 
-class MockDataprovider(DataproviderGetterMixin):
+class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
     """
     Use this class to build mocked markets for unit/scenario testing
 
@@ -125,7 +125,7 @@ class MockDataprovider(DataproviderGetterMixin):
         self.data['branches'].append(kwargs)
 
 
-class FixtureDataprovider(BaseDataprovider, DataproviderGetterMixin):
+class FixtureDataprovider(DataproviderGetterMixin, BaseDataprovider):
     """A fixture based dataprovider"""
     def __init__(self, json_file):
         self.input_file = json_file
