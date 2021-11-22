@@ -9,6 +9,7 @@ class MarketStandClusterFinder:
     adjacent, in another market row or have an obstakel in between.
     """
     def __init__(self, data, obstacles, branches_dict):
+        self.stands_allocated = []
         self.branches_dict = branches_dict
         self.obstacle_dict = self._process_obstacle_dict(obstacles)
         self.flattened_list = []
@@ -35,6 +36,9 @@ class MarketStandClusterFinder:
                         _next = None
                     self.stands_linked_list[_mid] = {"prev": _prev, "next": _next}
         self.flattened_list.append(None)
+
+    def set_stands_allocated(self, allocated_stands):
+        self.stands_allocated += allocated_stands
 
     def _process_obstacle_dict(self, obs):
         d = {}
@@ -78,6 +82,9 @@ class MarketStandClusterFinder:
             pass
         return True
 
+    def option_is_available(self, option):
+        return not any(elem in option for elem in self.stands_allocated)
+
     def find_valid_expansion(self, fixed_positions, total_size=0, prefs=[], preferred=False, merchant_branche=None):
         """
         check all adjacent clusters of the requested size,
@@ -94,7 +101,7 @@ class MarketStandClusterFinder:
                 branche_valid_for_option = True
                 if merchant_branche:
                     branche_valid_for_option = self.option_is_valid_branche(option, merchant_branche)
-                if branche_valid_for_option:
+                if branche_valid_for_option and self.option_is_available(option):
                     valid_options.append(option)
         if preferred:
             return self.filter_preferred(valid_options, prefs)
@@ -114,7 +121,7 @@ class MarketStandClusterFinder:
                 branche_valid_for_option = True
                 if merchant_branche:
                     branche_valid_for_option = self.option_is_valid_branche(option, merchant_branche)
-                if branche_valid_for_option:
+                if branche_valid_for_option and self.option_is_available(option):
                     valid_options.append(option)
         if preferred:
             return self.filter_preferred(valid_options, stand_list)

@@ -441,6 +441,7 @@ class BaseAllocator:
         return self.positions_df[stands]
 
     def _allocate_stands_to_merchant(self, stands_to_alloc, erk):
+        self.cluster_finder.set_stands_allocated(stands_to_alloc)
         self.market_output.add_allocation(erk, stands_to_alloc, self.merchant_object_by_id(erk))
         try:
             self.dequeue_marchant(erk)
