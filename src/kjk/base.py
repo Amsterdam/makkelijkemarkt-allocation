@@ -28,6 +28,13 @@ class MerchantDequeueError(BaseException):
     """this will be raised id a merchant id can not be removed from the queue (should never happen)"""
     pass
 
+class MarketStandDequeueError(BaseException):
+    """
+    this will be when a stand can not be removed from the queue (should never happen)
+    Assigning more than one merchant to the same stand id will cause this error.
+    """
+    pass
+
 
 class BaseDataprovider:
     """
@@ -451,7 +458,7 @@ class BaseAllocator:
             try:
                 self.dequeue_market_stand(st)
             except KeyError as e:
-                print(st, "failed")
+                raise MarketStandDequeueError(f"Allocation error: {erk} - {st}")
 
     def _allocate_solls_for_query(self, query):
         result_list = self.merchants_df.query(query)

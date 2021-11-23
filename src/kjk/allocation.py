@@ -6,7 +6,7 @@ from kjk.utils import MarketStandClusterFinder
 from kjk.utils import DebugRedisClient
 from kjk.base import *
 
-DEBUG = False
+DEBUG = True
 
 STRATEGY_EXP_FULL = 1
 STRATEGY_EXP_SOME = 2
@@ -105,8 +105,8 @@ class Allocator(BaseAllocator):
 
         df = self.merchants_df.query("(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'yes' & wants_expand == False").copy()
         df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
-        print(df[EXPANDERS_VIEW])
-        print()
+
+        failed = {}
         for index, row in df.iterrows():
 
             erk = row['erkenningsNummer']
@@ -115,8 +115,31 @@ class Allocator(BaseAllocator):
             merchant_branches = row['voorkeur.branches']
             maxi = row['voorkeur.maximum']
 
-            valid_pref_stands = self.cluster_finder.find_valid_cluster(pref, size=len(stands), preferred=True, merchant_branche=merchant_branches)
+            valid_pref_stands = self.cluster_finder.find_valid_cluster(pref, size=len(stands),
+                                                                       preferred=True, merchant_branche=merchant_branches,
+                                                                       mode='any')
+            if len(valid_pref_stands) == 0:
+                failed[erk] = stands
 
+        for f in failed.keys():
+            erk = f
+            stands_to_alloc = failed[f]
+            self._allocate_stands_to_merchant(stands_to_alloc, erk)
+
+        df = self.merchants_df.query("(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'yes' & wants_expand == False").copy()
+        df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
+
+        for index, row in df.iterrows():
+
+            erk = row['erkenningsNummer']
+            stands = row['plaatsen']
+            pref = row['pref']
+            merchant_branches = row['voorkeur.branches']
+            maxi = row['voorkeur.maximum']
+
+            valid_pref_stands = self.cluster_finder.find_valid_cluster(pref, size=len(stands),
+                                                                       preferred=True, merchant_branche=merchant_branches,
+                                                                       mode='any')
             if len(valid_pref_stands) < len(stands):
                 stands_to_alloc = stands
             else:
@@ -145,7 +168,9 @@ class Allocator(BaseAllocator):
                 valid_pref_stands = self.cluster_finder.find_valid_cluster(pref, size=int(maxi), preferred=True, merchant_branche=merchant_branches)
                 if len(valid_pref_stands) == 0:
                     # expansion possible on 'old' location?
-                    valid_pref_stands = self.cluster_finder.find_valid_expansion(row['plaatsen'], total_size=int(row['voorkeur.maximum']), merchant_branche=merchant_branches)
+                    valid_pref_stands = self.cluster_finder.find_valid_expansion(row['plaatsen'],
+                                                                                 total_size=int(row['voorkeur.maximum']),
+                                                                                 merchant_branche=merchant_branches)
                     if len(valid_pref_stands) > 0:
                         valid_pref_stands = valid_pref_stands[0]
 

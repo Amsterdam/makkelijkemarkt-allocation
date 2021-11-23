@@ -108,7 +108,7 @@ class MarketStandClusterFinder:
         else:
             return valid_options
 
-    def find_valid_cluster(self, stand_list, size=2, preferred=False, merchant_branche=None):
+    def find_valid_cluster(self, stand_list, size=2, preferred=False, merchant_branche=None, mode='all'):
         """
         check all adjacent clusters of the requested size
         """
@@ -116,7 +116,11 @@ class MarketStandClusterFinder:
         for i, elem in enumerate(self.flattened_list):
             # an option is valid if it i present in de prio list
             option = self.flattened_list[i:i+size]
-            valid =  all(elem in stand_list for elem in option)
+            if mode == 'all':
+                valid =  all(elem in stand_list for elem in option)
+            else: # any
+                valid = any(elem in stand_list for elem in option) and\
+                        all(isinstance(x, str) for x in option)
             if valid:
                 branche_valid_for_option = True
                 if merchant_branche:
