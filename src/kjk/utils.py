@@ -114,7 +114,7 @@ class MarketStandClusterFinder:
         """
         valid_options = []
         for i, elem in enumerate(self.flattened_list):
-            # an option is valid if it i present in de prio list
+            # an option is valid if it is present in de prio list
             option = self.flattened_list[i:i+size]
             if mode == 'all':
                 valid =  all(elem in stand_list for elem in option)

@@ -102,7 +102,8 @@ class TestBasicAllocation(unittest.TestCase):
                              status='soll',
                              sollicitatieNummer="6",
                              description='K. Oopman',
-                             voorkeur={"branches": ['handel'], "maximum": 1, "minimum": 1, "verkoopinrichting":[], "absentFrom":"", "absentUntil": ""})
+                             voorkeur={"branches": ['666-handel'], "maximum": 1, "minimum": 1,
+                                       "verkoopinrichting": [], "absentFrom": "", "absentUntil": ""})
 
         self.dp.add_rsvp(erkenningsNummer='244', attending=True)
         self.dp.add_stand(plaatsId='66', branches=['bak'], properties=[], verkoopinrichting=[], inactive=False)

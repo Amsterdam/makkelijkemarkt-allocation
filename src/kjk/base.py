@@ -461,6 +461,23 @@ class BaseAllocator:
                 except KeyError as e:
                     raise MarketStandDequeueError(f"Allocation error: {erk} - {st}")
 
+    def _allocate_solls_for_query_2(self, query):
+        result_list = self.merchants_df.query(query)
+        print(result_list)
+        print(self.positions_df)
+        for index, row in result_list.iterrows():
+            erk = row['erkenningsNummer']
+            pref = row['pref']
+            merchant_branches = row['voorkeur.branches']
+            maxi = row['voorkeur.maximum']
+            mini = row['voorkeur.minimum']
+
+            stds = self.cluster_finder.find_valid_cluster(pref, size=maxi, preferred=True, merchant_branche=merchant_branches)
+            if len(stds) == 0:
+                stds = self.cluster_finder.find_valid_cluster(pref, size=int(mini), preferred=True, merchant_branche=merchant_branches)
+            print("stands:", stds)
+            self._allocate_stands_to_merchant(stds, erk)
+
     def _allocate_solls_for_query(self, query):
         result_list = self.merchants_df.query(query)
         for index, row in result_list.iterrows():

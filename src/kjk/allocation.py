@@ -227,7 +227,7 @@ class Allocator(BaseAllocator):
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
         # A-list required branches
-        self._allocate_solls_for_query("alist == False & branche_required == 'no'")
+        self._allocate_solls_for_query_2("alist == False & branche_required == 'no'")
 
     def allocation_phase_9(self):
         print("\n--- FASE 9")
