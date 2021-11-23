@@ -71,30 +71,48 @@ class TestBasicAllocation(unittest.TestCase):
         """
         komt op een standwerkerplaats als hij standwerker is
         """
-
+        # exp merchants apperently have stands
+        # so they will always be allocated to their stands
         self.dp.add_merchant(erkenningsNummer='4',
-                        plaatsen=[],
-                        status='exp',
-                        sollicitatieNummer="4",
-                        description='Janus Standwerker',
-                        voorkeur={"branches": ['401-experimentele-zone'], "maximum": 1, "minimum": 1, "verkoopinrichting":[], "absentFrom":"", "absentUntil": ""})
+                             #plaatsen=['66'],
+                             #status='soll',
+                             plaatsen=[],
+                             status='soll',
+                             sollicitatieNummer="4",
+                             description='Janus Standwerker',
+                             voorkeur={"branches": ['401-experimentele-zone'], "maximum": 1, "minimum": 1, "verkoopinrichting":[], "absentFrom":"", "absentUntil": ""})
 
         self.dp.add_rsvp(erkenningsNummer='4', attending=True)
         self.dp.add_stand(plaatsId='66', branches=['401-experimentele-zone'], properties=[], verkoopinrichting=[], inactive=False)
         self.dp.add_branche(brancheId="401-experimentele-zone", verplicht=True, maximumPlaatsen=12)
         self.dp.mock()
 
-        print(self.dp.get_merchants())
-
         allocator = Allocator(self.dp)
         market_allocation = allocator.get_allocation()
-        pprint(market_allocation['toewijzingen'])
+        for tw in market_allocation['toewijzingen']:
+            if tw['plaatsen'][0] == '66':
+                self.assertEqual("Janus Standwerker", tw['ondernemer']['description'])
 
     def test_assign_unused_baking_stand(self):
         """
         komt op een bakplaats als deze niet gebruikt wordt
         """
-        pass
+        self.dp.add_merchant(erkenningsNummer='244',
+                             plaatsen=[],
+                             status='soll',
+                             sollicitatieNummer="6",
+                             description='K. Oopman',
+                             voorkeur={"branches": ['handel'], "maximum": 1, "minimum": 1, "verkoopinrichting":[], "absentFrom":"", "absentUntil": ""})
+
+        self.dp.add_rsvp(erkenningsNummer='244', attending=True)
+        self.dp.add_stand(plaatsId='66', branches=['bak'], properties=[], verkoopinrichting=[], inactive=False)
+        self.dp.add_branche(brancheId="bak", verplicht=True, maximumPlaatsen=12)
+        self.dp.mock()
+
+        allocator = Allocator(self.dp)
+        market_allocation = allocator.get_allocation()
+        for tw in market_allocation['toewijzingen']:
+            print(tw['erkenningsNummer'], " : ", tw['plaatsen'])
 
     def test_assign_unused_evi_stand(self):
         """

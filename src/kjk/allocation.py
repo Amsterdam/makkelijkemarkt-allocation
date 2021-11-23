@@ -231,6 +231,7 @@ class Allocator(BaseAllocator):
 
     def allocation_phase_9(self):
         print("\n--- FASE 9")
+        print("Alle ondernemers ingedeeld, nu de uitbreidings fase.")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
