@@ -121,11 +121,13 @@ class Allocator(BaseAllocator):
             if len(valid_pref_stands) == 0:
                 failed[erk] = stands
 
+        # first allocate the vpl's that can not move to avoid conflicts
         for f in failed.keys():
             erk = f
             stands_to_alloc = failed[f]
             self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
+        # reload the dataframe with the unsuccessful movers removed from the stack
         df = self.merchants_df.query("(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'yes' & wants_expand == False").copy()
         df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
 

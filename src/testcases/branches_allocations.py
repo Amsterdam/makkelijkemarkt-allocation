@@ -47,7 +47,7 @@ class TestRequiredBranches(unittest.TestCase):
         """
         krijgt voorrang boven sollicitanten niet in een verplichte branche
         """
-	# Altijd eerst brancheplaatsen proberen vullen met branche ondernemers.
+        # Altijd eerst brancheplaatsen proberen vullen met branche ondernemers.
         pass
     
 class TestRestrictedBranches(unittest.TestCase):
@@ -59,7 +59,7 @@ class TestRestrictedBranches(unittest.TestCase):
         """
         kan het maximum aantal plaatsen als SOLL niet overschrijden
         """
-	# Ondernemers in een branche met een toewijzingsbeperking kregen in sommige
+        # Ondernemers in een branche met een toewijzingsbeperking kregen in sommige
         # situaties teveel plaatsen toegekend. Dit gebeurde voornamelijk als er nog
         # 1 brancheplek beschikbaar was maar de ondernemer aan zet wilde graag 2 plaatsen.
         # Als er vervolgens optimistisch werd ingedeeld kreeg deze ondernemer gelijk
@@ -67,13 +67,13 @@ class TestRestrictedBranches(unittest.TestCase):
         pass
 
     def test_may_exceed_max_if_vpl(self):
-	"""
-	kan het maximum aantal plaatsen overschrijden indien VPL
-	"""
-	# VPL in een branche met een toewijzingsbeperking moeten wel altijd hun
+        """
+        kan het maximum aantal plaatsen overschrijden indien VPL
+        """
+        # VPL in een branche met een toewijzingsbeperking moeten wel altijd hun
         # plaatsen toegewezen krijgen, ook al overschrijden ze daarmee het maximum.
-	pass
-	
+        pass
+
     def test_allocation_strategy_required_branche(self):
         """
         kan conservatief ingedeeld worden terwijl de rest van de markt optimistisch ingedeeld wordt
