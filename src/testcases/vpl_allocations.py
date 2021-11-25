@@ -147,7 +147,7 @@ class TestTVPLZallocation(unittest.TestCase):
         dp.add_page(['1', '2', '3'])
         dp.add_stand(plaatsId='1', branches=[], properties=[], verkoopinrichting=[])
         dp.add_stand(plaatsId='2', branches=[], properties=[], verkoopinrichting=[])
-        dp.add_stand(plaatsId='3', branches=[], properties=[], verkoopinrichting=[])
+        dp.add_stand(plaatsId='3', branches=['101-agf'], properties=[], verkoopinrichting=[])
 
         # branches
         dp.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
@@ -192,17 +192,52 @@ class TestTVPLZallocation(unittest.TestCase):
         self.assertEqual(allocation['toewijzingen'][1]['ondernemer']['description'], "C Beefheart")
         self.assertEqual(allocation['afwijzingen'][0]['ondernemer']['description'], "J Medeski")
 
-    def test_non_pref_to_evi_and_brache(self):
+    def test_non_pref_to_evi_and_branche(self):
         """
         heeft geen voorrang over verplichte branche- en EVI ondernemers
         """
-        pass
+        self.dp.add_merchant(erkenningsNummer='18',
+                        plaatsen=[],
+                        status='soll',
+                        sollicitatieNummer="34",
+                        description='D Moon',
+                        voorkeur={"branches": ['101-agf'], "maximum": 1, "minimum": 1,
+                                  "verkoopinrichting":[], "absentFrom":"", "absentUntil": ""})
+
+        self.dp.add_rsvp(erkenningsNummer='2', attending=True)
+        self.dp.add_rsvp(erkenningsNummer='18', attending=True)
+        self.dp.mock()
+
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        self.assertEqual(allocation['toewijzingen'][1]['ondernemer']['description'], "D Moon")
+        self.assertEqual(allocation['afwijzingen'][0]['ondernemer']['description'], "C Beefheart")
 
     def test_right_to_number_of_stands(self):
         """
         heeft recht op een vast aantal plaatsen, maar heeft geen vaste plaats(en)
         """
-        pass
+        self.dp.update_merchant(erkenningsNummer='2',
+                                plaatsen=[],
+                                status='tvplz',
+                                sollicitatieNummer="1",
+                                description='C Beefheart',
+                                voorkeur={"branches": ['mooie spullen'], "maximum": 2, "minimum": 2,
+                                          "verkoopinrichting":[], "absentFrom":"", "absentUntil": ""})
+
+        self.dp.add_rsvp(erkenningsNummer='2', attending=True)
+
+        self.dp.add_page(['6', '7', '8'])
+        self.dp.add_stand(plaatsId='6', branches=[], properties=[], verkoopinrichting=[])
+        self.dp.add_stand(plaatsId='7', branches=[], properties=[], verkoopinrichting=[])
+        self.dp.add_stand(plaatsId='8', branches=[], properties=[], verkoopinrichting=[])
+
+        self.dp.mock()
+
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        self.assertListEqual(allocation['toewijzingen'][1]['plaatsen'], ['6', '7'])
+        self.assertEqual(allocation['toewijzingen'][1]['ondernemer']['description'], "C Beefheart")
 
     def test_can_not_limit_stands(self):
         """

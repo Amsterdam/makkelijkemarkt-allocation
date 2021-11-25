@@ -123,6 +123,15 @@ class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
     def add_merchant(self, **kwargs):
         self.data['ondernemers'].append(kwargs)
 
+    def update_merchant(self, **kwargs):
+        """update merchant based on erkenningsNummer"""
+        index = None
+        for i, m in enumerate(self.data['ondernemers']):
+            if m['erkenningsNummer'] == kwargs['erkenningsNummer']:
+                index = i
+        if index:
+            self.data['ondernemers'][index] = kwargs
+
     def add_stand(self, **kwargs):
         self.data['marktplaatsen'].append(kwargs)
 
