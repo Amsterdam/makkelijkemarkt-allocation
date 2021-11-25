@@ -71,9 +71,12 @@ class Allocator(BaseAllocator):
 
         df = self.merchants_df.query("(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'no' & wants_expand == False")
         for index, row in df.iterrows():
-            erk = row['erkenningsNummer']
-            stands = row['plaatsen']
-            self._allocate_stands_to_merchant(stands, erk)
+            try:
+                erk = row['erkenningsNummer']
+                stands = row['plaatsen']
+                self._allocate_stands_to_merchant(stands, erk)
+            except MarketStandDequeueError as e:
+                self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
 
     def allocation_phase_2(self):
         print("\n--- FASE 2")
@@ -196,8 +199,11 @@ class Allocator(BaseAllocator):
         else:
             print("check status ERROR not all vpl's allocated.")
 
-        # make sure merchants are sorted
+        # make sure merchants are sorted, tvplz should go first
         self.merchants_df.sort_values(by=['sollicitatieNummer'], inplace=True, ascending=False)
+        df_1 = self.merchants_df.query("status == 'tvplz'")
+        df_2 = self.merchants_df.query("status != 'tvplz'")
+        self.merchants_df = pd.concat([df_1, df_2])
 
         # A-list required branches
         self._allocate_solls_for_query("alist == True & branche_required == 'yes'")
@@ -232,6 +238,20 @@ class Allocator(BaseAllocator):
         print("Alle ondernemers ingedeeld, nu de uitbreidings fase.")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+    def allocation_phase_10(self):
+        print("\n--- FASE 10")
+        print("Markt allocatie ingedeeld, nu de validatie.")
+        print("nog open plaatsen: ", len(self.positions_df))
+        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+    def allocation_phase_11(self):
+        print("\n--- FASE 11")
+        print("Markt allocatie gevalideerd")
+        print("nog open plaatsen: ", len(self.positions_df))
+        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+        self.reject_remaining_merchants()
 
     def get_allocation(self):
         """
@@ -274,6 +294,8 @@ class Allocator(BaseAllocator):
         self.allocation_phase_7()
         self.allocation_phase_8()
         self.allocation_phase_9()
+        self.allocation_phase_10()
+        self.allocation_phase_11()
 
         if DEBUG:
             json_file = self.market_output.to_json_file()

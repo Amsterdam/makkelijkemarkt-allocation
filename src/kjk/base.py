@@ -36,6 +36,29 @@ class MarketStandDequeueError(BaseException):
     pass
 
 
+BRANCHE_FULL = {
+    "code": 1,
+    "message": 'Alle marktplaatsen voor deze branche zijn reeds ingedeeld.'
+}
+ADJACENT_UNAVAILABLE = {
+    "code": 2,
+    "message": 'Geen geschikte locatie gevonden met huidige voorkeuren.'
+}
+MINIMUM_UNAVAILABLE = {
+    "code": 3,
+    "message": 'Minimum aantal plaatsen niet beschikbaar.'
+}
+MARKET_FULL = {
+    "code": 4,
+    "message": 'Alle marktplaatsen zijn reeds ingedeeld.'
+}
+VPL_POSITION_NOT_AVAILABLE = {
+    "code": 5,
+    "message": 'De vaste plaatsen voor de vpl zijn niet beschikbaar'
+}
+
+
+
 class BaseDataprovider:
     """
     Defines an interface to provide data for the Allocator object (kjk.allocation.Allocator)
@@ -447,19 +470,32 @@ class BaseAllocator:
         stands = self.positions_df['branches'].apply(is_branche)
         return self.positions_df[stands]
 
+    def reject_remaining_merchants(self):
+        print("Ondernemers af te wijzen in deze fase: ",len(self.merchants_df))
+        for index, row in self.merchants_df.iterrows():
+            erk = row['erkenningsNummer']
+            self._reject_merchant(erk, MARKET_FULL)
+
+    def _reject_merchant(self, erk, reason):
+        self.market_output.add_rejection(erk, reason, self.merchant_object_by_id(erk))
+        try:
+            self.dequeue_marchant(erk)
+        except KeyError as e:
+            raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+
     def _allocate_stands_to_merchant(self, stands_to_alloc, erk):
         if len(stands_to_alloc) > 0:
-            self.cluster_finder.set_stands_allocated(stands_to_alloc)
-            self.market_output.add_allocation(erk, stands_to_alloc, self.merchant_object_by_id(erk))
-            try:
-                self.dequeue_marchant(erk)
-            except KeyError as e:
-                raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
             for st in stands_to_alloc:
                 try:
                     self.dequeue_market_stand(st)
                 except KeyError as e:
                     raise MarketStandDequeueError(f"Allocation error: {erk} - {st}")
+            try:
+                self.dequeue_marchant(erk)
+            except KeyError as e:
+                raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+            self.cluster_finder.set_stands_allocated(stands_to_alloc)
+            self.market_output.add_allocation(erk, stands_to_alloc, self.merchant_object_by_id(erk))
 
     def _allocate_solls_for_query_2(self, query):
         result_list = self.merchants_df.query(query)
