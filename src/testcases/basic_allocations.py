@@ -91,6 +91,7 @@ class TestBasicAllocation(unittest.TestCase):
         market_allocation = allocator.get_allocation()
         for tw in market_allocation['toewijzingen']:
             if tw['plaatsen'][0] == '66':
+                print("66")
                 self.assertEqual("Janus Standwerker", tw['ondernemer']['description'])
 
     def test_assign_unused_baking_stand(self):
@@ -102,18 +103,21 @@ class TestBasicAllocation(unittest.TestCase):
                              status='soll',
                              sollicitatieNummer="6",
                              description='K. Oopman',
-                             voorkeur={"branches": ['666-handel'], "maximum": 1, "minimum": 1,
+                             voorkeur={"branches": [], "maximum": 1, "minimum": 1,
                                        "verkoopinrichting": [], "absentFrom": "", "absentUntil": ""})
 
+        self.dp.add_page(['1', '2', '3', '4', '5', '6', '7', '8', '9'])
         self.dp.add_rsvp(erkenningsNummer='244', attending=True)
-        self.dp.add_stand(plaatsId='66', branches=['bak'], properties=[], verkoopinrichting=[], inactive=False)
+        self.dp.add_stand(plaatsId='7', branches=['bak'], properties=[], verkoopinrichting=[], inactive=False)
+        self.dp.add_stand(plaatsId='8', branches=[], properties=[], verkoopinrichting=[], inactive=False)
+        self.dp.add_stand(plaatsId='9', branches=[], properties=[], verkoopinrichting=[], inactive=False)
         self.dp.add_branche(brancheId="bak", verplicht=True, maximumPlaatsen=12)
         self.dp.mock()
 
         allocator = Allocator(self.dp)
         market_allocation = allocator.get_allocation()
         for tw in market_allocation['toewijzingen']:
-            print(tw['erkenningsNummer'], " : ", tw['plaatsen'])
+            print(tw['erkenningsNummer'], " --> ", tw['plaatsen'])
 
     def test_assign_unused_evi_stand(self):
         """

@@ -104,6 +104,19 @@ class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
         if not self.mocked:
             print("WARNING: mock objects not loaded!")
 
+    def add_page(self, plaats_list=[]):
+        d = {"title": "Test block",
+            "indelingslijstGroup": [
+                {
+                    "class": "block-left",
+                    "title": "2-22",
+                    "landmarkTop": "Mauritskade",
+                    "landmarkBottom": "Pieter Vlamingstraat",
+                    "plaatsList": plaats_list
+                }]
+            }
+        self.data['paginas'].append(d)
+
     def add_rsvp(self, **kwargs):
         self.data['aanmeldingen'].append(kwargs)
 
