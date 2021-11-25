@@ -463,8 +463,7 @@ class BaseAllocator:
 
     def _allocate_solls_for_query_2(self, query):
         result_list = self.merchants_df.query(query)
-        print(result_list)
-        print(self.positions_df)
+        print("Ondernemers te alloceren in deze fase: ",len(result_list))
         for index, row in result_list.iterrows():
             erk = row['erkenningsNummer']
             pref = row['pref']
@@ -472,14 +471,18 @@ class BaseAllocator:
             maxi = row['voorkeur.maximum']
             mini = row['voorkeur.minimum']
 
-            stds = self.cluster_finder.find_valid_cluster(pref, size=maxi, preferred=True, merchant_branche=merchant_branches)
+            stds = self.cluster_finder.find_valid_cluster_final_phase(pref, size=maxi, preferred=True)
             if len(stds) == 0:
-                stds = self.cluster_finder.find_valid_cluster(pref, size=int(mini), preferred=True, merchant_branche=merchant_branches)
-            print("stands:", stds)
+                stds = self.cluster_finder.find_valid_cluster_final_phase(pref, size=int(mini), preferred=True)
+            if len(stds) == 0:
+                stds_np = self.cluster_finder.find_valid_cluster_final_phase(pref, size=int(mini), preferred=False, anywhere=True)
+                if len(stds_np) > 0:
+                    stds = stds_np[0]
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_solls_for_query(self, query):
         result_list = self.merchants_df.query(query)
+        print("Ondernemers te alloceren in deze fase: ",len(result_list))
         for index, row in result_list.iterrows():
             erk = row['erkenningsNummer']
             pref = row['pref']

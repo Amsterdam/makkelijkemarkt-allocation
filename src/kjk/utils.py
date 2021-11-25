@@ -131,6 +131,26 @@ class MarketStandClusterFinder:
             return self.filter_preferred(valid_options, stand_list)
         else:
             return valid_options
+    
+    def find_valid_cluster_final_phase(self, stand_list, size=2, preferred=False, merchant_branche=None, anywhere=False):
+        """
+        check all adjacent clusters of the requested size
+        """
+        valid_options = []
+        for i, elem in enumerate(self.flattened_list):
+            # an option is valid if it is present in de prio list
+            option = self.flattened_list[i:i+size]
+            if anywhere:
+                valid = all(isinstance(x, str) for x in option)
+            else:
+                valid = any(elem in stand_list for elem in option) and\
+                        all(isinstance(x, str) for x in option)
+            if valid and self.option_is_available(option):
+                valid_options.append(option)
+        if preferred:
+            return self.filter_preferred(valid_options, stand_list)
+        else:
+            return valid_options
 
 
 class DebugRedisClient:
