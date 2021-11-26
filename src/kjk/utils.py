@@ -82,6 +82,8 @@ class MarketStandClusterFinder:
                 if evi_merchant:
                     if "eigen-materieel" not in self.evi_dict[std]:
                         return False
+                else:
+                    return "eigen-materieel" not in self.evi_dict[std]
         except KeyError as e:
             pass
         except TypeError as e:

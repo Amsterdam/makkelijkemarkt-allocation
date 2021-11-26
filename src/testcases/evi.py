@@ -165,13 +165,104 @@ class TestEVI(unittest.TestCase):
         """
         wordt afgewezen als er geen EVI plaatsen meer beschikbaar zijn
         """
-        pass
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["404-parfum"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": ["eigen-materieel"],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+        dp.add_pref(erkenningsNummer="1", plaatsId="1", priority=1)
+
+        # stands
+        dp.add_page(["1"])
+        dp.add_stand(
+            plaatsId="1",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.mock()
+        allocator = Allocator(dp)
+        market_allocation = allocator.get_allocation()
+        self.assertListEqual(market_allocation["toewijzingen"], [])
+        self.assertEqual(len(market_allocation["afwijzingen"]), 1)
 
     def test_pref_to_moving_vpl(self):
         """
         krijgt voorrang boven VPLs die willen verplaatsen
         """
-        pass
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["404-parfum"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": ["eigen-materieel"],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=["1"],
+            status="vpl",
+            sollicitatieNummer="3",
+            description="Jopie Goedkoopie",
+            voorkeur={
+                "branches": ["404-parfum"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+        dp.add_pref(erkenningsNummer="1", plaatsId="2", priority=1)
+        dp.add_pref(erkenningsNummer="2", plaatsId="2", priority=1)
+
+        # stands
+        dp.add_page(["1", "2"])
+        dp.add_stand(
+            plaatsId="1",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=[],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+        dp.mock()
+        allocator = Allocator(dp)
+        market_allocation = allocator.get_allocation()
+        self.assertListEqual(market_allocation["toewijzingen"][0]["plaatsen"], ["1"])
+        self.assertListEqual(market_allocation["toewijzingen"][1]["plaatsen"], ["2"])
 
     def test_pref_to_soll_no_evi(self):
         """
@@ -179,4 +270,62 @@ class TestEVI(unittest.TestCase):
         """
         # Altijd eerst EVI plaatsen proberen vullen met EVI ondernemers.
         # Ook indien `strategy === 'conservative'`.
-        pass
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["404-parfum"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": ["eigen-materieel"],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="3",
+            description="Jopie Goedkoopie",
+            voorkeur={
+                "branches": ["404-parfum"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+        dp.add_rsvp(erkenningsNummer="2", attending=True)
+        dp.add_pref(erkenningsNummer="1", plaatsId="2", priority=1)
+        dp.add_pref(erkenningsNummer="2", plaatsId="2", priority=1)
+
+        # stands
+        dp.add_page(["1", "2"])
+        dp.add_stand(
+            plaatsId="1",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=[],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+        dp.mock()
+        allocator = Allocator(dp)
+        market_allocation = allocator.get_allocation()
+        self.assertListEqual(market_allocation["toewijzingen"][0]["plaatsen"], ["2"])
+        self.assertEqual(len(market_allocation["afwijzingen"]), 0)

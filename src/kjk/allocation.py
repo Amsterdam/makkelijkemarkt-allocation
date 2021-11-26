@@ -162,6 +162,7 @@ class Allocator(BaseAllocator):
             pref = row["pref"]
             merchant_branches = row["voorkeur.branches"]
             maxi = row["voorkeur.maximum"]
+            evi = row["has_evi"] == "yes"
 
             valid_pref_stands = self.cluster_finder.find_valid_cluster(
                 pref,
@@ -169,6 +170,7 @@ class Allocator(BaseAllocator):
                 preferred=True,
                 merchant_branche=merchant_branches,
                 mode="any",
+                evi_merchant=evi,
             )
             if len(valid_pref_stands) < len(stands):
                 stands_to_alloc = stands
@@ -274,7 +276,7 @@ class Allocator(BaseAllocator):
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
-        self._allocate_solls_for_query_2("alist == True & branche_required == 'no'")
+        self._allocate_solls_for_query_2("alist == True & branche_required != 'yes'")
 
     def allocation_phase_8(self):
         print("\n--- FASE 8")
@@ -282,7 +284,7 @@ class Allocator(BaseAllocator):
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
-        self._allocate_solls_for_query_2("alist == False & branche_required == 'no'")
+        self._allocate_solls_for_query_2("alist == False & branche_required != 'yes'")
 
     def allocation_phase_9(self):
         print("\n--- FASE 9")
