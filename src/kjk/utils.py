@@ -126,7 +126,13 @@ class MarketStandClusterFinder:
             return valid_options
 
     def find_valid_cluster(
-        self, stand_list, size=2, preferred=False, merchant_branche=None, mode="all"
+        self,
+        stand_list,
+        size=2,
+        preferred=False,
+        merchant_branche=None,
+        mode="all",
+        evi_merchant=False,
     ):
         """
         check all adjacent clusters of the requested size
@@ -145,7 +151,7 @@ class MarketStandClusterFinder:
                 branche_valid_for_option = True
                 if merchant_branche:
                     branche_valid_for_option = self.option_is_valid_branche(
-                        option, merchant_branche, False
+                        option, merchant_branche, evi_merchant
                     )
                 if branche_valid_for_option and self.option_is_available(option):
                     valid_options.append(option)

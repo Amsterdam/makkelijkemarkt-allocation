@@ -193,6 +193,7 @@ class Allocator(BaseAllocator):
             pref = row["pref"]
             merchant_branches = row["voorkeur.branches"]
             maxi = row["voorkeur.maximum"]
+            evi = row["has_evi"] == "yes"
 
             valid_pref_stands = []
             if self.strategy == STRATEGY_EXP_FULL:
@@ -202,6 +203,7 @@ class Allocator(BaseAllocator):
                     size=int(maxi),
                     preferred=True,
                     merchant_branche=merchant_branches,
+                    evi_merchant=evi,
                 )
                 if len(valid_pref_stands) == 0:
                     # expansion possible on 'old' location?
@@ -209,6 +211,7 @@ class Allocator(BaseAllocator):
                         row["plaatsen"],
                         total_size=int(row["voorkeur.maximum"]),
                         merchant_branche=merchant_branches,
+                        evi_merchant=evi,
                     )
                     if len(valid_pref_stands) > 0:
                         valid_pref_stands = valid_pref_stands[0]

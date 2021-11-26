@@ -151,8 +151,8 @@ class TestEVI(unittest.TestCase):
             },
         )
 
-        # self.dp.add_pref(erkenningsNummer='2', plaatsId='1', priority=1)
-        # self.dp.add_pref(erkenningsNummer='2', plaatsId='2', priority=2)
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="1", priority=1)
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="2", priority=2)
 
         self.dp.mock()
         allocator = Allocator(self.dp)
