@@ -87,7 +87,7 @@ class Allocator(BaseAllocator):
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
-        # NOTE: save the expanders df for later, we need them for the extra stands iterations in tight strateies
+        # NOTE: save the expanders df for later, we need them for the extra stands iterations in tight strategies
         self.expanders_df = self.merchants_df.query(
             "(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'no' & wants_expand == True"
         ).copy()
@@ -291,6 +291,8 @@ class Allocator(BaseAllocator):
         print("Alle ondernemers ingedeeld, nu de uitbreidings fase.")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+        print(self.expanders_df)
 
     def allocation_phase_10(self):
         print("\n--- FASE 10")
