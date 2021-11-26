@@ -47,7 +47,7 @@ class ClusterFinderTestCase(unittest.TestCase):
     def setUp(self):
         dp = FixtureDataprovider("../fixtures/test_input.json")
         dp.load_data()
-        self.sut = MarketStandClusterFinder(dp.get_market_blocks(), dp.get_obstacles(), {'1': ['101-agf']})
+        self.sut = MarketStandClusterFinder(dp.get_market_blocks(), dp.get_obstacles(), {'1': ['101-agf']}, {})
 
     def test_find_cluster(self):
         res = self.sut.find_valid_cluster(['2', '4', '123', '22', '7', '9', '11'], size=3)

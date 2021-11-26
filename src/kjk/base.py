@@ -174,15 +174,20 @@ class BaseAllocator:
         # not sure but we just keep the first?
         self.merchants_df.drop_duplicates(subset="erkenningsNummer", keep="first", inplace=True)
 
-        # create a sparse datastructure for branche lookup per tsnad id
+        # create a sparse datastructure for branche lookup per stand id
         plaats_ids = self.positions_df['plaatsId'].to_list()
         branches = self.positions_df['branches'].to_list()
         stand_branche_dict = dict(zip(plaats_ids, branches))
 
+        # create a sparse datastructure for evi lookup per stand id
+        plaats_ids = self.positions_df['plaatsId'].to_list()
+        evis = self.positions_df['verkoopinrichting'].to_list()
+        stand_evi_dict = dict(zip(plaats_ids, evis))
+
         # create a dataframe with merchants attending the market
         # and create a positions dataframe
         # these dataframes will be used in the allocation
-        self.cluster_finder = MarketStandClusterFinder(dp.get_market_blocks(), dp.get_obstacles(), stand_branche_dict)
+        self.cluster_finder = MarketStandClusterFinder(dp.get_market_blocks(), dp.get_obstacles(), stand_branche_dict, stand_evi_dict)
         self.prepare_merchants()
         self.prepare_stands()
 
@@ -207,6 +212,7 @@ class BaseAllocator:
         self.add_prefs_for_merchant()
         self.add_alist_status_for_merchant()
         self.add_required_branche_for_merchant()
+        self.add_evi_for_merchant()
         self.merchants_df.set_index("erkenningsNummer", inplace=True)
         self.merchants_df['erkenningsNummer'] = self.merchants_df.index
 
@@ -284,6 +290,18 @@ class BaseAllocator:
                 return "unknown"
         is_required = self.merchants_df['voorkeur.branches'].apply(required)
         self.merchants_df["branche_required"] = is_required
+
+    def add_evi_for_merchant(self):
+        def has_evi(x):
+            try:
+                if 'eigen-materieel' in x:
+                    return 'yes'
+                else:
+                    return 'no'
+            except TypeError as e:
+                return 'unknown'
+        hasevi = self.merchants_df['voorkeur.verkoopinrichting'].apply(has_evi)
+        self.merchants_df["has_evi"] = hasevi
 
     def add_prefs_for_merchant(self):
         """add position preferences to the merchant dataframe"""
@@ -516,6 +534,25 @@ class BaseAllocator:
                     stds = stds_np[0]
             self._allocate_stands_to_merchant(stds, erk)
 
+    def _allocate_evi_for_query(self, query):
+        result_list = self.merchants_df.query(query)
+        print("EVI Ondernemers te alloceren in deze fase: ",len(result_list))
+        for index, row in result_list.iterrows():
+            erk = row['erkenningsNummer']
+            pref = row['pref']
+            merchant_branches = row['voorkeur.branches']
+            maxi = row['voorkeur.maximum']
+            mini = row['voorkeur.minimum']
+            stands_available = self.get_evi_stands()
+            try:
+                stands_available_list = stands_available['plaatsId'].to_list()
+            except KeyError as e:
+                stands_available_list = []
+            stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=maxi, preferred=True)
+            if len(stds) == 0:
+                stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=int(mini), preferred=True)
+            self._allocate_stands_to_merchant(stds, erk)
+
     def _allocate_solls_for_query(self, query):
         result_list = self.merchants_df.query(query)
         print("Ondernemers te alloceren in deze fase: ",len(result_list))
@@ -526,19 +563,13 @@ class BaseAllocator:
             maxi = row['voorkeur.maximum']
             mini = row['voorkeur.minimum']
 
-            if len(pref) == 0:
-                stands_available = self.get_stand_for_branche(merchant_branches[0])
-                try:
-                    stands_available_list = stands_available['plaatsId'].to_list()
-                except KeyError as e:
-                    stands_available_list = []
-                stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=maxi, preferred=True)
-                if len(stds) == 0:
-                    stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=int(mini), preferred=True)
-                self._allocate_stands_to_merchant(stds, erk)
-            else:
-                stds = self.cluster_finder.find_valid_cluster(pref, size=maxi, preferred=True, merchant_branche=merchant_branches)
-                if len(stds) == 0:
-                    stds = self.cluster_finder.find_valid_cluster(pref, size=int(mini), preferred=True, merchant_branche=merchant_branches)
-                self._allocate_stands_to_merchant(stds, erk)
+            stands_available = self.get_stand_for_branche(merchant_branches[0])
+            try:
+                stands_available_list = stands_available['plaatsId'].to_list()
+            except KeyError as e:
+                stands_available_list = []
+            stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=maxi, preferred=True)
+            if len(stds) == 0:
+                stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=int(mini), preferred=True)
+            self._allocate_stands_to_merchant(stds, erk)
 

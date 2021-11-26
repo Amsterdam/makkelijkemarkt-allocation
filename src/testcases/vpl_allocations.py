@@ -239,12 +239,14 @@ class TestTVPLZallocation(unittest.TestCase):
         self.assertListEqual(allocation['toewijzingen'][1]['plaatsen'], ['6', '7'])
         self.assertEqual(allocation['toewijzingen'][1]['ondernemer']['description'], "C Beefheart")
 
+    @unittest.skip("Navraag markten")
     def test_can_not_limit_stands(self):
         """
         mag zijn vaste aantal plaatsen niet verkleinen
         """
         pass
 
+    @unittest.skip("Dit is de default, navraag markten")
     def test_can_expand_stands(self):
         """
         mag zijn vaste aantal plaatsen uitbreiden indien mogelijk

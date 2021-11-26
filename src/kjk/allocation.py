@@ -91,13 +91,14 @@ class Allocator(BaseAllocator):
             erk = row['erkenningsNummer']
             stands = row['plaatsen']
             merchant_branches = row['voorkeur.branches']
+            evi = row['has_evi'] == 'yes'
             # if we have plenty space on the merket reward the expansion now
             if self.strategy == STRATEGY_EXP_FULL:
-                stands = self.cluster_finder.find_valid_expansion(row['plaatsen'], total_size=int(row['voorkeur.maximum']), merchant_branche=merchant_branches)
+                stands = self.cluster_finder.find_valid_expansion(row['plaatsen'], total_size=int(row['voorkeur.maximum']), merchant_branche=merchant_branches, evi_merchant=evi)
                 if len(stands) > 0:
                     stands = stands[0]
                 else:
-                    stands = row['plastsen'] # no expansion possible
+                    stands = row['plaatsen'] # no expansion possible
             self._allocate_stands_to_merchant(stands, erk)
 
     def allocation_phase_3(self):
@@ -208,6 +209,9 @@ class Allocator(BaseAllocator):
         # A-list required branches
         self._allocate_solls_for_query("alist == True & branche_required == 'yes'")
 
+        # A-list EVI
+        self._allocate_evi_for_query("alist == True & has_evi == 'yes'")
+
     def allocation_phase_6(self):
         print("\n--- FASE 6")
         print("A-lijst ingedeeld voor verplichte branches, nu de B-lijst for verplichte branches")
@@ -216,6 +220,9 @@ class Allocator(BaseAllocator):
 
         # B-list required branches
         self._allocate_solls_for_query("alist != True & branche_required == 'yes'")
+
+        # AB-list EVI
+        self._allocate_evi_for_query("alist != True & has_evi == 'yes'")
 
     def allocation_phase_7(self):
         print("\n--- FASE 7")

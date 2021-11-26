@@ -117,6 +117,14 @@ class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
             }
         self.data['paginas'].append(d)
 
+    def add_pref(self, **kwargs):
+        """
+           erkenningsNummer: "4000175070",
+           plaatsId: "247",
+           priority: 1,
+        """
+        self.data['voorkeuren'].append(kwargs)
+
     def add_rsvp(self, **kwargs):
         self.data['aanmeldingen'].append(kwargs)
 

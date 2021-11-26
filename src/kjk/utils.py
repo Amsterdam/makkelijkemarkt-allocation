@@ -8,9 +8,10 @@ class MarketStandClusterFinder:
     The list is sorted by priority. (most desirable first) We do not want to allocate merchants if stands are not
     adjacent, in another market row or have an obstakel in between.
     """
-    def __init__(self, data, obstacles, branches_dict):
+    def __init__(self, data, obstacles, branches_dict, evi_dict):
         self.stands_allocated = []
         self.branches_dict = branches_dict
+        self.evi_dict = evi_dict
         self.obstacle_dict = self._process_obstacle_dict(obstacles)
         self.flattened_list = []
         self.stands_linked_list = {}
@@ -66,7 +67,7 @@ class MarketStandClusterFinder:
                     return option
         return []
 
-    def option_is_valid_branche(self, option, merchant_branche):
+    def option_is_valid_branche(self, option, merchant_branche, evi_merchant):
         """
         check if a merchant is trying to move to a branche incompatible stand
         """
@@ -75,6 +76,9 @@ class MarketStandClusterFinder:
                 branches = self.branches_dict[std]
                 if len(branches) > 0 and len(merchant_branche) > 0:
                     if merchant_branche[0] not in branches:
+                        return False
+                if evi_merchant:
+                    if 'eigen-materieel' not in self.evi_dict[std]:
                         return False
         except KeyError as e:
             pass
@@ -85,7 +89,7 @@ class MarketStandClusterFinder:
     def option_is_available(self, option):
         return not any(elem in option for elem in self.stands_allocated)
 
-    def find_valid_expansion(self, fixed_positions, total_size=0, prefs=[], preferred=False, merchant_branche=None):
+    def find_valid_expansion(self, fixed_positions, total_size=0, prefs=[], preferred=False, merchant_branche=None, evi_merchant=False):
         """
         check all adjacent clusters of the requested size,
         and check if the fixed positions are contained in the
@@ -100,7 +104,7 @@ class MarketStandClusterFinder:
             if valid:
                 branche_valid_for_option = True
                 if merchant_branche:
-                    branche_valid_for_option = self.option_is_valid_branche(option, merchant_branche)
+                    branche_valid_for_option = self.option_is_valid_branche(option, merchant_branche, evi_merchant)
                 if branche_valid_for_option and self.option_is_available(option):
                     valid_options.append(option)
         if preferred:
@@ -124,7 +128,7 @@ class MarketStandClusterFinder:
             if valid:
                 branche_valid_for_option = True
                 if merchant_branche:
-                    branche_valid_for_option = self.option_is_valid_branche(option, merchant_branche)
+                    branche_valid_for_option = self.option_is_valid_branche(option, merchant_branche, False)
                 if branche_valid_for_option and self.option_is_available(option):
                     valid_options.append(option)
         if preferred:
