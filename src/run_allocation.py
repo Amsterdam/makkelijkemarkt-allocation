@@ -9,9 +9,9 @@ try:
     a = Allocator(dp)
     output = a.get_allocation()
     stop = time.time()
-    print("Allocation completed in ", round(stop-start, 2), "sec")
+    print("Allocation completed in ", round(stop - start, 2), "sec")
 except Exception as e:
     print("Error: ", e)
-    print("-"*60)
+    print("-" * 60)
     traceback.print_exc(file=sys.stdout)
-    print("-"*60)
+    print("-" * 60)

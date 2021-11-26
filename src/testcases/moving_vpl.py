@@ -5,7 +5,7 @@ class TestMovingVPL(unittest.TestCase):
     """
     Een VPL die wil verplaatsen
     """
-    
+
     def test_pref_no_non_baking(self):
         """
         krijgt WEL voorrang boven sollicitanten die niet willen bakken
@@ -26,7 +26,7 @@ class TestMovingVPL(unittest.TestCase):
         mag niet naar een plaats van een andere aanwezige VPL
         """
         pass
-    
+
     def test_can_switch_stands(self):
         """
         mag ruilen met een andere VPL

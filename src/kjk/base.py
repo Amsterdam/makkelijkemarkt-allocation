@@ -4,66 +4,86 @@ from datetime import date
 from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder
 
-pd.options.mode.chained_assignment = 'raise'
+pd.options.mode.chained_assignment = "raise"
 
 
 # dataframe views for debugging
-EXPANDERS_VIEW = [ "description", "voorkeur.maximum", "voorkeur.minimum", "plaatsen", "pref", "voorkeur.anywhere"]
-MERCHANTS_SORTED_VIEW = ["erkenningsNummer", "sollicitatieNummer", 
-                         "pref", "voorkeur.branches", 
-                         "voorkeur.minimum", "voorkeur.maximum"]
-ALIST_VIEW = ["erkenningsNummer", "description" ,"alist", "sollicitatieNummer"]
-BRANCHE_VIEW = ["erkenningsNummer", "description" ,"voorkeur.branches", "branche_required"]
+EXPANDERS_VIEW = [
+    "description",
+    "voorkeur.maximum",
+    "voorkeur.minimum",
+    "plaatsen",
+    "pref",
+    "voorkeur.anywhere",
+]
+MERCHANTS_SORTED_VIEW = [
+    "erkenningsNummer",
+    "sollicitatieNummer",
+    "pref",
+    "voorkeur.branches",
+    "voorkeur.minimum",
+    "voorkeur.maximum",
+]
+ALIST_VIEW = ["erkenningsNummer", "description", "alist", "sollicitatieNummer"]
+BRANCHE_VIEW = [
+    "erkenningsNummer",
+    "description",
+    "voorkeur.branches",
+    "branche_required",
+]
+
 
 class VPLCollisionError(BaseException):
     """this will be raised id two VPL merchants claim the same market position. (should never happen)"""
+
     pass
 
 
 class MerchantNotFoundError(BaseException):
     """this will be raised id a merchant id can not be found in the input data. (should never happen)"""
+
     pass
+
 
 class MerchantDequeueError(BaseException):
     """this will be raised id a merchant id can not be removed from the queue (should never happen)"""
+
     pass
+
 
 class MarketStandDequeueError(BaseException):
     """
     this will be when a stand can not be removed from the queue (should never happen)
     Assigning more than one merchant to the same stand id will cause this error.
     """
+
     pass
 
 
 BRANCHE_FULL = {
     "code": 1,
-    "message": 'Alle marktplaatsen voor deze branche zijn reeds ingedeeld.'
+    "message": "Alle marktplaatsen voor deze branche zijn reeds ingedeeld.",
 }
 ADJACENT_UNAVAILABLE = {
     "code": 2,
-    "message": 'Geen geschikte locatie gevonden met huidige voorkeuren.'
+    "message": "Geen geschikte locatie gevonden met huidige voorkeuren.",
 }
 MINIMUM_UNAVAILABLE = {
     "code": 3,
-    "message": 'Minimum aantal plaatsen niet beschikbaar.'
+    "message": "Minimum aantal plaatsen niet beschikbaar.",
 }
-MARKET_FULL = {
-    "code": 4,
-    "message": 'Alle marktplaatsen zijn reeds ingedeeld.'
-}
+MARKET_FULL = {"code": 4, "message": "Alle marktplaatsen zijn reeds ingedeeld."}
 VPL_POSITION_NOT_AVAILABLE = {
     "code": 5,
-    "message": 'De vaste plaatsen voor de vpl zijn niet beschikbaar'
+    "message": "De vaste plaatsen voor de vpl zijn niet beschikbaar",
 }
-
 
 
 class BaseDataprovider:
     """
     Defines an interface to provide data for the Allocator object (kjk.allocation.Allocator)
     Market data should contain the following collections:
-        marktDate, marktId, paginas, rows, branches, voorkeuren, naam, obstakels, aanmeldingen 
+        marktDate, marktId, paginas, rows, branches, voorkeuren, naam, obstakels, aanmeldingen
         markt, aLijst, ondernemers, aanwezigheid, marktplaatsen
     see: 'fixtures/dapp_20211030/a_input.json' for an anonimyzed example of a real world scenario
     """
@@ -134,14 +154,16 @@ class BaseAllocator:
         self.prefs = dp.get_preferences()
         self.open_positions = dp.get_market_locations()
         self.market_blocks = dp.get_market_blocks()
-        self.obstacles= dp.get_obstacles()
+        self.obstacles = dp.get_obstacles()
 
         # market id and date
         self.market_id = dp.get_market_id()
         self.market_date = dp.get_market_date()
 
         # output object
-        self.market_output = MarketArrangement(market_id=self.market_id, market_date=self.market_date)
+        self.market_output = MarketArrangement(
+            market_id=self.market_id, market_date=self.market_date
+        )
         self.market_output.set_config(self.market)
         self.market_output.set_branches(self.branches)
         self.market_output.set_market_positions(self.open_positions)
@@ -172,22 +194,29 @@ class BaseAllocator:
 
         # remove duplicate erkenningsNummers from nerchants df
         # not sure but we just keep the first?
-        self.merchants_df.drop_duplicates(subset="erkenningsNummer", keep="first", inplace=True)
+        self.merchants_df.drop_duplicates(
+            subset="erkenningsNummer", keep="first", inplace=True
+        )
 
         # create a sparse datastructure for branche lookup per stand id
-        plaats_ids = self.positions_df['plaatsId'].to_list()
-        branches = self.positions_df['branches'].to_list()
+        plaats_ids = self.positions_df["plaatsId"].to_list()
+        branches = self.positions_df["branches"].to_list()
         stand_branche_dict = dict(zip(plaats_ids, branches))
 
         # create a sparse datastructure for evi lookup per stand id
-        plaats_ids = self.positions_df['plaatsId'].to_list()
-        evis = self.positions_df['verkoopinrichting'].to_list()
+        plaats_ids = self.positions_df["plaatsId"].to_list()
+        evis = self.positions_df["verkoopinrichting"].to_list()
         stand_evi_dict = dict(zip(plaats_ids, evis))
 
         # create a dataframe with merchants attending the market
         # and create a positions dataframe
         # these dataframes will be used in the allocation
-        self.cluster_finder = MarketStandClusterFinder(dp.get_market_blocks(), dp.get_obstacles(), stand_branche_dict, stand_evi_dict)
+        self.cluster_finder = MarketStandClusterFinder(
+            dp.get_market_blocks(),
+            dp.get_obstacles(),
+            stand_branche_dict,
+            stand_evi_dict,
+        )
         self.prepare_merchants()
         self.prepare_stands()
 
@@ -197,7 +226,7 @@ class BaseAllocator:
     def create_merchant_dict(self):
         d = {}
         for m in self.merchants:
-            d[m['erkenningsNummer']] = m;
+            d[m["erkenningsNummer"]] = m
         return d
 
     def merchant_object_by_id(self, merchant_id):
@@ -214,26 +243,30 @@ class BaseAllocator:
         self.add_required_branche_for_merchant()
         self.add_evi_for_merchant()
         self.merchants_df.set_index("erkenningsNummer", inplace=True)
-        self.merchants_df['erkenningsNummer'] = self.merchants_df.index
+        self.merchants_df["erkenningsNummer"] = self.merchants_df.index
 
     def prepare_stands(self):
         """prepare the stands list for allocation"""
+
         def required(x):
             try:
                 return self.get_required_for_branche(x)
             except KeyError as e:
                 return "unknown"
-        is_required = self.positions_df['branches'].apply(required)
+
+        is_required = self.positions_df["branches"].apply(required)
         self.positions_df["required"] = is_required
         self.positions_df.set_index("plaatsId", inplace=True)
-        self.positions_df['plaatsId'] = self.positions_df.index
+        self.positions_df["plaatsId"] = self.positions_df.index
 
         try:
+
             def is_inactive(x):
                 if x == True:
                     return False
                 return True
-            active = self.positions_df['inactive'].apply(is_inactive)
+
+            active = self.positions_df["inactive"].apply(is_inactive)
             self.positions_df = self.positions_df[active]
         except KeyError as e:
             # No inactive stand found in cofiguration
@@ -251,7 +284,7 @@ class BaseAllocator:
             if "bak" in b:
                 return "yes"
             result = self.branches_df[self.branches_df["brancheId"] == b[0]]
-            if len(result) > 0 and result.iloc[0]['verplicht'] == True:
+            if len(result) > 0 and result.iloc[0]["verplicht"] == True:
                 return "yes"
             else:
                 return "no"
@@ -259,15 +292,17 @@ class BaseAllocator:
 
     def get_prefs_for_merchant(self, merchant_number):
         """get position pref for merchant_number (erkenningsNummer)"""
-        result_df = self.prefs_df[self.prefs_df['erkenningsNummer'] == merchant_number].copy()
-        result_df.sort_values(by=['priority'], inplace=True)
-        plaats = result_df['plaatsId'].to_list()
+        result_df = self.prefs_df[
+            self.prefs_df["erkenningsNummer"] == merchant_number
+        ].copy()
+        result_df.sort_values(by=["priority"], inplace=True)
+        plaats = result_df["plaatsId"].to_list()
         return plaats
 
     def get_willmove_for_merchant(self, merchant_number):
         """check if this merchant wants to move (only relevant for vpl) . merchant_number (erkenningsNummer)"""
-        result_df = self.prefs_df[self.prefs_df['erkenningsNummer'] == merchant_number]
-        plaats = result_df['plaatsId'].to_list()
+        result_df = self.prefs_df[self.prefs_df["erkenningsNummer"] == merchant_number]
+        plaats = result_df["plaatsId"].to_list()
         if len(plaats) > 0:
             return "yes"
         else:
@@ -276,11 +311,14 @@ class BaseAllocator:
     def add_alist_status_for_merchant(self):
         def prefs(x):
             try:
-                result_df = self.a_list_df[self.a_list_df['erkenningsNummer'] == x].copy()
+                result_df = self.a_list_df[
+                    self.a_list_df["erkenningsNummer"] == x
+                ].copy()
                 return len(result_df) > 0
             except KeyError as e:
                 return False
-        self.merchants_df['alist'] = self.merchants_df['erkenningsNummer'].apply(prefs)
+
+        self.merchants_df["alist"] = self.merchants_df["erkenningsNummer"].apply(prefs)
 
     def add_required_branche_for_merchant(self):
         def required(x):
@@ -288,43 +326,53 @@ class BaseAllocator:
                 return self.get_required_for_branche(x)
             except KeyError as e:
                 return "unknown"
-        is_required = self.merchants_df['voorkeur.branches'].apply(required)
+
+        is_required = self.merchants_df["voorkeur.branches"].apply(required)
         self.merchants_df["branche_required"] = is_required
 
     def add_evi_for_merchant(self):
         def has_evi(x):
             try:
-                if 'eigen-materieel' in x:
-                    return 'yes'
+                if "eigen-materieel" in x:
+                    return "yes"
                 else:
-                    return 'no'
+                    return "no"
             except TypeError as e:
-                return 'unknown'
-        hasevi = self.merchants_df['voorkeur.verkoopinrichting'].apply(has_evi)
+                return "unknown"
+
+        hasevi = self.merchants_df["voorkeur.verkoopinrichting"].apply(has_evi)
         self.merchants_df["has_evi"] = hasevi
 
     def add_prefs_for_merchant(self):
         """add position preferences to the merchant dataframe"""
+
         def prefs(x):
             try:
                 return self.get_prefs_for_merchant(x)
             except KeyError as e:
                 return []
-        self.merchants_df['pref'] = self.merchants_df['erkenningsNummer'].apply(prefs)
+
+        self.merchants_df["pref"] = self.merchants_df["erkenningsNummer"].apply(prefs)
 
         def will_move(x):
             try:
                 return self.get_willmove_for_merchant(x)
             except KeyError as e:
                 return "no"
-        self.merchants_df['will_move'] = self.merchants_df['erkenningsNummer'].apply(will_move)
+
+        self.merchants_df["will_move"] = self.merchants_df["erkenningsNummer"].apply(
+            will_move
+        )
 
         def wants_to_expand(x):
-            if x['status'] == "vpl":
-                return len(x['plaatsen']) < x['voorkeur.maximum']
+            if x["status"] == "vpl":
+                return len(x["plaatsen"]) < x["voorkeur.maximum"]
             else:
                 return False
-        self.merchants_df['wants_expand'] = self.merchants_df.apply(wants_to_expand, axis=1)
+
+        self.merchants_df["wants_expand"] = self.merchants_df.apply(
+            wants_to_expand, axis=1
+        )
 
     def df_for_attending_merchants(self):
         """
@@ -332,6 +380,7 @@ class BaseAllocator:
         - vpl and tvpl only have to tell when they are NOT attending
         - non vpl (tvplz, soll and exp) do have to attend.
         """
+
         def is_attending_market(x):
             try:
                 att = self.get_rsvp_for_merchant(x)
@@ -343,39 +392,54 @@ class BaseAllocator:
                     return "na"
             except KeyError as e:
                 return "na"
-        self.merchants_df['attending'] = self.merchants_df['erkenningsNummer'].apply(is_attending_market)
-        df_1 = self.merchants_df.query("attending != 'no' & (status == 'vpl' | status == 'tvlp')")
-        df_2 = self.merchants_df.query("attending == 'yes' & (status != 'vpl' & status != 'tvlp')")
+
+        self.merchants_df["attending"] = self.merchants_df["erkenningsNummer"].apply(
+            is_attending_market
+        )
+        df_1 = self.merchants_df.query(
+            "attending != 'no' & (status == 'vpl' | status == 'tvlp')"
+        )
+        df_2 = self.merchants_df.query(
+            "attending == 'yes' & (status != 'vpl' & status != 'tvlp')"
+        )
         self.merchants_df = pd.concat([df_1, df_2])
 
         def check_absent(x):
-            if x['voorkeur.absentUntil'] != None and x['voorkeur.absentFrom']:
-                from_str = x['voorkeur.absentFrom']
+            if x["voorkeur.absentUntil"] != None and x["voorkeur.absentFrom"]:
+                from_str = x["voorkeur.absentFrom"]
                 from_date = date.fromisoformat(from_str)
-                until_str = x['voorkeur.absentUntil']
+                until_str = x["voorkeur.absentUntil"]
                 until_date = date.fromisoformat(until_str)
                 if from_date <= self.market_date <= until_date:
                     return False
             return True
-        df = self.merchants_df[['voorkeur.absentFrom', 'voorkeur.absentUntil']].apply(check_absent, axis=1)
+
+        df = self.merchants_df[["voorkeur.absentFrom", "voorkeur.absentUntil"]].apply(
+            check_absent, axis=1
+        )
         self.merchants_df = self.merchants_df[df]
 
     def get_vpl_for_position(self, position):
         """return a merchant number for a fixed position, reurn None is no merchant found"""
+
         def num_positions(x):
             if position in x:
                 return True
             return False
-        has_positions = self.merchants_df['plaatsen'].apply(num_positions)
+
+        has_positions = self.merchants_df["plaatsen"].apply(num_positions)
         result_df = self.merchants_df[has_positions]
         if len(result_df) == 1:
-            return result_df.iloc[0]['erkenningsNummer']
+            return result_df.iloc[0]["erkenningsNummer"]
         if len(result_df) > 1:
-            raise VPLCollisionError(f"more than one vpl merchant for position {position}")
+            raise VPLCollisionError(
+                f"more than one vpl merchant for position {position}"
+            )
         return None
 
     def get_merchant_for_branche(self, branche, status=None):
         """get all merchants for a given branche for this market"""
+
         def has_branch(x):
             try:
                 if branche in x:
@@ -384,7 +448,8 @@ class BaseAllocator:
                 # nobranches == nan in dataframe
                 pass
             return False
-        has_branch = self.merchants_df['voorkeur.branches'].apply(has_branch)
+
+        has_branch = self.merchants_df["voorkeur.branches"].apply(has_branch)
         result_df = self.merchants_df[has_branch][["erkenningsNummer", "status"]]
         if status is not None:
             result_df = result_df[result_df["status"] == status]
@@ -393,6 +458,7 @@ class BaseAllocator:
 
     def get_expander_for_branche(self, branche, status=None):
         """get all expander for a given branche for this market"""
+
         def has_branch(x):
             try:
                 if branche in x:
@@ -401,7 +467,8 @@ class BaseAllocator:
                 # nobranches == nan in dataframe
                 pass
             return False
-        has_branch = self.expanders_df['voorkeur.branches'].apply(has_branch)
+
+        has_branch = self.expanders_df["voorkeur.branches"].apply(has_branch)
         result_df = self.expanders_df[has_branch][["erkenningsNummer", "status"]]
         if status is not None:
             result_df = result_df[result_df["status"] == status]
@@ -409,44 +476,51 @@ class BaseAllocator:
         return result_df.to_list()
 
     def get_baking_positions(self):
-        """get all baking positions for this market """
+        """get all baking positions for this market"""
+
         def has_bak(x):
             if "bak" in x:
                 return True
             return False
-        has_bak_df = self.positions_df['branches'].apply(has_bak)
-        result_df = self.positions_df[has_bak_df]['plaatsId']
+
+        has_bak_df = self.positions_df["branches"].apply(has_bak)
+        result_df = self.positions_df[has_bak_df]["plaatsId"]
         return result_df.to_list()
 
     def get_baking_positions_df(self):
-        """get all baking positions for this market """
+        """get all baking positions for this market"""
+
         def has_bak(x):
             if "bak" in x:
                 return True
             return False
-        has_bak_df = self.positions_df['branches'].apply(has_bak)
+
+        has_bak_df = self.positions_df["branches"].apply(has_bak)
         result_df = self.positions_df[has_bak_df]
         return result_df
 
     def get_rsvp_for_merchant(self, merchant_number):
         """boolean, Is this mechant attending this market?"""
-        result_df = self.rsvp_df[self.rsvp_df['erkenningsNummer'] == merchant_number]
+        result_df = self.rsvp_df[self.rsvp_df["erkenningsNummer"] == merchant_number]
         if len(result_df) == 1:
-            return result_df.iloc[0]['attending']
+            return result_df.iloc[0]["attending"]
         return None
 
     def get_evi_stands(self):
-        """ return a dataframe with evi stands"""
+        """return a dataframe with evi stands"""
+
         def has_evi(x):
-            if 'eigen-materieel' in x:
+            if "eigen-materieel" in x:
                 return True
             else:
                 return False
-        hasevi = self.positions_df['verkoopinrichting'].apply(has_evi)
+
+        hasevi = self.positions_df["verkoopinrichting"].apply(has_evi)
         return self.positions_df[hasevi]
 
     def get_merchants_with_evi(self, status=None):
         """return list of merchant numbers with evi, optionally filtered by status ('soll', 'vpl', etc)"""
+
         def has_evi(x):
             try:
                 if "eigen-materieel" in x:
@@ -455,7 +529,8 @@ class BaseAllocator:
                 # nobranches == nan in dataframe
                 pass
             return False
-        has_evi = self.merchants_df['voorkeur.verkoopinrichting'].apply(has_evi)
+
+        has_evi = self.merchants_df["voorkeur.verkoopinrichting"].apply(has_evi)
         result_df = self.merchants_df[has_evi][["erkenningsNummer", "status"]]
         if status is not None:
             result_df = result_df[result_df["status"] == status]
@@ -478,20 +553,21 @@ class BaseAllocator:
         stand = self.positions_df.query(f"plaatsId == '{stand_id}'")
         if len(stand) != 1:
             return []
-        return stand['branches'].iloc[0]
+        return stand["branches"].iloc[0]
 
     def get_stand_for_branche(self, branche):
         def is_branche(x):
             if branche in x:
                 return True
             return False
-        stands = self.positions_df['branches'].apply(is_branche)
+
+        stands = self.positions_df["branches"].apply(is_branche)
         return self.positions_df[stands]
 
     def reject_remaining_merchants(self):
-        print("Ondernemers af te wijzen in deze fase: ",len(self.merchants_df))
+        print("Ondernemers af te wijzen in deze fase: ", len(self.merchants_df))
         for index, row in self.merchants_df.iterrows():
-            erk = row['erkenningsNummer']
+            erk = row["erkenningsNummer"]
             self._reject_merchant(erk, MARKET_FULL)
 
     def _reject_merchant(self, erk, reason):
@@ -499,7 +575,9 @@ class BaseAllocator:
         try:
             self.dequeue_marchant(erk)
         except KeyError as e:
-            raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+            raise MerchantDequeueError(
+                "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
+            )
 
     def _allocate_stands_to_merchant(self, stands_to_alloc, erk):
         if len(stands_to_alloc) > 0:
@@ -511,65 +589,82 @@ class BaseAllocator:
             try:
                 self.dequeue_marchant(erk)
             except KeyError as e:
-                raise MerchantDequeueError("Could not dequeue merchant, there may be a duplicate merchant id in the input data!")
+                raise MerchantDequeueError(
+                    "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
+                )
             self.cluster_finder.set_stands_allocated(stands_to_alloc)
-            self.market_output.add_allocation(erk, stands_to_alloc, self.merchant_object_by_id(erk))
+            self.market_output.add_allocation(
+                erk, stands_to_alloc, self.merchant_object_by_id(erk)
+            )
 
     def _allocate_solls_for_query_2(self, query):
         result_list = self.merchants_df.query(query)
-        print("Ondernemers te alloceren in deze fase: ",len(result_list))
+        print("Ondernemers te alloceren in deze fase: ", len(result_list))
         for index, row in result_list.iterrows():
-            erk = row['erkenningsNummer']
-            pref = row['pref']
-            merchant_branches = row['voorkeur.branches']
-            maxi = row['voorkeur.maximum']
-            mini = row['voorkeur.minimum']
+            erk = row["erkenningsNummer"]
+            pref = row["pref"]
+            merchant_branches = row["voorkeur.branches"]
+            maxi = row["voorkeur.maximum"]
+            mini = row["voorkeur.minimum"]
 
-            stds = self.cluster_finder.find_valid_cluster_final_phase(pref, size=maxi, preferred=True)
+            stds = self.cluster_finder.find_valid_cluster_final_phase(
+                pref, size=maxi, preferred=True
+            )
             if len(stds) == 0:
-                stds = self.cluster_finder.find_valid_cluster_final_phase(pref, size=int(mini), preferred=True)
+                stds = self.cluster_finder.find_valid_cluster_final_phase(
+                    pref, size=int(mini), preferred=True
+                )
             if len(stds) == 0:
-                stds_np = self.cluster_finder.find_valid_cluster_final_phase(pref, size=int(mini), preferred=False, anywhere=True)
+                stds_np = self.cluster_finder.find_valid_cluster_final_phase(
+                    pref, size=int(mini), preferred=False, anywhere=True
+                )
                 if len(stds_np) > 0:
                     stds = stds_np[0]
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_evi_for_query(self, query):
         result_list = self.merchants_df.query(query)
-        print("EVI Ondernemers te alloceren in deze fase: ",len(result_list))
+        print("EVI Ondernemers te alloceren in deze fase: ", len(result_list))
         for index, row in result_list.iterrows():
-            erk = row['erkenningsNummer']
-            pref = row['pref']
-            merchant_branches = row['voorkeur.branches']
-            maxi = row['voorkeur.maximum']
-            mini = row['voorkeur.minimum']
+            erk = row["erkenningsNummer"]
+            pref = row["pref"]
+            merchant_branches = row["voorkeur.branches"]
+            maxi = row["voorkeur.maximum"]
+            mini = row["voorkeur.minimum"]
             stands_available = self.get_evi_stands()
             try:
-                stands_available_list = stands_available['plaatsId'].to_list()
+                stands_available_list = stands_available["plaatsId"].to_list()
             except KeyError as e:
                 stands_available_list = []
-            stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=maxi, preferred=True)
+            stds = self.cluster_finder.find_valid_cluster(
+                stands_available_list, size=maxi, preferred=True
+            )
             if len(stds) == 0:
-                stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=int(mini), preferred=True)
+                stds = self.cluster_finder.find_valid_cluster(
+                    stands_available_list, size=int(mini), preferred=True
+                )
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_solls_for_query(self, query):
         result_list = self.merchants_df.query(query)
-        print("Ondernemers te alloceren in deze fase: ",len(result_list))
+        print("Ondernemers te alloceren in deze fase: ", len(result_list))
         for index, row in result_list.iterrows():
-            erk = row['erkenningsNummer']
-            pref = row['pref']
-            merchant_branches = row['voorkeur.branches']
-            maxi = row['voorkeur.maximum']
-            mini = row['voorkeur.minimum']
+            erk = row["erkenningsNummer"]
+            pref = row["pref"]
+            merchant_branches = row["voorkeur.branches"]
+            maxi = row["voorkeur.maximum"]
+            mini = row["voorkeur.minimum"]
 
             stands_available = self.get_stand_for_branche(merchant_branches[0])
             try:
-                stands_available_list = stands_available['plaatsId'].to_list()
+                stands_available_list = stands_available["plaatsId"].to_list()
             except KeyError as e:
                 stands_available_list = []
-            stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=maxi, preferred=True)
+            stds = self.cluster_finder.find_valid_cluster(
+                stands_available_list, size=maxi, preferred=True
+            )
             if len(stds) == 0:
-                stds = self.cluster_finder.find_valid_cluster(stands_available_list, size=int(mini), preferred=True)
+                stds = self.cluster_finder.find_valid_cluster(
+                    stands_available_list, size=int(mini), preferred=True
+                )
             self._allocate_stands_to_merchant(stds, erk)
-

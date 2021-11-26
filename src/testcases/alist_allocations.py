@@ -1,5 +1,6 @@
 import unittest
 
+
 class TestAlistAllocations(unittest.TestCase):
     """
     Een sollicitant op de A-lijst
@@ -12,7 +13,7 @@ class TestAlistAllocations(unittest.TestCase):
         pass
 
     def test_assign_pref_to_blist(self):
-        """ 
+        """
         krijgt voorrang over gelijkwaardige sollicitanten op de B-lijst
         """
         pass

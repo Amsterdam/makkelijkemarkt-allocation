@@ -10,5 +10,5 @@ from testcases.soll import *
 from testcases.expansion import *
 from testcases.misc import *
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

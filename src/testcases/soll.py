@@ -1,5 +1,6 @@
 import unittest
 
+
 class TestSollAllocation(unittest.TestCase):
     """
     Een sollicitant die ingedeeld wil worden

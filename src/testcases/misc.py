@@ -38,7 +38,7 @@ class TestTVPLcancellation(unittest.TestCase):
 
     def test_register_tvpl(self):
         """
-        hoeft zich niet af te melden als zij zichzelf niet aangemeld hebben        
+        hoeft zich niet af te melden als zij zichzelf niet aangemeld hebben
         """
         pass
 
@@ -71,7 +71,6 @@ class Test_SOLL_EXP_EXPF(unittest.TestCase):
         kan geen minimum gewenste plaatsen opgeven in hun voorkeuren
         """
         pass
-
 
     def test_can_not_have_max_pref(self):
         """

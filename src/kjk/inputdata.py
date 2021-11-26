@@ -4,45 +4,44 @@ from kjk.base import BaseDataprovider
 
 
 class DataproviderGetterMixin:
-
     def get_obstacles(self):
-        return self.data['obstakels']
+        return self.data["obstakels"]
 
     def get_market_blocks(self):
-        return self.data['paginas']
+        return self.data["paginas"]
 
     def get_market_date(self):
-        return self.data['marktDate']
+        return self.data["marktDate"]
 
     def get_market(self):
-        return self.data['markt']
+        return self.data["markt"]
 
     def get_merchants(self):
-        return self.data['ondernemers']
+        return self.data["ondernemers"]
 
     def get_market_locations(self):
-        return self.data['marktplaatsen']
+        return self.data["marktplaatsen"]
 
     def get_rsvp(self):
-        return self.data['aanmeldingen']
+        return self.data["aanmeldingen"]
 
     def get_a_list(self):
-        return self.data['aLijst']
+        return self.data["aLijst"]
 
     def get_attending(self):
-        return self.data['aanwezigheid']
+        return self.data["aanwezigheid"]
 
     def get_branches(self):
-        return self.data['branches']
+        return self.data["branches"]
 
     def get_preferences(self):
-        return self.data['voorkeuren']
+        return self.data["voorkeuren"]
 
     def get_market_id(self):
-        return self.data['marktId']
+        return self.data["marktId"]
 
     def get_market_date(self):
-        return self.data['marktDate']
+        return self.data["marktDate"]
 
 
 class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
@@ -78,21 +77,22 @@ class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
     # assert market_allocation now
 
     """
+
     def __init__(self, json_file):
         self.input_file = json_file
-        f = open(self.input_file, 'r')
+        f = open(self.input_file, "r")
         self.data = json.load(f)
         f.close()
 
         # start with an empty market config
-        self.data['ondernemers'] = []
-        self.data['branches'] = []
-        self.data['marktplaatsen'] = []
-        self.data['paginas'] = []
-        self.data['obstakels'] = []
-        self.data['aanmeldingen'] = []
-        self.data['aLijst'] = []
-        self.data['voorkeuren'] = []
+        self.data["ondernemers"] = []
+        self.data["branches"] = []
+        self.data["marktplaatsen"] = []
+        self.data["paginas"] = []
+        self.data["obstakels"] = []
+        self.data["aanmeldingen"] = []
+        self.data["aLijst"] = []
+        self.data["voorkeuren"] = []
 
         # mock data not loaded yet
         self.mocked = False
@@ -105,43 +105,45 @@ class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
             print("WARNING: mock objects not loaded!")
 
     def add_page(self, plaats_list=[]):
-        d = {"title": "Test block",
+        d = {
+            "title": "Test block",
             "indelingslijstGroup": [
                 {
                     "class": "block-left",
                     "title": "2-22",
                     "landmarkTop": "Mauritskade",
                     "landmarkBottom": "Pieter Vlamingstraat",
-                    "plaatsList": plaats_list
-                }]
-            }
-        self.data['paginas'].append(d)
+                    "plaatsList": plaats_list,
+                }
+            ],
+        }
+        self.data["paginas"].append(d)
 
     def add_pref(self, **kwargs):
         """
-           erkenningsNummer: "4000175070",
-           plaatsId: "247",
-           priority: 1,
+        erkenningsNummer: "4000175070",
+        plaatsId: "247",
+        priority: 1,
         """
-        self.data['voorkeuren'].append(kwargs)
+        self.data["voorkeuren"].append(kwargs)
 
     def add_rsvp(self, **kwargs):
-        self.data['aanmeldingen'].append(kwargs)
+        self.data["aanmeldingen"].append(kwargs)
 
     def add_merchant(self, **kwargs):
-        self.data['ondernemers'].append(kwargs)
+        self.data["ondernemers"].append(kwargs)
 
     def update_merchant(self, **kwargs):
         """update merchant based on erkenningsNummer"""
         index = None
-        for i, m in enumerate(self.data['ondernemers']):
-            if m['erkenningsNummer'] == kwargs['erkenningsNummer']:
+        for i, m in enumerate(self.data["ondernemers"]):
+            if m["erkenningsNummer"] == kwargs["erkenningsNummer"]:
                 index = i
         if index:
-            self.data['ondernemers'][index] = kwargs
+            self.data["ondernemers"][index] = kwargs
 
     def add_stand(self, **kwargs):
-        self.data['marktplaatsen'].append(kwargs)
+        self.data["marktplaatsen"].append(kwargs)
 
     def add_branche(self, **kwargs):
         """
@@ -152,20 +154,21 @@ class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
         verplicht : bool
         maximumPlaatsen : int
         """
-        self.data['branches'].append(kwargs)
+        self.data["branches"].append(kwargs)
 
 
 class FixtureDataprovider(DataproviderGetterMixin, BaseDataprovider):
     """A fixture based dataprovider"""
+
     def __init__(self, json_file):
         self.input_file = json_file
 
     def load_data(self):
-        f = open(self.input_file, 'r')
+        f = open(self.input_file, "r")
         self.data = json.load(f)
         f.close()
         return self.data
 
-if __name__ == "__main__":
-    dp = FixtureDataprovider('fixtures/dapp_20211030/a_input.json')
 
+if __name__ == "__main__":
+    dp = FixtureDataprovider("fixtures/dapp_20211030/a_input.json")

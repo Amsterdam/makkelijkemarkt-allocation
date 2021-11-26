@@ -49,7 +49,8 @@ class TestRequiredBranches(unittest.TestCase):
         """
         # Altijd eerst brancheplaatsen proberen vullen met branche ondernemers.
         pass
-    
+
+
 class TestRestrictedBranches(unittest.TestCase):
     """
     Een ondernemer in een beperkte branche (bijv. agf)
