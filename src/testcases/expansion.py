@@ -20,7 +20,7 @@ class TestExpansion(unittest.TestCase):
             sollicitatieNummer="2",
             description="Frank Zappa",
             voorkeur={
-                "branches": ["101-afg"],
+                "branches": [],
                 "maximum": 4,
                 "minimum": 2,
                 "verkoopinrichting": [],
@@ -64,6 +64,11 @@ class TestExpansion(unittest.TestCase):
         # add pages
         dp.add_page([None, "1", "2", "3", "4", None])
         dp.add_page([None, "5", "6", "7", None])
+
+        # prefs
+        dp.add_pref(erkenningsNummer="3", plaatsId="7", priority=1)
+        dp.add_pref(erkenningsNummer="2", plaatsId="5", priority=1)
+        dp.add_pref(erkenningsNummer="2", plaatsId="6", priority=1)
 
         # stands
         dp.add_stand(
@@ -115,7 +120,7 @@ class TestExpansion(unittest.TestCase):
         )
 
         # branches
-        dp.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
+        # dp.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
 
         # rsvp
         dp.add_rsvp(erkenningsNummer="1", attending=True)

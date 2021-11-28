@@ -311,13 +311,14 @@ class Allocator(BaseAllocator):
                     total_size=int(row["voorkeur.maximum"]),
                     merchant_branche=merchant_branches,
                     evi_merchant=evi,
+                    ignore_check_available=assigned_stands,
                 )
                 print(
                     erk, " -> ", assigned_stands, row["voorkeur.maximum"], " : ", stands
                 )
-                if len(stands) > len(assigned_stands):
+                if len(stands) > 0:
                     self._allocate_stands_to_merchant(
-                        stands, erk, dequeue_marchant=False
+                        stands[0], erk, dequeue_merchant=False
                     )
 
     def allocation_phase_10(self):
