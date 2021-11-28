@@ -16,7 +16,7 @@ class Allocator(BaseAllocator):
     So we can focus on the actual allocation phases here
     """
 
-    def allocation_phase_0(self):
+    def allocation_phase_00(self):
         print("\n--- START ALLOCATION FASE 0")
         print("analyseer de markt en kijk (globaal) of er genoeg plaatsen zijn:")
         print("nog open plaatsen: ", len(self.positions_df))
@@ -60,7 +60,7 @@ class Allocator(BaseAllocator):
             "num_merchants": len(evi_merchants),
         }
 
-    def allocation_phase_1(self):
+    def allocation_phase_01(self):
         print("\n--- START ALLOCATION FASE 1")
         print("ondenemers (vpl) die niet willen verplaatsen of uitbreiden:")
         print("nog open plaatsen: ", len(self.positions_df))
@@ -77,7 +77,7 @@ class Allocator(BaseAllocator):
             except MarketStandDequeueError as e:
                 self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
 
-    def allocation_phase_2(self):
+    def allocation_phase_02(self):
         print("\n--- FASE 2")
         print("ondenemers (vpl) die NIET willen verplaatsen maar WEL uitbreiden:")
         print("nog open plaatsen: ", len(self.positions_df))
@@ -109,7 +109,7 @@ class Allocator(BaseAllocator):
                     stands = row["plaatsen"]  # no expansion possible
             self._allocate_stands_to_merchant(stands, erk)
 
-    def allocation_phase_3(self):
+    def allocation_phase_03(self):
         print("\n--- FASE 3")
         print("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
         print("nog open plaatsen: ", len(self.positions_df))
@@ -174,7 +174,7 @@ class Allocator(BaseAllocator):
                 stands_to_alloc = valid_pref_stands
             self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
-    def allocation_phase_4(self):
+    def allocation_phase_04(self):
         print("\n--- FASE 4")
         print("de vpl's die willen uitbreiden en verplaatsen")
         print("nog open plaatsen: ", len(self.positions_df))
@@ -221,7 +221,7 @@ class Allocator(BaseAllocator):
                 stands_to_alloc = valid_pref_stands
             self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
-    def allocation_phase_5(self):
+    def allocation_phase_05(self):
         print(
             "\n## Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrij zijn verdelen"
         )
@@ -255,7 +255,7 @@ class Allocator(BaseAllocator):
         # A-list EVI
         self._allocate_evi_for_query("alist == True & has_evi == 'yes'")
 
-    def allocation_phase_6(self):
+    def allocation_phase_06(self):
         print("\n--- FASE 6")
         print(
             "A-lijst ingedeeld voor verplichte branches, nu de B-lijst for verplichte branches"
@@ -271,7 +271,7 @@ class Allocator(BaseAllocator):
         # AB-list EVI
         self._allocate_evi_for_query("alist != True & has_evi == 'yes'")
 
-    def allocation_phase_7(self):
+    def allocation_phase_07(self):
         print("\n--- FASE 7")
         print("B-lijst ingedeeld voor verplichte branches, overige solls op de A-lijst")
         print("nog open plaatsen: ", len(self.positions_df))
@@ -281,7 +281,7 @@ class Allocator(BaseAllocator):
             "alist == True & branche_required != 'yes' & has_evi != 'yes'"
         )
 
-    def allocation_phase_8(self):
+    def allocation_phase_08(self):
         print("\n--- FASE 8")
         print("A-list gedaan, overige solls")
         print("nog open plaatsen: ", len(self.positions_df))
@@ -291,7 +291,7 @@ class Allocator(BaseAllocator):
             "alist == False & branche_required != 'yes' & has_evi != 'yes'"
         )
 
-    def allocation_phase_9(self):
+    def allocation_phase_09(self):
         print("\n--- FASE 9")
         print("Alle ondernemers ingedeeld, nu de uitbreidings fase.")
         print("nog open plaatsen: ", len(self.positions_df))
@@ -344,16 +344,16 @@ class Allocator(BaseAllocator):
            reminder: aLijst, vervangers
         """
 
-        self.allocation_phase_0()
-        self.allocation_phase_1()
-        self.allocation_phase_2()
-        self.allocation_phase_3()
-        self.allocation_phase_4()
-        self.allocation_phase_5()
-        self.allocation_phase_6()
-        self.allocation_phase_7()
-        self.allocation_phase_8()
-        self.allocation_phase_9()
+        self.allocation_phase_00()
+        self.allocation_phase_01()
+        self.allocation_phase_02()
+        self.allocation_phase_03()
+        self.allocation_phase_04()
+        self.allocation_phase_05()
+        self.allocation_phase_06()
+        self.allocation_phase_07()
+        self.allocation_phase_08()
+        self.allocation_phase_09()
         self.allocation_phase_10()
         self.allocation_phase_11()
 
