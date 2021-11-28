@@ -296,9 +296,29 @@ class Allocator(BaseAllocator):
 
         # STRATEGY_EXP_NONE means no expansion possible (market space is thight)
         # STRATEGY_EXP_FULL means expansion already done during previous phases
-        print(self.expanders_df)
         if self.strategy == STRATEGY_EXP_SOME:
-            print(self.expanders_df)
+            for index, row in self.expanders_df.iterrows():
+                erk = row["erkenningsNummer"]
+                stands = row["plaatsen"]
+                merchant_branches = row["voorkeur.branches"]
+                evi = row["has_evi"] == "yes"
+
+                assigned_stands = self.market_output.get_assigned_stands_for_merchant(
+                    erk
+                )
+                stands = self.cluster_finder.find_valid_expansion(
+                    assigned_stands,
+                    total_size=int(row["voorkeur.maximum"]),
+                    merchant_branche=merchant_branches,
+                    evi_merchant=evi,
+                )
+                print(
+                    erk, " -> ", assigned_stands, row["voorkeur.maximum"], " : ", stands
+                )
+                if len(stands) > len(assigned_stands):
+                    self._allocate_stands_to_merchant(
+                        stands, erk, dequeue_marchant=False
+                    )
 
     def allocation_phase_10(self):
         print("\n--- FASE 10")

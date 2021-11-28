@@ -40,12 +40,18 @@ class MarketArrangement:
         self.market_positions = []
         self.merchants = []
 
+        self.assigned_stands = {}
+
     def add_allocation(self, merchant_id=None, stand_ids=None, merchant_object=None):
         if type(stand_ids) is not list:
             raise StandsTypeError("market stands must be of type list")
         if merchant_id in self.allocation_dict:
             allocation_obj = self.allocation_dict[merchant_id]
             allocation_obj["plaatsen"] += stand_ids
+            allocation_obj["plaatsen"] = list(
+                set(allocation_obj["plaatsen"])
+            )  # remove duplicates
+            self.assigned_stands[merchant_id] = allocation_obj["plaatsen"]
         else:
             allocation_obj = {
                 "marktId": self.market_id,
@@ -55,6 +61,7 @@ class MarketArrangement:
                 "erkenningsNummer": merchant_id,
             }
             self.allocation_dict[merchant_id] = allocation_obj
+            self.assigned_stands[merchant_id] = stand_ids
 
     def add_rejection(self, merchant_id=None, reason=None, merchant_object=None):
         rejection_obj = {
@@ -65,6 +72,12 @@ class MarketArrangement:
             "erkenningsNummer": merchant_id,
         }
         self.rejection_list.append(rejection_obj)
+
+    def get_assigned_stands_for_merchant(self, merchant_id):
+        try:
+            return self.assigned_stands[merchant_id]
+        except KeyError as e:
+            return None
 
     def set_config(self, conf=None):
         self.market_config = conf

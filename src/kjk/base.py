@@ -587,7 +587,7 @@ class BaseAllocator:
                 "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
             )
 
-    def _allocate_stands_to_merchant(self, stands_to_alloc, erk):
+    def _allocate_stands_to_merchant(self, stands_to_alloc, erk, dequeue_merchant=True):
         if len(stands_to_alloc) > 0:
             for st in stands_to_alloc:
                 try:
@@ -595,7 +595,8 @@ class BaseAllocator:
                 except KeyError as e:
                     raise MarketStandDequeueError(f"Allocation error: {erk} - {st}")
             try:
-                self.dequeue_marchant(erk)
+                if dequeue_merchant:
+                    self.dequeue_marchant(erk)
             except KeyError as e:
                 raise MerchantDequeueError(
                     "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"

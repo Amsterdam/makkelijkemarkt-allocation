@@ -168,7 +168,7 @@ class OutputLayoutTest(unittest.TestCase):
         output = self.sut.to_data()
         self.assertEqual(len(output["toewijzingen"]), 1)
         self.assertListEqual(
-            output["toewijzingen"][0]["plaatsen"], [101, 102, 103, 4, 5]
+            output["toewijzingen"][0]["plaatsen"], [4, 5, 101, 102, 103]
         )
 
     def test_add_rejection(self):
