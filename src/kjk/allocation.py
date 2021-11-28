@@ -84,13 +84,11 @@ class Allocator(BaseAllocator):
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
         # NOTE: save the expanders df for later, we need them for the extra stands iterations in tight strategies
-        self.expanders_df = self.merchants_df.query(
+        df = self.merchants_df.query(
             "(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'no' & wants_expand == True"
         ).copy()
-        self.expanders_df.sort_values(
-            by=["sollicitatieNummer"], inplace=True, ascending=False
-        )
-        for index, row in self.expanders_df.iterrows():
+        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=False)
+        for index, row in df.iterrows():
             erk = row["erkenningsNummer"]
             stands = row["plaatsen"]
             merchant_branches = row["voorkeur.branches"]
@@ -183,7 +181,6 @@ class Allocator(BaseAllocator):
         df = self.merchants_df.query(
             "status == 'vpl' & wants_expand == True & will_move == 'yes'"
         )
-        self.expanders_df = self.expanders_df.append(df)
         for index, row in df.iterrows():
 
             erk = row["erkenningsNummer"]
@@ -297,7 +294,11 @@ class Allocator(BaseAllocator):
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
+        # STRATEGY_EXP_NONE means no expansion possible (market space is thight)
+        # STRATEGY_EXP_FULL means expansion already done during previous phases
         print(self.expanders_df)
+        if self.strategy == STRATEGY_EXP_SOME:
+            print(self.expanders_df)
 
     def allocation_phase_10(self):
         print("\n--- FASE 10")

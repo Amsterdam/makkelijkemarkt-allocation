@@ -238,6 +238,20 @@ class BaseAllocator:
         except KeyError as e:
             raise MerchantNotFoundError(f"mechant not found: {merchant_id}")
 
+    def create_expanders_set(self):
+        def wants_to_expand(x):
+            try:
+                return int(x["voorkeur.maximum"]) > int(x["voorkeur.minimum"])
+            except KeyError as e:
+                return False
+            except ValueError as e:
+                return False
+
+        self.merchants_df["wants_expand"] = self.merchants_df.apply(
+            wants_to_expand, axis=1
+        )
+        self.expanders_df = self.merchants_df.query("wants_expand == True").copy()
+
     def prepare_merchants(self):
         """prepare the merchants list for allocation"""
         self.df_for_attending_merchants()
@@ -245,6 +259,7 @@ class BaseAllocator:
         self.add_alist_status_for_merchant()
         self.add_required_branche_for_merchant()
         self.add_evi_for_merchant()
+        self.create_expanders_set()
         self.merchants_df.set_index("erkenningsNummer", inplace=True)
         self.merchants_df["erkenningsNummer"] = self.merchants_df.index
 
@@ -365,16 +380,6 @@ class BaseAllocator:
 
         self.merchants_df["will_move"] = self.merchants_df["erkenningsNummer"].apply(
             will_move
-        )
-
-        def wants_to_expand(x):
-            if x["status"] == "vpl":
-                return len(x["plaatsen"]) < x["voorkeur.maximum"]
-            else:
-                return False
-
-        self.merchants_df["wants_expand"] = self.merchants_df.apply(
-            wants_to_expand, axis=1
         )
 
     def df_for_attending_merchants(self):
@@ -637,7 +642,6 @@ class BaseAllocator:
             maxi = row["voorkeur.maximum"]
             mini = row["voorkeur.minimum"]
             stands_available = self.get_evi_stands()
-            print(row["description"])
             try:
                 stands_available_list = stands_available["plaatsId"].to_list()
             except KeyError as e:
@@ -651,7 +655,6 @@ class BaseAllocator:
                 stds = self.cluster_finder.find_valid_cluster(
                     stands_available_list, size=int(mini), preferred=True
                 )
-            print(stands_available_list, stds)
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_branche_solls_for_query(self, query):
