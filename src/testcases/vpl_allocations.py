@@ -157,8 +157,8 @@ class TestTVPallocation(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         market_allocation = allocation = allocator.get_allocation()
-        self.assertTrue(len(market_allocation["afwijzingen"]) == 1)
-        self.assertEqual(market_allocation["afwijzingen"][0]["reason"]["code"], 5)
+        self.assertTrue(len(market_allocation["afwijzingen"]) == 3)
+        self.assertEqual(market_allocation["afwijzingen"][2]["reason"]["code"], 4)
 
     @unittest.skip(
         "Uitgezet, omdat nog niet besloten is hoe om te gaan met 'willekeurig indelen' voor VPL."

@@ -6,11 +6,7 @@ from kjk.utils import MarketStandClusterFinder
 from kjk.utils import DebugRedisClient
 from kjk.base import *
 
-DEBUG = True
-
-STRATEGY_EXP_FULL = 1
-STRATEGY_EXP_SOME = 2
-STRATEGY_EXP_NONE = 3
+DEBUG = False
 
 
 class Allocator(BaseAllocator):
@@ -205,6 +201,7 @@ class Allocator(BaseAllocator):
                     size=int(maxi),
                     preferred=True,
                     merchant_branche=merchant_branches,
+                    mode="any",
                     evi_merchant=evi,
                 )
                 if len(valid_pref_stands) == 0:
@@ -251,7 +248,9 @@ class Allocator(BaseAllocator):
         self.merchants_df = pd.concat([df_1, df_2])
 
         # A-list required branches
-        self._allocate_solls_for_query("alist == True & branche_required == 'yes'")
+        self._allocate_branche_solls_for_query(
+            "alist == True & branche_required == 'yes'"
+        )
 
         # A-list EVI
         self._allocate_evi_for_query("alist == True & has_evi == 'yes'")
@@ -265,7 +264,9 @@ class Allocator(BaseAllocator):
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
         # B-list required branches
-        self._allocate_solls_for_query("alist != True & branche_required == 'yes'")
+        self._allocate_branche_solls_for_query(
+            "alist != True & branche_required == 'yes'"
+        )
 
         # AB-list EVI
         self._allocate_evi_for_query("alist != True & has_evi == 'yes'")
@@ -276,7 +277,9 @@ class Allocator(BaseAllocator):
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
-        self._allocate_solls_for_query_2("alist == True & branche_required != 'yes'")
+        self._allocate_solls_for_query(
+            "alist == True & branche_required != 'yes' & has_evi != 'yes'"
+        )
 
     def allocation_phase_8(self):
         print("\n--- FASE 8")
@@ -284,7 +287,9 @@ class Allocator(BaseAllocator):
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
-        self._allocate_solls_for_query_2("alist == False & branche_required != 'yes'")
+        self._allocate_solls_for_query(
+            "alist == False & branche_required != 'yes' & has_evi != 'yes'"
+        )
 
     def allocation_phase_9(self):
         print("\n--- FASE 9")

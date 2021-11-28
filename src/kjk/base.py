@@ -6,6 +6,9 @@ from kjk.utils import MarketStandClusterFinder
 
 pd.options.mode.chained_assignment = "raise"
 
+STRATEGY_EXP_FULL = 1
+STRATEGY_EXP_SOME = 2
+STRATEGY_EXP_NONE = 3
 
 # dataframe views for debugging
 EXPANDERS_VIEW = [
@@ -597,7 +600,7 @@ class BaseAllocator:
                 erk, stands_to_alloc, self.merchant_object_by_id(erk)
             )
 
-    def _allocate_solls_for_query_2(self, query):
+    def _allocate_solls_for_query(self, query):
         result_list = self.merchants_df.query(query)
         print("Ondernemers te alloceren in deze fase: ", len(result_list))
         for index, row in result_list.iterrows():
@@ -607,9 +610,11 @@ class BaseAllocator:
             maxi = row["voorkeur.maximum"]
             mini = row["voorkeur.minimum"]
 
-            stds = self.cluster_finder.find_valid_cluster_final_phase(
-                pref, size=maxi, preferred=True
-            )
+            stds = []
+            if self.strategy == STRATEGY_EXP_FULL:
+                stds = self.cluster_finder.find_valid_cluster_final_phase(
+                    pref, size=maxi, preferred=True
+                )
             if len(stds) == 0:
                 stds = self.cluster_finder.find_valid_cluster_final_phase(
                     pref, size=int(mini), preferred=True
@@ -632,20 +637,24 @@ class BaseAllocator:
             maxi = row["voorkeur.maximum"]
             mini = row["voorkeur.minimum"]
             stands_available = self.get_evi_stands()
+            print(row["description"])
             try:
                 stands_available_list = stands_available["plaatsId"].to_list()
             except KeyError as e:
                 stands_available_list = []
-            stds = self.cluster_finder.find_valid_cluster(
-                stands_available_list, size=maxi, preferred=True
-            )
+            stds = []
+            if self.strategy == STRATEGY_EXP_FULL:
+                stds = self.cluster_finder.find_valid_cluster(
+                    stands_available_list, size=maxi, preferred=True
+                )
             if len(stds) == 0:
                 stds = self.cluster_finder.find_valid_cluster(
                     stands_available_list, size=int(mini), preferred=True
                 )
+            print(stands_available_list, stds)
             self._allocate_stands_to_merchant(stds, erk)
 
-    def _allocate_solls_for_query(self, query):
+    def _allocate_branche_solls_for_query(self, query):
         result_list = self.merchants_df.query(query)
         print("Ondernemers te alloceren in deze fase: ", len(result_list))
         for index, row in result_list.iterrows():
@@ -660,9 +669,11 @@ class BaseAllocator:
                 stands_available_list = stands_available["plaatsId"].to_list()
             except KeyError as e:
                 stands_available_list = []
-            stds = self.cluster_finder.find_valid_cluster(
-                stands_available_list, size=maxi, preferred=True
-            )
+            stds = []
+            if self.strategy == STRATEGY_EXP_FULL:
+                stds = self.cluster_finder.find_valid_cluster(
+                    stands_available_list, size=maxi, preferred=True
+                )
             if len(stds) == 0:
                 stds = self.cluster_finder.find_valid_cluster(
                     stands_available_list, size=int(mini), preferred=True
