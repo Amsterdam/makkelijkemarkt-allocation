@@ -125,9 +125,9 @@ class TestExpansion(unittest.TestCase):
         dp.add_rsvp(erkenningsNummer="3", attending=True)
 
         self.dp = dp
-        # dp.mock()
-        # allocator = Allocator(dp)
-        # self.market_allocation = allocation = allocator.get_allocation()
+        dp.mock()
+        allocator = Allocator(dp)
+        self.market_allocation = allocation = allocator.get_allocation()
 
     def test_stay_in_same_row(self):
         """
