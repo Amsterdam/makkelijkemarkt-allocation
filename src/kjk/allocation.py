@@ -313,9 +313,6 @@ class Allocator(BaseAllocator):
                     evi_merchant=evi,
                     ignore_check_available=assigned_stands,
                 )
-                print(
-                    erk, " -> ", assigned_stands, row["voorkeur.maximum"], " : ", stands
-                )
                 if len(stands) > 0:
                     self._allocate_stands_to_merchant(
                         stands[0], erk, dequeue_merchant=False

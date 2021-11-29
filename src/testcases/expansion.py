@@ -228,7 +228,102 @@ class TestExpansion(unittest.TestCase):
         """
         kan niet verder vergroten dan is toegestaan
         """
-        pass
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="C beefheart",
+            voorkeur={
+                "branches": ["limited"],
+                "maximum": 4,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=["3", "4"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["limited"],
+                "maximum": 3,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        # add pages
+        dp.add_page([None, "1", "2", "3", "4", None])
+        dp.add_page([None, "5", "6", "7", None])
+
+        dp.add_branche(brancheId="limited", maximumPlaatsen=2, verplicht=True)
+
+        # stands
+        dp.add_stand(
+            plaatsId="1",
+            branches=["limited"],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=["limited"],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        dp.add_stand(
+            plaatsId="3",
+            branches=["limited"],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        dp.add_stand(
+            plaatsId="4",
+            branches=["limited"],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        dp.add_stand(
+            plaatsId="5",
+            branches=["limited"],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        dp.add_stand(
+            plaatsId="6",
+            branches=["limited"],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        dp.add_stand(
+            plaatsId="7",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+
+        dp.mock()
+        allocator = Allocator(dp)
+        allocation = allocator.get_allocation()
+        stds = allocation["toewijzingen"][1]["plaatsen"]
+        self.assertListEqual(stds, ["3", "4"])
 
     def test_can_not_get_obstacle_stand(self):
         """
