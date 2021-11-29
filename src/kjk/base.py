@@ -160,7 +160,7 @@ class BaseAllocator:
         self.market_blocks = dp.get_market_blocks()
         self.obstacles = dp.get_obstacles()
 
-        # quard the max branch positions
+        # guard the max branch positions
         self.branches_scrutenizer = BranchesScrutenizer(self.branches)
 
         # market id and date
@@ -223,6 +223,7 @@ class BaseAllocator:
             dp.get_obstacles(),
             stand_branche_dict,
             stand_evi_dict,
+            self.branches,
         )
         self.prepare_merchants()
         self.prepare_stands()

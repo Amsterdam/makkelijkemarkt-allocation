@@ -45,7 +45,15 @@ class MarketStandClusterFinder:
     adjacent, in another market row or have an obstakel in between.
     """
 
-    def __init__(self, data, obstacles, branches_dict, evi_dict):
+    def __init__(self, data, obstacles, branches_dict, evi_dict, branches):
+
+        self.branche_required_dict = {}
+        for b in branches:
+            try:
+                self.branche_required_dict[b["brancheId"]] = b["verplicht"]
+            except KeyError as e:
+                self.branche_required_dict[b["brancheId"]] = False
+
         self.stands_allocated = []
         self.branches_dict = branches_dict
         self.evi_dict = evi_dict
@@ -104,25 +112,35 @@ class MarketStandClusterFinder:
                     return option
         return []
 
+    def branche_is_required(self, branche_id):
+        try:
+            return self.branche_required_dict[branche_id]
+        except KeyError as e:
+            return False
+
     def option_is_valid_branche(self, option, merchant_branche, evi_merchant):
         """
         check if a merchant is trying to move to a branche incompatible stand
         """
-        try:
-            for std in option:
-                branches = self.branches_dict[std]
-                if len(branches) > 0 and len(merchant_branche) > 0:
-                    if merchant_branche[0] not in branches:
+        if len(merchant_branche) > 0:
+            is_required = self.branche_is_required(merchant_branche[0])
+            try:
+                for std in option:
+                    branches = self.branches_dict[std]
+                    if is_required and len(branches) == 0:
                         return False
-                if evi_merchant:
-                    if "eigen-materieel" not in self.evi_dict[std]:
-                        return False
-                else:
-                    return "eigen-materieel" not in self.evi_dict[std]
-        except KeyError as e:
-            pass
-        except TypeError as e:
-            pass
+                    if len(branches) > 0:
+                        if merchant_branche[0] not in branches:
+                            return False
+                    if evi_merchant:
+                        if "eigen-materieel" not in self.evi_dict[std]:
+                            return False
+                    else:
+                        return "eigen-materieel" not in self.evi_dict[std]
+            except KeyError as e:
+                pass
+            except TypeError as e:
+                pass
         return True
 
     def option_is_available(self, option):

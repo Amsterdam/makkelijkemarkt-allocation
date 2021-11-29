@@ -139,7 +139,7 @@ class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
         for i, m in enumerate(self.data["ondernemers"]):
             if m["erkenningsNummer"] == kwargs["erkenningsNummer"]:
                 index = i
-        if index:
+        if index is not None:
             self.data["ondernemers"][index] = kwargs
 
     def add_stand(self, **kwargs):

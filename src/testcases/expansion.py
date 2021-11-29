@@ -36,7 +36,7 @@ class TestExpansion(unittest.TestCase):
             sollicitatieNummer="12",
             description="C Beefheart",
             voorkeur={
-                "branches": ["101-afg"],
+                "branches": ["101-bbb"],
                 "maximum": 3,
                 "minimum": 1,
                 "verkoopinrichting": [],
@@ -119,18 +119,15 @@ class TestExpansion(unittest.TestCase):
             inactive=False,
         )
 
-        # branches
-        # dp.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
-
         # rsvp
         dp.add_rsvp(erkenningsNummer="1", attending=True)
         dp.add_rsvp(erkenningsNummer="2", attending=True)
         dp.add_rsvp(erkenningsNummer="3", attending=True)
 
         self.dp = dp
-        dp.mock()
-        allocator = Allocator(dp)
-        self.market_allocation = allocation = allocator.get_allocation()
+        # dp.mock()
+        # allocator = Allocator(dp)
+        # self.market_allocation = allocation = allocator.get_allocation()
 
     def test_stay_in_same_row(self):
         """
@@ -172,13 +169,34 @@ class TestExpansion(unittest.TestCase):
         """
         kan 3 plaatsen krijgen
         """
-        pass
+        res = self.market_allocation["toewijzingen"][0]["plaatsen"]
+        self.assertTrue(len(res) > 2)
 
     def test_must_stay_in_branche_location(self):
         """
         kan niet uitbreiden naar een niet-branche plaats als zijn branche verplicht is
         """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1", "2"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="Dweezil Zappa",
+            voorkeur={
+                "branches": ["101-agf"],
+                "maximum": 4,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        stds = allocation["toewijzingen"][0]["plaatsen"]
+        self.assertListEqual(stds, ["1", "2"])
 
     def test_must_stay_in_evi_location(self):
         """
