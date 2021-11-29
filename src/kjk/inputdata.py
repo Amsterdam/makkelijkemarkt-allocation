@@ -145,6 +145,16 @@ class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
     def add_stand(self, **kwargs):
         self.data["marktplaatsen"].append(kwargs)
 
+    def add_obstacle(self, **kwargs):
+        """
+        kraamA: "245",
+        kraamB: "247",
+        obstakel: [
+            "loopje"
+        ]
+        """
+        self.data["obstakels"].append(kwargs)
+
     def add_branche(self, **kwargs):
         """
         brancheId : str

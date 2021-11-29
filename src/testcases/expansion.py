@@ -329,7 +329,49 @@ class TestExpansion(unittest.TestCase):
         """
         kan dat niet naar een zijde met een obstakel
         """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["8", "9"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="Dweezil Zappa",
+            voorkeur={
+                "branches": ["999-iphone-hoesjes"],
+                "maximum": 3,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_stand(
+            plaatsId="8",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.add_stand(
+            plaatsId="9",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.add_stand(
+            plaatsId="10",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.add_page([None, "8", "9", "10", None])
+        self.dp.add_obstacle(kraamA="9", kraamB="10", obstakel=["boom"])
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        stds = allocation["toewijzingen"][0]["plaatsen"]
+        self.assertListEqual(stds, ["8", "9"])
 
     def test_can_provide_min_stands(self):
         """
