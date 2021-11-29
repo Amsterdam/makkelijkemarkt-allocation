@@ -209,7 +209,7 @@ class TestExpansion(unittest.TestCase):
             sollicitatieNummer="2",
             description="Dweezil Zappa",
             voorkeur={
-                "branches": [],
+                "branches": ["999-iphone-hoesjes"],
                 "maximum": 4,
                 "minimum": 2,
                 "verkoopinrichting": ["eigen-materieel"],
