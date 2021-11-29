@@ -138,7 +138,11 @@ class ClusterFinderTestCase(unittest.TestCase):
         dp = FixtureDataprovider("../fixtures/test_input.json")
         dp.load_data()
         self.sut = MarketStandClusterFinder(
-            dp.get_market_blocks(), dp.get_obstacles(), {"1": ["101-agf"]}, {}, [],
+            dp.get_market_blocks(),
+            dp.get_obstacles(),
+            {"1": ["101-agf"]},
+            {},
+            [],
         )
 
     def test_find_cluster(self):

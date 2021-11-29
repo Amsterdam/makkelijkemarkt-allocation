@@ -202,7 +202,27 @@ class TestExpansion(unittest.TestCase):
         """
         kan niet uitbreiden naar een niet-EVI plaats indien zij een EVI hebben
         """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1", "2"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="Dweezil Zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 4,
+                "minimum": 2,
+                "verkoopinrichting": ["eigen-materieel"],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        stds = allocation["toewijzingen"][0]["plaatsen"]
+        self.assertListEqual(stds, ["1", "2"])
 
     def test_must_obey_expansion_limits(self):
         """
