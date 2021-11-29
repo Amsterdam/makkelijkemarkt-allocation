@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import date
 from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder
+from kjk.utils import BranchesScrutenizer
 
 pd.options.mode.chained_assignment = "raise"
 
@@ -158,6 +159,9 @@ class BaseAllocator:
         self.open_positions = dp.get_market_locations()
         self.market_blocks = dp.get_market_blocks()
         self.obstacles = dp.get_obstacles()
+
+        # quard the max branch positions
+        self.branches_scrutenizer = BranchesScrutenizer(self.branches)
 
         # market id and date
         self.market_id = dp.get_market_id()
@@ -589,22 +593,39 @@ class BaseAllocator:
 
     def _allocate_stands_to_merchant(self, stands_to_alloc, erk, dequeue_merchant=True):
         if len(stands_to_alloc) > 0:
-            for st in stands_to_alloc:
-                try:
-                    self.dequeue_market_stand(st)
-                except KeyError as e:
-                    raise MarketStandDequeueError(f"Allocation error: {erk} - {st}")
+            merchant_obj = self.merchant_object_by_id(erk)
+
+            # We have some data quality issues
+            # each merchant should spec his merch
+            # in KjK, see exception handling
+            allocation_allowed = True  # unless the scrutenizer tells otherwise
+            branches = []
             try:
-                if dequeue_merchant:
-                    self.dequeue_marchant(erk)
-            except KeyError as e:
-                raise MerchantDequeueError(
-                    "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
+                branches = merchant_obj["voorkeur"]["branches"]
+                allocation_allowed = self.branches_scrutenizer.allocation_allowed(
+                    branches
                 )
-            self.cluster_finder.set_stands_allocated(stands_to_alloc)
-            self.market_output.add_allocation(
-                erk, stands_to_alloc, self.merchant_object_by_id(erk)
-            )
+            except KeyError as e:
+                print("ERROR: ondernemer heeft geen branche in zijn voorkeur.")
+            except IndexError as e:
+                print("ERROR: ondernemer heeft geen branche in zijn voorkeur.")
+
+            if allocation_allowed:
+                for st in stands_to_alloc:
+                    try:
+                        self.dequeue_market_stand(st)
+                    except KeyError as e:
+                        raise MarketStandDequeueError(f"Allocation error: {erk} - {st}")
+                try:
+                    if dequeue_merchant:
+                        self.dequeue_marchant(erk)
+                except KeyError as e:
+                    raise MerchantDequeueError(
+                        "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
+                    )
+                self.branches_scrutenizer.add_allocation(branches)
+                self.cluster_finder.set_stands_allocated(stands_to_alloc)
+                self.market_output.add_allocation(erk, stands_to_alloc, merchant_obj)
 
     def _allocate_solls_for_query(self, query):
         result_list = self.merchants_df.query(query)

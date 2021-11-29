@@ -12,6 +12,56 @@ from kjk.outputdata import (
     ADJACENT_UNAVAILABLE,
 )
 from kjk.utils import MarketStandClusterFinder
+from kjk.utils import BranchesScrutenizer
+
+
+class BrancheScrutenizerTestCase(unittest.TestCase):
+    """
+    test data in fixture:
+    {'101-agf': 15,
+     '103-brood-banket': 4,
+     '104-hummus-kruiden-olijven': 2,
+     '105-noten-zuidvruchten': 4,
+     '109-zuivel-eieren': 8,
+     '110-poelier': 5,
+     '111-exotische-groenten': 2,
+     '206-oudhollands-gebak': 1,
+     '207-grill-frituur': 4,
+     '209-vis-gebakken': 8,
+     '211-delicatessen-hapjes': 1,
+     '302-bloemen-planten': 8,
+     '401 - Overig markt - Experimentele zone': 12,
+     'bak': 37}
+    """
+
+    def setUp(self):
+        dp = FixtureDataprovider("../fixtures/test_input.json")
+        dp.load_data()
+        self.sut = BranchesScrutenizer(dp.get_branches())
+
+    def test_max_branches(self):
+        self.sut.add_allocation(["101-agf"])
+        allowed = self.sut.allocation_allowed(["101-agf"])
+        self.assertTrue(allowed)
+
+        self.sut.add_allocation(["104-hummus-kruiden-olijven"])
+        self.sut.add_allocation(["104-hummus-kruiden-olijven"])
+
+        allowed = self.sut.allocation_allowed(["104-hummus-kruiden-olijven"])
+        self.assertFalse(allowed)
+
+    def test_max_bak(self):
+        for alloc in range(35):
+            self.sut.add_allocation(["404-broodje-bapao", "bak"])
+
+        allowed = self.sut.allocation_allowed(["404-broodje-bapao", "bak"])
+        self.assertTrue(allowed)
+
+        for alloc in range(2):
+            self.sut.add_allocation(["404-broodje-knakworst", "bak"])
+
+        allowed = self.sut.allocation_allowed(["404-broodje-knakworst", "bak"])
+        self.assertFalse(allowed)
 
 
 class MockDataproviderTestCase(unittest.TestCase):

@@ -33,7 +33,7 @@ class TestExpansion(unittest.TestCase):
             erkenningsNummer="2",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="2",
+            sollicitatieNummer="12",
             description="C Beefheart",
             voorkeur={
                 "branches": ["101-afg"],
@@ -136,31 +136,31 @@ class TestExpansion(unittest.TestCase):
         """
         blijft binnen dezelfde marktkraamrij
         """
-        print("\nToewijzingen:")
-        print("- " * 30)
-        pprint(self.market_allocation["toewijzingen"])
-
-        print("\nAfwijzingen:")
-        print("- " * 30)
-        pprint(self.market_allocation["afwijzingen"])
+        res = self.market_allocation["toewijzingen"][0]["plaatsen"]
+        res.sort()
+        self.assertListEqual(res, ["1", "2", "3", "4"])
 
     def test_can_have_second_stand(self):
         """
         kan een 2de plaats krijgen
         """
-        pass
+        res = self.market_allocation["toewijzingen"][0]["plaatsen"]
+        self.assertTrue(len(res) > 2)
 
     def test_will_get_following_stands(self):
         """
         krijgt aaneensluitende plaatsen
         """
-        pass
+        res = self.market_allocation["toewijzingen"][0]["plaatsen"]
+        res.sort()
+        self.assertListEqual(res, ["1", "2", "3", "4"])
 
     def test_get_2_extra_if_space_sufficient(self):
         """
         krijgt gelijk twee plaatsen als er genoeg ruimte op de markt is
         """
-        pass
+        res = self.market_allocation["toewijzingen"][0]["plaatsen"]
+        self.assertTrue(len(res) == 4)
 
     def test_more_tand_two_stands_must_wait(self):
         """

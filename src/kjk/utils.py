@@ -1,5 +1,40 @@
 import json
 import redis
+from pprint import pprint
+
+
+class BranchesScrutenizer:
+    """
+    The BranchesScrutenizer object will check if the branche positions
+    will not exceed the maximum
+    """
+
+    def __init__(self, branches):
+        self.max_dict = {}
+        self.counter_dict = {}
+        for b in branches:
+            try:
+                self.max_dict[b["brancheId"]] = b["maximumPlaatsen"]
+                self.counter_dict[b["brancheId"]] = 0
+            except KeyError as e:
+                pass  # no max for branche
+
+    def add_allocation(self, branches):
+        for branche in branches:
+            try:
+                self.counter_dict[branche] += 1
+            except KeyError as e:
+                pass  # no max for branche
+
+    def allocation_allowed(self, branches):
+        allowed = True
+        for branche in branches:
+            try:
+                if self.counter_dict[branche] >= self.max_dict[branche]:
+                    allowed = False
+            except KeyError as e:
+                pass
+        return allowed
 
 
 class MarketStandClusterFinder:
