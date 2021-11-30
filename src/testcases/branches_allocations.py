@@ -260,7 +260,7 @@ class TestRequiredBranches(unittest.TestCase):
             sollicitatieNummer="3",
             description="Terry Bozio",
             voorkeur={
-                "branches": [],
+                "branches": ["404-lost-and-found"],
                 "maximum": 1,
                 "minimum": 1,
                 "verkoopinrichting": [],
@@ -280,11 +280,13 @@ class TestRequiredBranches(unittest.TestCase):
         allocation = allocator.get_allocation()
 
         self.assertEqual(
-            allocation["toewijzingen"][0]["ondernemer"]["erkenningsNummer"], "1"
+            allocation["toewijzingen"][0]["ondernemer"]["erkenningsNummer"], "2"
         )
         self.assertEqual(
-            allocation["afwijzingen"][0]["ondernemer"]["erkenningsNummer"], "2"
+            allocation["toewijzingen"][1]["ondernemer"]["erkenningsNummer"], "1"
         )
+        self.assertListEqual(allocation["toewijzingen"][0]["plaatsen"], ["1"])
+        self.assertListEqual(allocation["toewijzingen"][1]["plaatsen"], ["3"])
 
     def test_pref_to_soll_in_non_required_branches(self):
         """

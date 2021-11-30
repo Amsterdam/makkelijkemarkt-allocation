@@ -126,10 +126,9 @@ class TestEVI(unittest.TestCase):
 
         self.dp.mock()
         allocator = Allocator(self.dp)
-        self.market_allocation = allocator.get_allocation()
-        self.assertListEqual(
-            self.market_allocation["toewijzingen"][1]["plaatsen"], ["3"]
-        )
+        allocation = allocator.get_allocation()
+        pprint(allocation["toewijzingen"])
+        self.assertListEqual(allocation["toewijzingen"][2]["plaatsen"], ["99"])
 
     def test_can_not_expand_to_non_evi_stand(self):
         """
