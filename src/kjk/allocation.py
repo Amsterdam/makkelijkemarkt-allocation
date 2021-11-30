@@ -126,6 +126,7 @@ class Allocator(BaseAllocator):
             pref = row["pref"]
             merchant_branches = row["voorkeur.branches"]
             maxi = row["voorkeur.maximum"]
+            evi = row["has_evi"] == "yes"
 
             valid_pref_stands = self.cluster_finder.find_valid_cluster(
                 pref,
@@ -133,6 +134,7 @@ class Allocator(BaseAllocator):
                 preferred=True,
                 merchant_branche=merchant_branches,
                 mode="any",
+                evi_merchant=evi,
             )
             if len(valid_pref_stands) == 0:
                 failed[erk] = stands

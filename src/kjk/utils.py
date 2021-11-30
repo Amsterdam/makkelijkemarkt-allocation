@@ -122,6 +122,18 @@ class MarketStandClusterFinder:
         """
         check if a merchant is trying to move to a branche incompatible stand
         """
+        if merchant_branche is None or len(merchant_branche) == 0:
+            try:
+                for std in option:
+                    branches = self.branches_dict[std]
+                    if len(branches) > 0:
+                        return False
+            except KeyError as e:
+                pass
+            except TypeError as e:
+                pass
+            return True
+
         if len(merchant_branche) > 0:
             is_required = self.branche_is_required(merchant_branche[0])
             try:
