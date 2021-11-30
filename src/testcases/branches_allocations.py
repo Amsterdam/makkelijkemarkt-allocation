@@ -279,8 +279,12 @@ class TestRequiredBranches(unittest.TestCase):
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
 
-        pprint(allocation["toewijzingen"])
-        pprint(allocation["afwijzingen"])
+        self.assertEqual(
+            allocation["toewijzingen"][0]["ondernemer"]["erkenningsNummer"], "1"
+        )
+        self.assertEqual(
+            allocation["afwijzingen"][0]["ondernemer"]["erkenningsNummer"], "2"
+        )
 
     def test_pref_to_soll_in_non_required_branches(self):
         """
