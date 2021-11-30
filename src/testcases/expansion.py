@@ -227,6 +227,7 @@ class TestExpansion(unittest.TestCase):
     def test_must_obey_expansion_limits(self):
         """
         kan niet verder vergroten dan is toegestaan
+        kan dat niet indien het maximum aantal branche-plaatsen wordt overschreden
         """
         dp = MockDataprovider("../fixtures/test_input.json")
 
@@ -377,32 +378,184 @@ class TestExpansion(unittest.TestCase):
         """
         kan een minimum aantal gewenste plaatsen opgeven
         """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["8", "9"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="Dweezil Zappa",
+            voorkeur={
+                "branches": ["999-iphone-hoesjes"],
+                "maximum": 6,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_stand(
+            plaatsId="8",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.add_stand(
+            plaatsId="9",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        # min 6 stand should be rejected
+        self.assertEqual(
+            allocation["toewijzingen"][0]["ondernemer"]["description"], "Dweezil Zappa"
+        )
+        self.assertListEqual(allocation["toewijzingen"][0]["plaatsen"], ["8", "9"])
 
     def test_can_provide_max_stands(self):
         """
         kan een maximum aantal gewenste plaatsen opgeven
         """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["8", "9"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="Dweezil Zappa",
+            voorkeur={
+                "branches": ["999-iphone-hoesjes"],
+                "maximum": 3,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_stand(
+            plaatsId="8",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.add_stand(
+            plaatsId="9",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.add_stand(
+            plaatsId="10",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.add_page([None, "8", "9", "10", None])
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        # should get 8,9,10 (max)
+        self.assertListEqual(
+            allocation["toewijzingen"][0]["plaatsen"], ["8", "9", "10"]
+        )
+        self.assertEqual(
+            allocation["toewijzingen"][0]["ondernemer"]["description"], "Dweezil Zappa"
+        )
 
     def test_gets_rejected_if_not_min(self):
         """
         wordt afgewezen als niet aan zijn minimum gewenste plaatsen wordt voldaan
         """
-        pass
-
-    def test_expansion_must_obey_max_branche_stands(self):
-        """
-        kan dat niet indien het maximum aantal branche-plaatsen wordt overschreden
-        """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["8", "9"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="Dweezil Zappa",
+            voorkeur={
+                "branches": ["999-iphone-hoesjes"],
+                "maximum": 6,
+                "minimum": 6,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        # min 6 stand should be rejected
+        self.assertEqual(
+            allocation["afwijzingen"][0]["ondernemer"]["description"], "Dweezil Zappa"
+        )
 
     def test_get_expansion_to_pref_side(self):
         """
         krijgt extra plaats(en) aan hun voorkeurszijde
         """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["9", "10"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="Dweezil Zappa",
+            voorkeur={
+                "branches": ["999-iphone-hoesjes"],
+                "maximum": 3,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_stand(
+            plaatsId="8",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.add_stand(
+            plaatsId="9",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.add_stand(
+            plaatsId="10",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.add_stand(
+            plaatsId="11",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="11", priority=1)
+        self.dp.add_page([None, "8", "9", "10", "11", None])
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        # should get 9,10,11 because 11 is pref
+        self.assertListEqual(
+            allocation["toewijzingen"][0]["plaatsen"], ["9", "10", "11"]
+        )
+        self.assertEqual(
+            allocation["toewijzingen"][0]["ondernemer"]["description"], "Dweezil Zappa"
+        )
 
+    @unittest.skip("Navragen markten wat is een cirkelvormige oppstelling?")
     def test_expansion_circular_market(self):
         """
         kan dit in een cirkelvormige marktoptstelling
