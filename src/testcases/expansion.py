@@ -542,21 +542,20 @@ class TestExpansion(unittest.TestCase):
             verkoopinrichting=[],
             inactive=False,
         )
-        self.dp.add_pref(erkenningsNummer="1", plaatsId="9", priority=1)
-        self.dp.add_pref(erkenningsNummer="1", plaatsId="10", priority=1)
         self.dp.add_pref(erkenningsNummer="1", plaatsId="11", priority=1)
         self.dp.add_page([None, "8", "9", "10", "11", None])
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        # should get 8,9,10 (max)
+        # should get 9,10,11 because 11 is pref
         self.assertListEqual(
-            allocation["toewijzingen"][0]["plaatsen"], ["8", "9", "10"]
+            allocation["toewijzingen"][0]["plaatsen"], ["9", "10", "11"]
         )
         self.assertEqual(
             allocation["toewijzingen"][0]["ondernemer"]["description"], "Dweezil Zappa"
         )
 
+    @unittest.skip("Navragen markten wat is een cirkelvormige oppstelling?")
     def test_expansion_circular_market(self):
         """
         kan dit in een cirkelvormige marktoptstelling
