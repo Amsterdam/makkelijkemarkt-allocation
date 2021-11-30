@@ -379,7 +379,7 @@ class TestExpansion(unittest.TestCase):
         """
         pass
 
-    def test_can_provide_nax_stands(self):
+    def test_can_provide_max_stands(self):
         """
         kan een maximum aantal gewenste plaatsen opgeven
         """
