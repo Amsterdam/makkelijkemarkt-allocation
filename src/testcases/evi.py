@@ -81,7 +81,7 @@ class TestEVI(unittest.TestCase):
         )
 
         # branches
-        dp.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
+        dp.add_branche(brancheId="101-agf", verplicht=False, maximumPlaatsen=12)
 
         # rsvp
         dp.add_rsvp(erkenningsNummer="1", attending=True)
