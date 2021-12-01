@@ -1,16 +1,138 @@
 import unittest
-
+from kjk.allocation import Allocator
+from kjk.inputdata import MockDataprovider
+from pprint import pprint
 
 class TestSollAllocation(unittest.TestCase):
     """
     Een sollicitant die ingedeeld wil worden
     """
+    def setUp(self):
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1", "2"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["101-afg"],
+                "maximum": 2,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="C Beefheart",
+            voorkeur={
+                "branches": ["101-afg"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_merchant(
+            erkenningsNummer="3",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="3",
+            description="J Medeski",
+            voorkeur={
+                "branches": ["mooie spullen"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        # stands
+        dp.add_stand(
+            plaatsId="1",
+            branches=["101-agf"],
+            properties=["boom"],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=["101-agf"],
+            properties=["boom"],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="3",
+            branches=["101-agf"],
+            properties=["boom"],
+            verkoopinrichting=[],
+            inactive=True,
+        )
+
+        # branches
+        dp.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
+        dp.add_branche(brancheId="102-vis", verplicht=True, maximumPlaatsen=12)
+
+        # rsvp
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+        dp.add_rsvp(erkenningsNummer="2", attending=True)
+        dp.add_rsvp(erkenningsNummer="3", attending=True)
+
+        self.dp = dp
+        dp.mock()
+        allocator = Allocator(dp)
+        self.market_allocation = allocation = allocator.get_allocation()
 
     def test_not_required_to_state_branch(self):
         """
         Een sollicitant die ingedeeld wil worden
         """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["101-agf"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": ["eigen-materieel"],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_stand(
+            plaatsId="4",
+            branches=["102-vis"],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+        self.dp.add_stand(
+            plaatsId="5",
+            branches=["101-agf"],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+        self.dp.add_page(["1", "2", "4", "5"])
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        pprint(allocation["toewijzingen"])
+        pprint(allocation["afwijzingen"])
+        stds = allocation["toewijzingen"][0]["plaatsen"]
+        self.assertListEqual(stds, ["5"])
 
     def test_pref_evi_locations(self):
         """
