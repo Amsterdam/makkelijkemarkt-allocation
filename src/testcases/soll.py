@@ -132,14 +132,80 @@ class TestSollAllocation(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        stds = alloc_erk("1", allocation)["plaatsen"]
+        stds = allocation["toewijzingen"][0]["plaatsen"]
         self.assertListEqual(stds, ["5"])
 
     def test_pref_evi_locations(self):
         """
         krijgt voorkeur op plaatsen zonder kraam indien zij een EVI hebben
         """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["101-agf"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": ["eigen-materieel"],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_merchant(
+            erkenningsNummer="4",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="3",
+            description="Y Medeski",
+            voorkeur={
+                "branches": ["mooie spullen"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_merchant(
+            erkenningsNummer="5",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="3",
+            description="Z Medeski",
+            voorkeur={
+                "branches": ["mooie spullen"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.add_rsvp(erkenningsNummer="4", attending=True)
+        self.dp.add_rsvp(erkenningsNummer="5", attending=True)
+
+        self.dp.add_stand(
+            plaatsId="4",
+            branches=["102-vis"],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+        self.dp.add_stand(
+            plaatsId="5",
+            branches=["101-agf"],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+        self.dp.add_page(["1", "2", "4", "5"])
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        stds = allocation["toewijzingen"][0]["plaatsen"]
+        self.assertListEqual(stds, ["5"])
 
     def test_has_alist_pref(self):
         """
