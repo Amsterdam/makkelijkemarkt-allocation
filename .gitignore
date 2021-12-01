@@ -11,6 +11,7 @@ __pycache__/
 input.json
 indeling.json
 anonymizer.py
+merchants.md
 
 # Distribution / packaging
 .Python

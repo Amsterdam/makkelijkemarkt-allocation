@@ -229,7 +229,7 @@ class BaseAllocator:
         self.prepare_stands()
 
         # save to text for manual debugging
-        self.merchants_df.to_markdown("merchants.md")
+        self.merchants_df.to_markdown("../merchants.md")
 
     def create_merchant_dict(self):
         d = {}
