@@ -13,6 +13,44 @@ from kjk.outputdata import (
 )
 from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
+from kjk.test_utils import (
+    stands_erk,
+    alloc_erk,
+    reject_erk,
+    ErkenningsnummerNotFoudError,
+)
+
+
+class TestUtilsTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_data = {
+            "toewijzingen": [
+                {"erkenningsNummer": "1", "plaatsen": ["1", "2"]},
+                {"erkenningsNummer": "2", "plaatsen": ["4", "5"]},
+            ],
+            "afwijzingen": [{"erkenningsNummer": "3"}, {"erkenningsNummer": "4"}],
+        }
+
+    def test_alloc_erk(self):
+        res = alloc_erk("1", self.test_data)
+        self.assertEqual(res["erkenningsNummer"], "1")
+        self.assertListEqual(res["plaatsen"], ["1", "2"])
+
+    def test_stands_erk(self):
+        res = stands_erk("1", self.test_data)
+        self.assertListEqual(res, ["1", "2"])
+
+    def test_reject_erk(self):
+        res = reject_erk("3", self.test_data)
+        self.assertEqual(res["erkenningsNummer"], "3")
+
+    def test_exception_raised(self):
+        with self.assertRaises(ErkenningsnummerNotFoudError):
+            res = alloc_erk("123", self.test_data)
+        with self.assertRaises(ErkenningsnummerNotFoudError):
+            res = reject_erk("123", self.test_data)
+        with self.assertRaises(ErkenningsnummerNotFoudError):
+            res = stands_erk("123", self.test_data)
 
 
 class BrancheScrutenizerTestCase(unittest.TestCase):
