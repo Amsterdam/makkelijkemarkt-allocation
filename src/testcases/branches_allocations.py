@@ -366,6 +366,75 @@ class TestRestrictedBranches(unittest.TestCase):
     Een ondernemer in een beperkte branche (bijv. agf)
     """
 
+    def setUp(self):
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["101-cosmic-utensils"],
+                "maximum": 2,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="3",
+            description="Terry Bozio",
+            voorkeur={
+                "branches": ["404-lost-and-found"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        # branches
+        dp.add_branche(
+            brancheId="101-cosmic-utensils", verplicht=True, maximumPlaatsen=1
+        )
+
+        # rsvp
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+        dp.add_rsvp(erkenningsNummer="2", attending=True)
+
+        # add pages
+        dp.add_page([None, "1", "2", "3", None])
+
+        # stands
+        dp.add_stand(
+            plaatsId="1",
+            branches=["101-cosmic-utensils"],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=["101-cosmic-utensils"],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="3",
+            branches=["101-cosmic-utensils"],
+            properties=[],
+            verkoopinrichting=[],
+        )
+
+        self.dp = dp
+
     def test_not_exceed_max_stands_if_soll(self):
         """
         kan het maximum aantal plaatsen als SOLL niet overschrijden
@@ -375,7 +444,10 @@ class TestRestrictedBranches(unittest.TestCase):
         # 1 brancheplek beschikbaar was maar de ondernemer aan zet wilde graag 2 plaatsen.
         # Als er vervolgens optimistisch werd ingedeeld kreeg deze ondernemer gelijk
         # 2 plaatsen, waarmee het maximum met 1 plaats werd overschreden.
-        pass
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        self.assertListEqual(stands_erk("1", allocation), ["1"])
 
     def test_may_exceed_max_if_vpl(self):
         """
