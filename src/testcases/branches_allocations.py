@@ -455,10 +455,22 @@ class TestRestrictedBranches(unittest.TestCase):
         """
         # VPL in een branche met een toewijzingsbeperking moeten wel altijd hun
         # plaatsen toegewezen krijgen, ook al overschrijden ze daarmee het maximum.
-        pass
-
-    def test_allocation_strategy_required_branche(self):
-        """
-        kan conservatief ingedeeld worden terwijl de rest van de markt optimistisch ingedeeld wordt
-        """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1", "2"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["101-cosmic-utensils"],
+                "maximum": 2,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        self.assertListEqual(stands_erk("1", allocation), ["1", "2"])
