@@ -228,8 +228,12 @@ class BaseAllocator:
         self.prepare_merchants()
         self.prepare_stands()
 
+        # collection for holding stand ids for evi stands
+        self.evi_ids = []
+        self.populate_evi_stand_ids()
+
         # save to text for manual debugging
-        self.merchants_df.to_markdown("../merchants.md")
+        self.merchants_df.to_markdown("../../merchants.md")
 
     def create_merchant_dict(self):
         d = {}
@@ -518,6 +522,12 @@ class BaseAllocator:
         if len(result_df) == 1:
             return result_df.iloc[0]["attending"]
         return None
+
+    def populate_evi_stand_ids(self):
+        """populate the evi stand ids collection"""
+        for i, p in self.positions_df.iterrows():
+            if "eigen-materieel" in p["verkoopinrichting"]:
+                self.evi_ids.append(p["plaatsId"])
 
     def get_evi_stands(self):
         """return a dataframe with evi stands"""
