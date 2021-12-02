@@ -229,7 +229,7 @@ class BaseAllocator:
         self.prepare_stands()
 
         # save to text for manual debugging
-        self.merchants_df.to_markdown("merchants.md")
+        self.merchants_df.to_markdown("../merchants.md")
 
     def create_merchant_dict(self):
         d = {}
@@ -664,6 +664,7 @@ class BaseAllocator:
             merchant_branches = row["voorkeur.branches"]
             maxi = row["voorkeur.maximum"]
             mini = row["voorkeur.minimum"]
+            evi = row["has_evi"] == "yes"
             stands_available = self.get_evi_stands()
             try:
                 stands_available_list = stands_available["plaatsId"].to_list()
@@ -672,11 +673,11 @@ class BaseAllocator:
             stds = []
             if self.strategy == STRATEGY_EXP_FULL:
                 stds = self.cluster_finder.find_valid_cluster(
-                    stands_available_list, size=maxi, preferred=True
+                    stands_available_list, size=maxi, preferred=True, merchant_branche=merchant_branches, evi_merchant=evi
                 )
             if len(stds) == 0:
                 stds = self.cluster_finder.find_valid_cluster(
-                    stands_available_list, size=int(mini), preferred=True
+                    stands_available_list, size=int(mini), preferred=True, merchant_branche=merchant_branches, evi_merchant=evi
                 )
             self._allocate_stands_to_merchant(stds, erk)
 

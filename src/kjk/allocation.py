@@ -264,7 +264,7 @@ class Allocator(BaseAllocator):
 
         # B-list required branches
         self._allocate_branche_solls_for_query(
-            "alist != True & branche_required == 'yes'"
+            "alist != True & branche_required == 'yes' & has_evi != 'yes'"
         )
 
         # AB-list EVI
