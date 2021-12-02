@@ -3,10 +3,12 @@ from kjk.allocation import Allocator
 from kjk.inputdata import MockDataprovider
 from pprint import pprint
 
+
 class TestSollAllocation(unittest.TestCase):
     """
     Een sollicitant die ingedeeld wil worden
     """
+
     def setUp(self):
         dp = MockDataprovider("../fixtures/test_input.json")
 

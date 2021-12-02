@@ -673,11 +673,19 @@ class BaseAllocator:
             stds = []
             if self.strategy == STRATEGY_EXP_FULL:
                 stds = self.cluster_finder.find_valid_cluster(
-                    stands_available_list, size=maxi, preferred=True, merchant_branche=merchant_branches, evi_merchant=evi
+                    stands_available_list,
+                    size=maxi,
+                    preferred=True,
+                    merchant_branche=merchant_branches,
+                    evi_merchant=evi,
                 )
             if len(stds) == 0:
                 stds = self.cluster_finder.find_valid_cluster(
-                    stands_available_list, size=int(mini), preferred=True, merchant_branche=merchant_branches, evi_merchant=evi
+                    stands_available_list,
+                    size=int(mini),
+                    preferred=True,
+                    merchant_branche=merchant_branches,
+                    evi_merchant=evi,
                 )
             self._allocate_stands_to_merchant(stds, erk)
 

@@ -1,5 +1,19 @@
+from pprint import pprint
+
+
 class ErkenningsnummerNotFoudError(BaseException):
     pass
+
+
+def print_alloc(data):
+    print("=" * 70)
+    print("Allocation:")
+    print("-" * 70)
+    print("Toewijzingen:")
+    pprint(data["toewijzingen"])
+    print("-" * 70)
+    print("Afwijzingen:")
+    pprint(data["afwijzingen"])
 
 
 def alloc_erk(erk, data):

@@ -2,6 +2,7 @@ import unittest
 from pprint import pprint
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider, MockDataprovider
+from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc
 
 
 class TestRequiredBranches(unittest.TestCase):
@@ -293,7 +294,71 @@ class TestRequiredBranches(unittest.TestCase):
         krijgt voorrang boven sollicitanten niet in een verplichte branche
         """
         # Altijd eerst brancheplaatsen proberen vullen met branche ondernemers.
-        pass
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["101-cosmic-utensils"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=["1"],
+            status="soll",
+            sollicitatieNummer="3",
+            description="Terry Bozio",
+            voorkeur={
+                "branches": ["404-lost-and-found"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        # branches
+        dp.add_branche(
+            brancheId="101-cosmic-utensils", verplicht=True, maximumPlaatsen=2
+        )
+
+        # rsvp
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+        dp.add_rsvp(erkenningsNummer="2", attending=True)
+
+        # add pages
+        dp.add_page([None, "1", None])
+
+        # stands
+        dp.add_stand(
+            plaatsId="1",
+            branches=["101-cosmic-utensils"],
+            properties=[],
+            verkoopinrichting=[],
+        )
+
+        # pref
+        dp.add_pref(erkenningsNummer="2", plaatsId="3", priority=1)
+
+        dp.mock()
+        allocator = Allocator(dp)
+        allocation = allocator.get_allocation()
+        self.assertListEqual(stands_erk("1", allocation), ["1"])
+        try:
+            reject_erk("2", allocation)
+        except Exception as e:
+            self.fail("merchant not found in rejections")
 
 
 class TestRestrictedBranches(unittest.TestCase):
