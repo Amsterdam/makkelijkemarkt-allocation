@@ -104,6 +104,12 @@ class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
         if not self.mocked:
             print("WARNING: mock objects not loaded!")
 
+    def set_alist(self, alist):
+        """
+        [{"erkenningsNummer": "5021971012"}, {"erkenningsNummer": "5021971012"}]
+        """
+        self.data["aLijst"] = alist
+
     def add_page(self, plaats_list=[]):
         d = {
             "title": "Test block",

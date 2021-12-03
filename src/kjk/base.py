@@ -659,6 +659,12 @@ class BaseAllocator:
                 )
             if len(stds) == 0:
                 stds_np = self.cluster_finder.find_valid_cluster_final_phase(
+                    pref, size=int(maxi), preferred=False, anywhere=True
+                )
+                if len(stds_np) > 0:
+                    stds = stds_np[0]
+            if len(stds) == 0:
+                stds_np = self.cluster_finder.find_valid_cluster_final_phase(
                     pref, size=int(mini), preferred=False, anywhere=True
                 )
                 if len(stds_np) > 0:
