@@ -300,27 +300,35 @@ class Allocator(BaseAllocator):
 
         # STRATEGY_EXP_NONE means no expansion possible (market space is thight)
         # STRATEGY_EXP_FULL means expansion already done during previous phases
-        if self.strategy == STRATEGY_EXP_SOME:
-            for index, row in self.expanders_df.iterrows():
-                erk = row["erkenningsNummer"]
-                stands = row["plaatsen"]
-                merchant_branches = row["voorkeur.branches"]
-                evi = row["has_evi"] == "yes"
 
-                assigned_stands = self.market_output.get_assigned_stands_for_merchant(
-                    erk
-                )
-                stands = self.cluster_finder.find_valid_expansion(
-                    assigned_stands,
-                    total_size=int(row["voorkeur.maximum"]),
-                    merchant_branche=merchant_branches,
-                    evi_merchant=evi,
-                    ignore_check_available=assigned_stands,
-                )
-                if len(stands) > 0:
-                    self._allocate_stands_to_merchant(
-                        stands[0], erk, dequeue_merchant=False
+        # get the alist people first
+        df_alist = self.expanders_df.query("alist == True")
+        df_blist = self.expanders_df.query("alist != True")
+        dataframes = [df_alist, df_blist]
+
+        if self.strategy == STRATEGY_EXP_SOME:
+            for df in dataframes:
+                print(df)
+                for index, row in df.iterrows():
+                    erk = row["erkenningsNummer"]
+                    stands = row["plaatsen"]
+                    merchant_branches = row["voorkeur.branches"]
+                    evi = row["has_evi"] == "yes"
+
+                    assigned_stands = (
+                        self.market_output.get_assigned_stands_for_merchant(erk)
                     )
+                    stands = self.cluster_finder.find_valid_expansion(
+                        assigned_stands,
+                        total_size=int(row["voorkeur.maximum"]),
+                        merchant_branche=merchant_branches,
+                        evi_merchant=evi,
+                        ignore_check_available=assigned_stands,
+                    )
+                    if len(stands) > 0:
+                        self._allocate_stands_to_merchant(
+                            stands[0], erk, dequeue_merchant=False
+                        )
 
     def allocation_phase_10(self):
         print("\n--- FASE 10")
