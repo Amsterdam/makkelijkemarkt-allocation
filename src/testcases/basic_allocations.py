@@ -2,6 +2,13 @@ import unittest
 from pprint import pprint
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider, MockDataprovider
+from kjk.test_utils import (
+    alloc_erk,
+    stands_erk,
+    reject_erk,
+    print_alloc,
+    ErkenningsnummerNotFoudError,
+)
 
 
 class TestBasicAllocation(unittest.TestCase):
@@ -267,7 +274,7 @@ class TestBasicAllocation(unittest.TestCase):
             erkenningsNummer="23",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="6",
+            sollicitatieNummer="999",
             description="G. Rootheidswaanzin",
             voorkeur={
                 "branches": ["vacuumslangen"],
@@ -294,6 +301,9 @@ class TestBasicAllocation(unittest.TestCase):
                 "absentUntil": "",
             },
         )
+        self.dp.add_branche(
+            brancheId="vacuumslangen", verplicht=True, maximumPlaatsen=1
+        )
 
         self.dp.add_page(["1", "2", "3", "4", "5", "6", "7", "8", "9"])
         self.dp.add_rsvp(erkenningsNummer="24", attending=True)
@@ -314,7 +324,7 @@ class TestBasicAllocation(unittest.TestCase):
         )
         self.dp.add_stand(
             plaatsId="5",
-            branches=[],
+            branches=["vacuumslangen"],
             properties=[],
             verkoopinrichting=[],
             inactive=False,
@@ -352,4 +362,8 @@ class TestBasicAllocation(unittest.TestCase):
 
         allocator = Allocator(self.dp)
         market_allocation = allocator.get_allocation()
-        pprint(market_allocation["toewijzingen"])
+        res = alloc_erk("24", market_allocation)
+        self.assertListEqual(res["plaatsen"], ["5"])
+        res = reject_erk("23", market_allocation)
+        with self.assertRaises(ErkenningsnummerNotFoudError):
+            reject_erk("24", market_allocation)

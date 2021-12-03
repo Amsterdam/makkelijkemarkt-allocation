@@ -101,9 +101,8 @@ class TestRequiredBranches(unittest.TestCase):
         kan enkel op een brancheplek staan
         """
         # should get 3
-        self.assertListEqual(
-            self.market_allocation["toewijzingen"][0]["plaatsen"], ["3"]
-        )
+        twz = alloc_erk("1", self.market_allocation)
+        self.assertListEqual(twz["plaatsen"], ["3"])
 
     def test_assign_most_suitable_stand(self):
         """
@@ -116,10 +115,11 @@ class TestRequiredBranches(unittest.TestCase):
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
 
+        twz = alloc_erk("1", allocation)
         # should get 3 although his prefs are 4 (4 is not branched)
-        self.assertListEqual(allocation["toewijzingen"][0]["plaatsen"], ["3"])
+        self.assertListEqual(twz["plaatsen"], ["3"])
 
-    def test_can_not_axpand_to_non_branche_stand(self):
+    def test_can_not_expand_to_non_branche_stand(self):
         """
         kan niet uitbreiden naar een niet-branche plaats
         """
@@ -143,7 +143,8 @@ class TestRequiredBranches(unittest.TestCase):
         allocation = allocator.get_allocation()
 
         # should only get 3 there is no room for branched exapnsion
-        self.assertListEqual(allocation["toewijzingen"][0]["plaatsen"], ["3"])
+        twz = alloc_erk("1", allocation)
+        self.assertListEqual(twz["plaatsen"], ["3"])
 
     def test_reject_if_branche_stands_unavailable(self):
         """
@@ -171,12 +172,10 @@ class TestRequiredBranches(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        self.assertEqual(
-            allocation["toewijzingen"][0]["ondernemer"]["erkenningsNummer"], "2"
-        )
-        self.assertEqual(
-            allocation["afwijzingen"][0]["ondernemer"]["erkenningsNummer"], "1"
-        )
+        twz = alloc_erk("2", allocation)
+        afw = reject_erk("1", allocation)
+        self.assertEqual(twz["ondernemer"]["erkenningsNummer"], "2")
+        self.assertEqual(afw["ondernemer"]["erkenningsNummer"], "1")
 
     def test_reject_if_max_branches_reached(self):
         """
@@ -280,14 +279,12 @@ class TestRequiredBranches(unittest.TestCase):
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
 
-        self.assertEqual(
-            allocation["toewijzingen"][0]["ondernemer"]["erkenningsNummer"], "2"
-        )
-        self.assertEqual(
-            allocation["toewijzingen"][1]["ondernemer"]["erkenningsNummer"], "1"
-        )
-        self.assertListEqual(allocation["toewijzingen"][0]["plaatsen"], ["1"])
-        self.assertListEqual(allocation["toewijzingen"][1]["plaatsen"], ["3"])
+        twz_1 = alloc_erk("2", allocation)
+        twz_2 = alloc_erk("1", allocation)
+        self.assertEqual(twz_1["ondernemer"]["erkenningsNummer"], "2")
+        self.assertEqual(twz_2["ondernemer"]["erkenningsNummer"], "1")
+        self.assertListEqual(twz_1["plaatsen"], ["1"])
+        self.assertListEqual(twz_2["plaatsen"], ["3"])
 
     def test_pref_to_soll_in_non_required_branches(self):
         """

@@ -14,6 +14,7 @@ from kjk.outputdata import (
 from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
 from kjk.test_utils import (
+    print_alloc,
     stands_erk,
     alloc_erk,
     reject_erk,
@@ -165,10 +166,9 @@ class MockDataproviderTestCase(unittest.TestCase):
         self.sut.mock()
         allocator = Allocator(self.sut)
         market_allocation = allocation = allocator.get_allocation()
-        stands = market_allocation["toewijzingen"][0]["plaatsen"]
-        erk = market_allocation["toewijzingen"][0]["erkenningsNummer"]
-        self.assertEqual(erk, "1123456")
-        self.assertListEqual(stands, ["1", "2"])
+        self.assertListEqual(
+            alloc_erk("1123456", market_allocation)["plaatsen"], ["1", "2"]
+        )
 
 
 class ClusterFinderTestCase(unittest.TestCase):
@@ -245,7 +245,9 @@ class OutputLayoutTest(unittest.TestCase):
         self.sut.add_allocation("3000187072", [101, 102, 103], self.mock_merchant_obj)
         output = self.sut.to_data()
         self.assertEqual(len(output["toewijzingen"]), 1)
-        self.assertListEqual(output["toewijzingen"][0]["plaatsen"], [101, 102, 103])
+        self.assertListEqual(
+            alloc_erk("3000187072", output)["plaatsen"], [101, 102, 103]
+        )
 
     def test_raise_exception(self):
         try:
@@ -260,7 +262,7 @@ class OutputLayoutTest(unittest.TestCase):
         output = self.sut.to_data()
         self.assertEqual(len(output["toewijzingen"]), 1)
         self.assertListEqual(
-            output["toewijzingen"][0]["plaatsen"], [4, 5, 101, 102, 103]
+            alloc_erk("3000187072", output)["plaatsen"], [4, 5, 101, 102, 103]
         )
 
     def test_add_rejection(self):

@@ -2,6 +2,7 @@ import unittest
 from kjk.allocation import Allocator
 from kjk.inputdata import MockDataprovider
 from pprint import pprint
+from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc
 
 
 class TestSollAllocation(unittest.TestCase):
@@ -131,9 +132,7 @@ class TestSollAllocation(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        pprint(allocation["toewijzingen"])
-        pprint(allocation["afwijzingen"])
-        stds = allocation["toewijzingen"][0]["plaatsen"]
+        stds = alloc_erk("1", allocation)["plaatsen"]
         self.assertListEqual(stds, ["5"])
 
     def test_pref_evi_locations(self):

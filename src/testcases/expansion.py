@@ -2,6 +2,7 @@ import unittest
 from pprint import pprint
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider, MockDataprovider
+from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc
 
 
 class TestExpansion(unittest.TestCase):
@@ -133,7 +134,7 @@ class TestExpansion(unittest.TestCase):
         """
         blijft binnen dezelfde marktkraamrij
         """
-        res = self.market_allocation["toewijzingen"][0]["plaatsen"]
+        res = alloc_erk("1", self.market_allocation)["plaatsen"]
         res.sort()
         self.assertListEqual(res, ["1", "2", "3", "4"])
 
@@ -141,14 +142,14 @@ class TestExpansion(unittest.TestCase):
         """
         kan een 2de plaats krijgen
         """
-        res = self.market_allocation["toewijzingen"][0]["plaatsen"]
+        res = alloc_erk("1", self.market_allocation)["plaatsen"]
         self.assertTrue(len(res) > 2)
 
     def test_will_get_following_stands(self):
         """
         krijgt aaneensluitende plaatsen
         """
-        res = self.market_allocation["toewijzingen"][0]["plaatsen"]
+        res = alloc_erk("1", self.market_allocation)["plaatsen"]
         res.sort()
         self.assertListEqual(res, ["1", "2", "3", "4"])
 
@@ -156,10 +157,10 @@ class TestExpansion(unittest.TestCase):
         """
         krijgt gelijk twee plaatsen als er genoeg ruimte op de markt is
         """
-        res = self.market_allocation["toewijzingen"][0]["plaatsen"]
+        res = alloc_erk("1", self.market_allocation)["plaatsen"]
         self.assertTrue(len(res) == 4)
 
-    @unittest.skip("TODO: wat doen we met enywhere")
+    @unittest.skip("TODO: wat doen we met anywhere")
     def test_more_tand_two_stands_must_wait(self):
         """
         naar meer dan 2 plaatsen moet wachten op iedereen die 2 plaatsen wil
@@ -170,7 +171,7 @@ class TestExpansion(unittest.TestCase):
         """
         kan 3 plaatsen krijgen
         """
-        res = self.market_allocation["toewijzingen"][0]["plaatsen"]
+        res = alloc_erk("1", self.market_allocation)["plaatsen"]
         self.assertTrue(len(res) > 2)
 
     def test_must_stay_in_branche_location(self):
@@ -196,7 +197,7 @@ class TestExpansion(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        stds = allocation["toewijzingen"][0]["plaatsen"]
+        stds = alloc_erk("1", allocation)["plaatsen"]
         self.assertListEqual(stds, ["1", "2"])
 
     def test_must_stay_in_evi_location(self):
@@ -222,7 +223,7 @@ class TestExpansion(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        stds = allocation["toewijzingen"][0]["plaatsen"]
+        stds = alloc_erk("1", allocation)["plaatsen"]
         self.assertListEqual(stds, ["1", "2"])
 
     def test_must_obey_expansion_limits(self):
@@ -324,7 +325,7 @@ class TestExpansion(unittest.TestCase):
         dp.mock()
         allocator = Allocator(dp)
         allocation = allocator.get_allocation()
-        stds = allocation["toewijzingen"][1]["plaatsen"]
+        stds = alloc_erk("2", allocation)["plaatsen"]
         self.assertListEqual(stds, ["3", "4"])
 
     def test_can_not_get_obstacle_stand(self):
@@ -372,7 +373,7 @@ class TestExpansion(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        stds = allocation["toewijzingen"][0]["plaatsen"]
+        stds = alloc_erk("1", allocation)["plaatsen"]
         self.assertListEqual(stds, ["8", "9"])
 
     def test_can_provide_min_stands(self):
@@ -411,11 +412,9 @@ class TestExpansion(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        # min 6 stand should be rejected
-        self.assertEqual(
-            allocation["toewijzingen"][0]["ondernemer"]["description"], "Dweezil Zappa"
-        )
-        self.assertListEqual(allocation["toewijzingen"][0]["plaatsen"], ["8", "9"])
+        twz = alloc_erk("1", allocation)
+        self.assertEqual(twz["ondernemer"]["description"], "Dweezil Zappa")
+        self.assertListEqual(twz["plaatsen"], ["8", "9"])
 
     def test_can_provide_max_stands(self):
         """
@@ -462,12 +461,9 @@ class TestExpansion(unittest.TestCase):
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
         # should get 8,9,10 (max)
-        self.assertListEqual(
-            allocation["toewijzingen"][0]["plaatsen"], ["8", "9", "10"]
-        )
-        self.assertEqual(
-            allocation["toewijzingen"][0]["ondernemer"]["description"], "Dweezil Zappa"
-        )
+        twz = alloc_erk("1", allocation)
+        self.assertListEqual(twz["plaatsen"], ["8", "9", "10"])
+        self.assertEqual(twz["ondernemer"]["description"], "Dweezil Zappa")
 
     def test_gets_rejected_if_not_min(self):
         """
@@ -493,7 +489,7 @@ class TestExpansion(unittest.TestCase):
         allocation = allocator.get_allocation()
         # min 6 stand should be rejected
         self.assertEqual(
-            allocation["afwijzingen"][0]["ondernemer"]["description"], "Dweezil Zappa"
+            reject_erk("1", allocation)["ondernemer"]["description"], "Dweezil Zappa"
         )
 
     def test_get_expansion_to_pref_side(self):
@@ -549,12 +545,9 @@ class TestExpansion(unittest.TestCase):
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
         # should get 9,10,11 because 11 is pref
-        self.assertListEqual(
-            allocation["toewijzingen"][0]["plaatsen"], ["9", "10", "11"]
-        )
-        self.assertEqual(
-            allocation["toewijzingen"][0]["ondernemer"]["description"], "Dweezil Zappa"
-        )
+        twz = alloc_erk("1", allocation)
+        self.assertListEqual(twz["plaatsen"], ["9", "10", "11"])
+        self.assertEqual(twz["ondernemer"]["description"], "Dweezil Zappa")
 
     @unittest.skip("Navragen markten wat is een cirkelvormige oppstelling?")
     def test_expansion_circular_market(self):

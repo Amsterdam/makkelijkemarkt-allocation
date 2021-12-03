@@ -3,6 +3,7 @@ from pprint import pprint
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider, MockDataprovider
 from kjk.test_utils import print_alloc
+from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc
 
 
 class TestEviMerchantNoRequiredBranche(unittest.TestCase):
@@ -166,9 +167,8 @@ class TestEVI(unittest.TestCase):
         allocator = Allocator(self.dp)
         self.market_allocation = allocator.get_allocation()
         # 101, 103 are evi stands. Zappa prefs are 2, 3 (assign evi anyway)
-        self.assertListEqual(
-            self.market_allocation["toewijzingen"][1]["plaatsen"], ["101", "103"]
-        )
+        erk = alloc_erk("1", self.market_allocation)
+        self.assertListEqual(erk["plaatsen"], ["101", "103"])
 
     def test_most_suitable_stand(self):
         """
@@ -198,8 +198,8 @@ class TestEVI(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        pprint(allocation["toewijzingen"])
-        self.assertListEqual(allocation["toewijzingen"][2]["plaatsen"], ["99"])
+        twz = alloc_erk("55", allocation)
+        self.assertListEqual(twz["plaatsen"], ["99"])
 
     def test_can_not_expand_to_non_evi_stand(self):
         """
@@ -227,9 +227,7 @@ class TestEVI(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         self.market_allocation = allocator.get_allocation()
-        self.assertListEqual(
-            self.market_allocation["toewijzingen"][0]["plaatsen"], ["1"]
-        )
+        self.assertListEqual(alloc_erk("2", self.market_allocation)["plaatsen"], ["1"])
 
     def test_reject_if_no_more_evi_stands(self):
         """
@@ -331,8 +329,8 @@ class TestEVI(unittest.TestCase):
         dp.mock()
         allocator = Allocator(dp)
         market_allocation = allocator.get_allocation()
-        self.assertListEqual(market_allocation["toewijzingen"][0]["plaatsen"], ["1"])
-        self.assertListEqual(market_allocation["toewijzingen"][1]["plaatsen"], ["2"])
+        self.assertListEqual(alloc_erk("2", market_allocation)["plaatsen"], ["1"])
+        self.assertListEqual(alloc_erk("1", market_allocation)["plaatsen"], ["2"])
 
     def test_pref_to_soll_no_evi(self):
         """
@@ -397,5 +395,5 @@ class TestEVI(unittest.TestCase):
         dp.mock()
         allocator = Allocator(dp)
         market_allocation = allocator.get_allocation()
-        self.assertListEqual(market_allocation["toewijzingen"][0]["plaatsen"], ["2"])
+        self.assertListEqual(alloc_erk("1", market_allocation)["plaatsen"], ["2"])
         self.assertEqual(len(market_allocation["afwijzingen"]), 0)
