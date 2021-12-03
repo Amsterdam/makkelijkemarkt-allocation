@@ -2,6 +2,77 @@ import unittest
 from pprint import pprint
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider, MockDataprovider
+from kjk.test_utils import print_alloc
+
+
+class TestEviMerchantNoRequiredBranche(unittest.TestCase):
+    def setUp(self):
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["404-parfum"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": ["eigen-materieel"],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_pref(erkenningsNummer="1", plaatsId="2", priority=1)
+
+        # stands
+        dp.add_page(["1", "2", "3", "99", "101", "103"])
+        dp.add_stand(
+            plaatsId="1",
+            branches=["bogus"],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+        dp.add_stand(plaatsId="2", branches=[], properties=[], verkoopinrichting=[])
+        dp.add_stand(
+            plaatsId="3", branches=["101-agf"], properties=[], verkoopinrichting=[]
+        )
+        dp.add_stand(
+            plaatsId="99",
+            branches=["bogus"],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+        dp.add_stand(plaatsId="100", branches=[], properties=[], verkoopinrichting=[])
+        dp.add_stand(
+            plaatsId="101",
+            branches=["bogus"],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+        dp.add_stand(
+            plaatsId="103",
+            branches=["bogus"],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+
+        # branches
+        dp.add_branche(brancheId="404-parfum", verplicht=False, maximumPlaatsen=3)
+        dp.add_branche(brancheId="bogus", verplicht=False, maximumPlaatsen=3)
+
+        # rsvp
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+        self.dp = dp
+
+    def test_allocation_combi_evi_no_required_branche(self):
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        print_alloc(allocation)
 
 
 class TestEVI(unittest.TestCase):

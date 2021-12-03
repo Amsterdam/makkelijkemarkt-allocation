@@ -115,7 +115,7 @@ class MarketArrangement:
         self.output["afwijzingen"] = self.rejection_list
         return self.output
 
-    def to_json_file(self, file_name="test_output.json"):
+    def to_json_file(self, file_name="../test_output.json"):
         f = open(file_name, "w")
         json.dump(self.to_data(), f, indent=4)
         f.close()

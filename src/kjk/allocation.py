@@ -32,6 +32,7 @@ class Allocator(BaseAllocator):
         elif min_demand < num_available:
             self.strategy = STRATEGY_EXP_SOME
 
+        print()
         print("max ", max_demand)
         print("min ", int(min_demand))
         print("beschikbaar ", num_available)
@@ -277,7 +278,8 @@ class Allocator(BaseAllocator):
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
         self._allocate_solls_for_query(
-            "alist == True & branche_required != 'yes' & has_evi != 'yes'"
+            # "alist == True & branche_required != 'yes' & has_evi != 'yes'"
+            "alist == True & branche_required != 'yes'"
         )
 
     def allocation_phase_08(self):
@@ -325,6 +327,52 @@ class Allocator(BaseAllocator):
         print("Markt allocatie ingedeeld, nu de validatie.")
         print("nog open plaatsen: ", len(self.positions_df))
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+
+        if DEBUG:
+            print("-" * 60)
+            print("\tValideren dubbel toegewezen kramen: ")
+            tws = self.market_output.to_data()["toewijzingen"]
+            stds = []
+            doubles = []
+            for tw in tws:
+                for p in tw["plaatsen"]:
+                    if p not in stds:
+                        stds.append(p)
+                    else:
+                        doubles.append(p)
+            if len(doubles) == 0:
+                print("\t-> OK")
+            else:
+                print("\tFailed")
+            print("-" * 60)
+
+            print("-" * 60)
+            print("\tValideren evi toegewezen kramen: ")
+            tws = self.market_output.to_data()["toewijzingen"]
+            status_ok = True
+            errors = []
+            for tw in tws:
+                try:
+                    evi = tw["ondernemer"]["voorkeur"]["verkoopinrichting"]
+                    if len(evi) > 0:
+                        for pl in tw["plaatsen"]:
+                            if pl not in self.evi_ids:
+                                status_ok = False
+                                errors.append(
+                                    (
+                                        pl,
+                                        tw["ondernemer"]["erkenningsNummer"],
+                                        tw["ondernemer"]["plaatsen"],
+                                        tw["ondernemer"]["status"],
+                                    )
+                                )
+                except KeyError as e:
+                    pass
+            if status_ok:
+                print("\t-> OK")
+            else:
+                print("\tFailed: ", errors)
+            print("-" * 60)
 
     def allocation_phase_11(self):
         print("\n--- FASE 11")
