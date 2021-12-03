@@ -1,15 +1,17 @@
 from pprint import pprint
 import pandas as pd
+from tabulate import tabulate
 from datetime import date
 from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder
 from kjk.utils import DebugRedisClient
 from kjk.base import *
+from kjk.validation import ValidatorMixin
 
-DEBUG = False
+DEBUG = True
 
 
-class Allocator(BaseAllocator):
+class Allocator(BaseAllocator, ValidatorMixin):
     """
     The base allocator object takes care of the data preparation phase
     and implements query methods
@@ -337,50 +339,8 @@ class Allocator(BaseAllocator):
         print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
 
         if DEBUG:
-            print("-" * 60)
-            print("\tValideren dubbel toegewezen kramen: ")
-            tws = self.market_output.to_data()["toewijzingen"]
-            stds = []
-            doubles = []
-            for tw in tws:
-                for p in tw["plaatsen"]:
-                    if p not in stds:
-                        stds.append(p)
-                    else:
-                        doubles.append(p)
-            if len(doubles) == 0:
-                print("\t-> OK")
-            else:
-                print("\tFailed")
-            print("-" * 60)
-
-            print("-" * 60)
-            print("\tValideren evi toegewezen kramen: ")
-            tws = self.market_output.to_data()["toewijzingen"]
-            status_ok = True
-            errors = []
-            for tw in tws:
-                try:
-                    evi = tw["ondernemer"]["voorkeur"]["verkoopinrichting"]
-                    if len(evi) > 0:
-                        for pl in tw["plaatsen"]:
-                            if pl not in self.evi_ids:
-                                status_ok = False
-                                errors.append(
-                                    (
-                                        pl,
-                                        tw["ondernemer"]["erkenningsNummer"],
-                                        tw["ondernemer"]["plaatsen"],
-                                        tw["ondernemer"]["status"],
-                                    )
-                                )
-                except KeyError as e:
-                    pass
-            if status_ok:
-                print("\t-> OK")
-            else:
-                print("\tFailed: ", errors)
-            print("-" * 60)
+            self.validate_double_allocation()
+            self.validate_evi_allocations()
 
     def allocation_phase_11(self):
         print("\n--- FASE 11")
