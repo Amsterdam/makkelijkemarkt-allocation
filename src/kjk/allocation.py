@@ -310,7 +310,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         if self.strategy == STRATEGY_EXP_SOME:
             for df in dataframes:
-                print(df)
                 for index, row in df.iterrows():
                     erk = row["erkenningsNummer"]
                     stands = row["plaatsen"]
@@ -396,8 +395,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         if DEBUG:
             json_file = self.market_output.to_json_file()
-            debug_redis = DebugRedisClient()
-            debug_redis.insert_test_result(json_file)
+            # debug_redis = DebugRedisClient()
+            # debug_redis.insert_test_result(json_file)
 
         return self.market_output.to_data()
 

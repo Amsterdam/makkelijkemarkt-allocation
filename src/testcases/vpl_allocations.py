@@ -2,6 +2,7 @@ import unittest
 from pprint import pprint
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider, MockDataprovider
+from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc
 
 
 class TestTVPallocation(unittest.TestCase):
@@ -132,7 +133,8 @@ class TestTVPallocation(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         market_allocation = allocation = allocator.get_allocation()
-        num_stands = len(market_allocation["toewijzingen"][0]["plaatsen"])
+        twz = alloc_erk("1", market_allocation)
+        num_stands = len(twz["plaatsen"])
         self.assertEqual(num_stands, 1)
 
     def test_vpl_fixed_not_available(self):
@@ -158,7 +160,7 @@ class TestTVPallocation(unittest.TestCase):
         allocator = Allocator(self.dp)
         market_allocation = allocation = allocator.get_allocation()
         self.assertTrue(len(market_allocation["afwijzingen"]) == 3)
-        self.assertEqual(market_allocation["afwijzingen"][2]["reason"]["code"], 4)
+        self.assertEqual(reject_erk("2", market_allocation)["reason"]["code"], 4)
 
     @unittest.skip(
         "Uitgezet, omdat nog niet besloten is hoe om te gaan met 'willekeurig indelen' voor VPL."
@@ -250,10 +252,10 @@ class TestTVPLZallocation(unittest.TestCase):
         """
         moet zich eerst expliciet aanmelden
         """
-
-        self.assertEqual(self.market_allocation["toewijzingen"][1]["plaatsen"], ["3"])
+        twz = alloc_erk("3", self.market_allocation)
+        self.assertEqual(twz["plaatsen"], ["3"])
         self.assertEqual(
-            self.market_allocation["toewijzingen"][1]["ondernemer"]["description"],
+            twz["ondernemer"]["description"],
             "J Medeski",
         )
 
@@ -262,18 +264,18 @@ class TestTVPLZallocation(unittest.TestCase):
 
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        self.assertListEqual(allocation["toewijzingen"][1]["plaatsen"], ["3"])
-        self.assertEqual(
-            allocation["toewijzingen"][1]["ondernemer"]["description"], "C Beefheart"
-        )
+        twz = alloc_erk("2", allocation)
+        self.assertListEqual(twz["plaatsen"], ["3"])
+        self.assertEqual(twz["ondernemer"]["description"], "C Beefheart")
 
     def test_pref_to_soll(self):
         """
         krijgt voorkeur boven sollicitanten
         """
-        self.assertEqual(self.market_allocation["toewijzingen"][1]["plaatsen"], ["3"])
+        twz = alloc_erk("3", self.market_allocation)
+        self.assertEqual(twz["plaatsen"], ["3"])
         self.assertEqual(
-            self.market_allocation["toewijzingen"][1]["ondernemer"]["description"],
+            twz["ondernemer"]["description"],
             "J Medeski",
         )
 
@@ -282,13 +284,11 @@ class TestTVPLZallocation(unittest.TestCase):
 
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        self.assertListEqual(allocation["toewijzingen"][1]["plaatsen"], ["3"])
-        self.assertEqual(
-            allocation["toewijzingen"][1]["ondernemer"]["description"], "C Beefheart"
-        )
-        self.assertEqual(
-            allocation["afwijzingen"][0]["ondernemer"]["description"], "J Medeski"
-        )
+        twz = alloc_erk("2", allocation)
+        rejection = reject_erk("3", allocation)
+        self.assertListEqual(twz["plaatsen"], ["3"])
+        self.assertEqual(twz["ondernemer"]["description"], "C Beefheart")
+        self.assertEqual(rejection["ondernemer"]["description"], "J Medeski")
 
     def test_non_pref_to_evi_and_branche(self):
         """
@@ -317,10 +317,10 @@ class TestTVPLZallocation(unittest.TestCase):
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
         self.assertEqual(
-            allocation["toewijzingen"][1]["ondernemer"]["description"], "D Moon"
+            alloc_erk("18", allocation)["ondernemer"]["description"], "D Moon"
         )
         self.assertEqual(
-            allocation["afwijzingen"][0]["ondernemer"]["description"], "C Beefheart"
+            reject_erk("2", allocation)["ondernemer"]["description"], "C Beefheart"
         )
 
     def test_right_to_number_of_stands(self):
@@ -360,9 +360,9 @@ class TestTVPLZallocation(unittest.TestCase):
 
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        self.assertListEqual(allocation["toewijzingen"][1]["plaatsen"], ["6", "7"])
+        self.assertListEqual(alloc_erk("2", allocation)["plaatsen"], ["6", "7"])
         self.assertEqual(
-            allocation["toewijzingen"][1]["ondernemer"]["description"], "C Beefheart"
+            alloc_erk("2", allocation)["ondernemer"]["description"], "C Beefheart"
         )
 
     @unittest.skip("Navraag markten")
