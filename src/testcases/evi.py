@@ -73,7 +73,7 @@ class TestEviMerchantNoRequiredBranche(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        print_alloc(allocation)
+        # print_alloc(allocation)
 
 
 class TestEVI(unittest.TestCase):

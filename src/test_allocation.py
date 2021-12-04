@@ -453,4 +453,8 @@ class AllocatorTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    from kjk.logging import *
+
+    logging.disable(logging.CRITICAL)
     unittest.main()
+    logging.disable(logging.NOTSET)

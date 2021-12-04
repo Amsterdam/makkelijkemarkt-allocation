@@ -1,7 +1,11 @@
+from kjk.logging import clog, log
+from tabulate import tabulate
+
+
 class ValidatorMixin:
     def validate_double_allocation(self):
-        print("-" * 60)
-        print("Valideren dubbel toegewezen kramen: ")
+        log.info("-" * 60)
+        log.info("Valideren dubbel toegewezen kramen: ")
         tws = self.market_output.to_data()["toewijzingen"]
         stds = []
         doubles = []
@@ -12,14 +16,13 @@ class ValidatorMixin:
                 else:
                     doubles.append(p)
         if len(doubles) == 0:
-            print("-> OK")
+            clog.info("-> OK")
         else:
-            print("Failed")
-        print("-" * 60)
+            clog.error("Failed")
 
     def validate_evi_allocations(self):
-        print("-" * 60)
-        print("Valideren evi toegewezen kramen: ")
+        log.info("-" * 60)
+        log.info("Valideren evi toegewezen kramen: ")
         tws = self.market_output.to_data()["toewijzingen"]
         status_ok = True
         errors = [
@@ -54,8 +57,8 @@ class ValidatorMixin:
             except KeyError as e:
                 pass
         if status_ok:
-            print("-> OK")
+            clog.info("-> OK")
         else:
-            print("Failed: \n")
+            clog.error("Failed: \n")
             print(tabulate(errors, headers="firstrow"))
-        print("-" * 60)
+            clog.info("")
