@@ -1,5 +1,6 @@
 import unittest
 
+
 # market scenario tests
 from testcases.basic_allocations import *
 from testcases.alist_allocations import *
@@ -15,4 +16,8 @@ from testcases.misc import *
 from test_allocation import *
 
 if __name__ == "__main__":
+    from kjk.logging import *
+
+    logging.disable(logging.CRITICAL)
     unittest.main()
+    logging.disable(logging.NOTSET)

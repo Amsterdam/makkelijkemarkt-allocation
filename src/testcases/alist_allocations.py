@@ -77,6 +77,7 @@ class TestAlistAllocations(unittest.TestCase):
         krijgt voorrang over gelijkwaardige sollicitanten op de B-lijst
         """
         # normally erk 1 get the stand
+        self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
         res = alloc_erk("1", allocation)
@@ -169,6 +170,7 @@ class TestAlistAllocations(unittest.TestCase):
         dp.add_rsvp(erkenningsNummer="1", attending=True)
         dp.add_rsvp(erkenningsNummer="2", attending=True)
 
+        dp.mock()
         allocator = Allocator(dp)
         allocation = allocator.get_allocation()
         res_zappa = alloc_erk("1", allocation)
@@ -180,6 +182,7 @@ class TestAlistAllocations(unittest.TestCase):
         dp.set_alist({"erkenningsNummer": "2"})
 
         # after the alist should be reversed
+        dp.mock()
         allocator = Allocator(dp)
         allocation = allocator.get_allocation()
         res_zappa = alloc_erk("1", allocation)

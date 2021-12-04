@@ -7,6 +7,7 @@ from kjk.utils import MarketStandClusterFinder
 from kjk.utils import DebugRedisClient
 from kjk.base import *
 from kjk.validation import ValidatorMixin
+from kjk.logging import clog, log
 
 DEBUG = True
 
@@ -19,10 +20,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
     """
 
     def allocation_phase_00(self):
-        print("\n--- START ALLOCATION FASE 0")
-        print("analyseer de markt en kijk (globaal) of er genoeg plaatsen zijn:")
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        clog.info("--- Makkelijkemarkt Allocatie ---")
+        clog.info("--- ALLOCATIE FASE 0 ---")
+        log.info("analyseer de markt en kijk (globaal) of er genoeg plaatsen zijn:")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {} ".format(len(self.merchants_df)))
 
         max_demand = self.merchants_df["voorkeur.maximum"].sum()
         min_demand = self.merchants_df["voorkeur.minimum"].sum()
@@ -34,11 +36,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
         elif min_demand < num_available:
             self.strategy = STRATEGY_EXP_SOME
 
-        print()
-        print("max ", max_demand)
-        print("min ", int(min_demand))
-        print("beschikbaar ", num_available)
-        print("strategie: ", self.strategy)
+        log.info("")
+        log.info("max {}".format(max_demand))
+        log.info("min {}".format(int(min_demand)))
+        log.info("beschikbaar {}".format(num_available))
+        log.info("strategie: {}".format(self.strategy))
 
         # branche positions vs merchants rsvp
         self.branches_strategy = {}
@@ -64,10 +66,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
         }
 
     def allocation_phase_01(self):
-        print("\n--- START ALLOCATION FASE 1")
-        print("ondenemers (vpl) die niet willen verplaatsen of uitbreiden:")
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 1 ---")
+        log.info("ondenemers (vpl) die niet willen verplaatsen of uitbreiden:")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         df = self.merchants_df.query(
             "(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'no' & wants_expand == False"
@@ -81,10 +84,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
 
     def allocation_phase_02(self):
-        print("\n--- FASE 2")
-        print("ondenemers (vpl) die NIET willen verplaatsen maar WEL uitbreiden:")
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 2 ---")
+        log.info("ondenemers (vpl) die NIET willen verplaatsen maar WEL uitbreiden:")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         # NOTE: save the expanders df for later, we need them for the extra stands iterations in tight strategies
         df = self.merchants_df.query(
@@ -111,10 +115,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
             self._allocate_stands_to_merchant(stands, erk)
 
     def allocation_phase_03(self):
-        print("\n--- FASE 3")
-        print("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 3 ---")
+        log.info("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         df = self.merchants_df.query(
             "(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
@@ -178,10 +183,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
             self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
     def allocation_phase_04(self):
-        print("\n--- FASE 4")
-        print("de vpl's die willen uitbreiden en verplaatsen")
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 4 ---")
+        log.info("de vpl's die willen uitbreiden en verplaatsen")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         df = self.merchants_df.query(
             "status == 'vpl' & wants_expand == True & will_move == 'yes'"
@@ -224,22 +230,24 @@ class Allocator(BaseAllocator, ValidatorMixin):
             self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
     def allocation_phase_05(self):
-        print(
-            "\n## Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrij zijn verdelen"
+        log.info("")
+        clog.info(
+            "## Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrij zijn verdelen"
         )
-        print("\n--- FASE 5")
-        print(
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 5 ---")
+        log.info(
             "de soll's die een kraam willen in een verplichte branche en op de A-lijst staan"
         )
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         # double check all vpls allocated
         df = self.merchants_df.query("status == 'vpl'")
         if len(df) == 0:
-            print("check status OK all vpl's allocated.")
+            clog.info("check status OK all vpl's allocated.")
         else:
-            print("check status ERROR not all vpl's allocated.")
+            clog.info("check status ERROR not all vpl's allocated.")
 
         # make sure merchants are sorted, tvplz should go first
         self.merchants_df.sort_values(
@@ -258,12 +266,13 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self._allocate_evi_for_query("alist == True & has_evi == 'yes'")
 
     def allocation_phase_06(self):
-        print("\n--- FASE 6")
-        print(
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 6 ---")
+        log.info(
             "A-lijst ingedeeld voor verplichte branches, nu de B-lijst for verplichte branches"
         )
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         # B-list required branches
         self._allocate_branche_solls_for_query(
@@ -274,10 +283,13 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self._allocate_evi_for_query("alist != True & has_evi == 'yes'")
 
     def allocation_phase_07(self):
-        print("\n--- FASE 7")
-        print("B-lijst ingedeeld voor verplichte branches, overige solls op de A-lijst")
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 7 ---")
+        log.info(
+            "B-lijst ingedeeld voor verplichte branches, overige solls op de A-lijst"
+        )
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         self._allocate_solls_for_query(
             # "alist == True & branche_required != 'yes' & has_evi != 'yes'"
@@ -285,20 +297,22 @@ class Allocator(BaseAllocator, ValidatorMixin):
         )
 
     def allocation_phase_08(self):
-        print("\n--- FASE 8")
-        print("A-list gedaan, overige solls")
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 8 ---")
+        log.info("A-list gedaan, overige solls")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         self._allocate_solls_for_query(
             "alist == False & branche_required != 'yes' & has_evi != 'yes'"
         )
 
     def allocation_phase_09(self):
-        print("\n--- FASE 9")
-        print("Alle ondernemers ingedeeld, nu de uitbreidings fase.")
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 9 ---")
+        log.info("Alle ondernemers ingedeeld, nu de uitbreidings fase.")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         # STRATEGY_EXP_NONE means no expansion possible (market space is thight)
         # STRATEGY_EXP_FULL means expansion already done during previous phases
@@ -332,20 +346,22 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         )
 
     def allocation_phase_10(self):
-        print("\n--- FASE 10")
-        print("Markt allocatie ingedeeld, nu de validatie.")
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 10 ---")
+        log.info("Markt allocatie ingedeeld, nu de validatie.")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         if DEBUG:
             self.validate_double_allocation()
             self.validate_evi_allocations()
 
     def allocation_phase_11(self):
-        print("\n--- FASE 11")
-        print("Markt allocatie gevalideerd")
-        print("nog open plaatsen: ", len(self.positions_df))
-        print("ondenemers nog niet ingedeeld: ", len(self.merchants_df))
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 11 ---")
+        log.info("Markt allocatie gevalideerd")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         self.reject_remaining_merchants()
 

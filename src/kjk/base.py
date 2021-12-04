@@ -4,6 +4,7 @@ from datetime import date
 from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
+from kjk.logging import clog, log
 
 pd.options.mode.chained_assignment = "raise"
 
@@ -588,7 +589,9 @@ class BaseAllocator:
         return self.positions_df[stands]
 
     def reject_remaining_merchants(self):
-        print("Ondernemers af te wijzen in deze fase: ", len(self.merchants_df))
+        log.warning(
+            "Ondernemers af te wijzen in deze fase: {}".format(len(self.merchants_df))
+        )
         for index, row in self.merchants_df.iterrows():
             erk = row["erkenningsNummer"]
             self._reject_merchant(erk, MARKET_FULL)
@@ -617,9 +620,9 @@ class BaseAllocator:
                     branches
                 )
             except KeyError as e:
-                print("ERROR: ondernemer heeft geen branche in zijn voorkeur.")
+                clog.warning(f"ondernemer {erk} heeft geen branche in zijn voorkeur.")
             except IndexError as e:
-                print("ERROR: ondernemer heeft geen branche in zijn voorkeur.")
+                clog.warning(f"ondernemer {erk} heeft geen branche in zijn voorkeur.")
 
             if allocation_allowed:
                 for st in stands_to_alloc:
@@ -640,7 +643,7 @@ class BaseAllocator:
 
     def _allocate_solls_for_query(self, query):
         result_list = self.merchants_df.query(query)
-        print("Ondernemers te alloceren in deze fase: ", len(result_list))
+        log.info("Ondernemers te alloceren in deze fase: {}".format(len(result_list)))
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
             pref = row["pref"]
@@ -673,7 +676,9 @@ class BaseAllocator:
 
     def _allocate_evi_for_query(self, query):
         result_list = self.merchants_df.query(query)
-        print("EVI Ondernemers te alloceren in deze fase: ", len(result_list))
+        log.info(
+            "EVI Ondernemers te alloceren in deze fase: {}".format(len(result_list))
+        )
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
             pref = row["pref"]
@@ -707,7 +712,7 @@ class BaseAllocator:
 
     def _allocate_branche_solls_for_query(self, query):
         result_list = self.merchants_df.query(query)
-        print("Ondernemers te alloceren in deze fase: ", len(result_list))
+        log.info("Ondernemers te alloceren in deze fase: {}".format(len(result_list)))
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
             pref = row["pref"]
