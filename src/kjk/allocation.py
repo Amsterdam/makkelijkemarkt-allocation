@@ -1,6 +1,5 @@
 from pprint import pprint
 import pandas as pd
-from tabulate import tabulate
 from datetime import date
 from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder

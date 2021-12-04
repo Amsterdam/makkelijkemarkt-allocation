@@ -1,4 +1,5 @@
 from kjk.logging import clog, log
+from tabulate import tabulate
 
 
 class ValidatorMixin:
@@ -18,7 +19,6 @@ class ValidatorMixin:
             clog.info("-> OK")
         else:
             clog.error("Failed")
-        log.info("-" * 60)
 
     def validate_evi_allocations(self):
         log.info("-" * 60)
@@ -60,5 +60,5 @@ class ValidatorMixin:
             clog.info("-> OK")
         else:
             clog.error("Failed: \n")
-            log.info(tabulate(errors, headers="firstrow"))
-        log.info("-" * 60)
+            print(tabulate(errors, headers="firstrow"))
+            clog.info("")
