@@ -440,7 +440,6 @@ class Test_SOLL_EXP_EXPF(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        print_alloc(allocation)
         erk = alloc_erk("1", allocation)
         self.assertListEqual(erk["plaatsen"], ["1", "2"])
 
@@ -448,13 +447,104 @@ class Test_SOLL_EXP_EXPF(unittest.TestCase):
         """
         kan geen minimum gewenste plaatsen opgeven in hun voorkeuren
         """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1", "2"],
+            status="exp",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 6,
+                "minimum": 4,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.add_rsvp(erkenningsNummer="1", attending=True)
+
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="3", priority=1)
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="4", priority=1)
+        self.dp.add_page([None, "3", "4", None])
+
+        # stands
+        self.dp.add_stand(
+            plaatsId="3",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        self.dp.add_stand(
+            plaatsId="4",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        erk = alloc_erk("1", allocation)
+        self.assertListEqual(erk["plaatsen"], ["1", "2"])
 
     def test_can_not_have_max_pref(self):
         """
         kan geen maximum aantal gewenste plaatsen opgeven in hun voorkeuren
         """
-        pass
+        dp = MockDataprovider("../fixtures/test_input.json")
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1", "2"],
+            status="exp",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 3,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+
+        dp.add_pref(erkenningsNummer="1", plaatsId="3", priority=1)
+        dp.add_pref(erkenningsNummer="1", plaatsId="4", priority=1)
+        dp.add_page([None, "1", "2", "3", "4", None])
+
+        # stands
+        dp.add_stand(
+            plaatsId="1",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="3",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="4",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.mock()
+        allocator = Allocator(dp)
+        allocation = allocator.get_allocation()
+        erk = alloc_erk("1", allocation)
+        self.assertListEqual(erk["plaatsen"], ["1", "2"])
 
 
 class TestMinimizeRejections(unittest.TestCase):
