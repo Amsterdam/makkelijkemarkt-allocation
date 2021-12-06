@@ -72,7 +72,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         df = self.merchants_df.query(
-            "(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'no' & wants_expand == False"
+            "(status == 'exp' | status == 'expf') | ((status == 'vpl' | status == 'tvpl') & will_move == 'no' & wants_expand == False)"
         )
         for index, row in df.iterrows():
             try:
@@ -91,7 +91,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         # NOTE: save the expanders df for later, we need them for the extra stands iterations in tight strategies
         df = self.merchants_df.query(
-            "(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'no' & wants_expand == True"
+            "(status == 'vpl' | status == 'tvpl') & will_move == 'no' & wants_expand == True"
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=False)
         for index, row in df.iterrows():
@@ -121,7 +121,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         df = self.merchants_df.query(
-            "(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
+            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=False)
 
@@ -154,7 +154,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         # reload the dataframe with the unsuccessful movers removed from the stack
         df = self.merchants_df.query(
-            "(status == 'vpl' | status == 'exp' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
+            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=False)
 
@@ -189,7 +189,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         df = self.merchants_df.query(
-            "status == 'vpl' & wants_expand == True & will_move == 'yes'"
+            "(status == 'vpl' | status == 'tvpl') & wants_expand == True & will_move == 'yes'"
         )
         for index, row in df.iterrows():
 
@@ -258,11 +258,13 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         # A-list required branches
         self._allocate_branche_solls_for_query(
-            "alist == True & branche_required == 'yes'"
+            "(status != 'exp' & status != 'expf') & alist == True & branche_required == 'yes'"
         )
 
         # A-list EVI
-        self._allocate_evi_for_query("alist == True & has_evi == 'yes'")
+        self._allocate_evi_for_query(
+            "(status != 'exp' & status != 'expf') & alist == True & has_evi == 'yes'"
+        )
 
     def allocation_phase_06(self):
         log.info("")
@@ -275,11 +277,13 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         # B-list required branches
         self._allocate_branche_solls_for_query(
-            "alist != True & branche_required == 'yes' & has_evi != 'yes'"
+            "(status != 'exp' & status != 'expf') & alist != True & branche_required == 'yes' & has_evi != 'yes'"
         )
 
         # AB-list EVI
-        self._allocate_evi_for_query("alist != True & has_evi == 'yes'")
+        self._allocate_evi_for_query(
+            "(status != 'exp' & status != 'expf') & alist != True & has_evi == 'yes'"
+        )
 
     def allocation_phase_07(self):
         log.info("")
@@ -292,7 +296,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         self._allocate_solls_for_query(
             # "alist == True & branche_required != 'yes' & has_evi != 'yes'"
-            "alist == True & branche_required != 'yes'"
+            "(status != 'exp' & status != 'expf') & alist == True & branche_required != 'yes'"
         )
 
     def allocation_phase_08(self):
@@ -303,7 +307,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         self._allocate_solls_for_query(
-            "alist == False & branche_required != 'yes' & has_evi != 'yes'"
+            "(status != 'exp' & status != 'expf') & alist == False & branche_required != 'yes' & has_evi != 'yes'"
         )
 
     def allocation_phase_09(self):
