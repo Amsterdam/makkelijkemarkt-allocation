@@ -3,6 +3,7 @@ from pprint import pprint
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider, MockDataprovider
 from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc
+from kjk.test_utils import ErkenningsnummerNotFoudError
 
 
 class TestRejections(unittest.TestCase):
@@ -100,11 +101,92 @@ class TestVPLcancellation(unittest.TestCase):
     Een VPL/TVPL die niet ingedeeld wil worden
     """
 
+    def setUp(self):
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1", "2"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 4,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="12",
+            description="C Beefheart",
+            voorkeur={
+                "branches": ["101-bbb"],
+                "maximum": 3,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_merchant(
+            erkenningsNummer="3",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="3",
+            description="J Medeski",
+            voorkeur={
+                "branches": ["mooie spullen"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_page([None, "1", "2", None])
+
+        # stands
+        dp.add_stand(
+            plaatsId="1",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+
+        # rsvp
+        dp.add_rsvp(erkenningsNummer="1", attending=False)
+        dp.add_rsvp(erkenningsNummer="2", attending=True)
+        dp.add_rsvp(erkenningsNummer="3", attending=True)
+
+        self.dp = dp
+        dp.mock()
+        allocator = Allocator(dp)
+        self.market_allocation = allocation = allocator.get_allocation()
+
     def test_cancellation(self):
         """
         kan zich afmelden voor een marktdag
         """
-        pass
+        with self.assertRaises(ErkenningsnummerNotFoudError):
+            alloc_erk("1", self.market_allocation)
+        with self.assertRaises(ErkenningsnummerNotFoudError):
+            reject_erk("1", self.market_allocation)
 
     def test_periodic_cancellation(self):
         """
