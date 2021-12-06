@@ -192,7 +192,50 @@ class TestVPLcancellation(unittest.TestCase):
         """
         kan zijn aanwezigheid voor een bepaalde periode uitschakelen
         """
-        pass
+        self.dp.add_merchant(
+            erkenningsNummer="6",
+            plaatsen=["1"],
+            status="vpl",
+            sollicitatieNummer="3",
+            description="John Rambo",
+            voorkeur={
+                "branches": ["mooie spullen"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+                # "absentFrom": "2021-10-20",
+                # "absentUntil": "2021-11-20",
+            },
+        )
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        self.assertListEqual(alloc_erk("6", allocation)["plaatsen"], ["1"])
+
+        self.dp.update_merchant(
+            erkenningsNummer="6",
+            plaatsen=["1"],
+            status="vpl",
+            sollicitatieNummer="3",
+            description="John Rambo",
+            voorkeur={
+                "branches": ["mooie spullen"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "2021-10-20",
+                "absentUntil": "2021-11-20",
+            },
+        )
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        with self.assertRaises(ErkenningsnummerNotFoudError):
+            alloc_erk("6", self.market_allocation)
+        with self.assertRaises(ErkenningsnummerNotFoudError):
+            reject_erk("6", self.market_allocation)
 
 
 class TestTVPLcancellation(unittest.TestCase):
