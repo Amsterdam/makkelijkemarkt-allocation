@@ -192,7 +192,7 @@ class TestBasicAllocation(unittest.TestCase):
             erkenningsNummer="244",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="6",
+            sollicitatieNummer="1",
             description="K. Oopman",
             voorkeur={
                 "branches": ["vacuumslangen"],
@@ -233,7 +233,7 @@ class TestBasicAllocation(unittest.TestCase):
             erkenningsNummer="244",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="6",
+            sollicitatieNummer="1",
             description="K. Oopman",
             voorkeur={
                 "branches": ["vacuumslangen"],

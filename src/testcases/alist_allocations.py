@@ -103,7 +103,7 @@ class TestAlistAllocations(unittest.TestCase):
             erkenningsNummer="1",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="2",
+            sollicitatieNummer="1",
             description="Frank Zappa",
             voorkeur={
                 "branches": [],
@@ -119,7 +119,7 @@ class TestAlistAllocations(unittest.TestCase):
             erkenningsNummer="2",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="1",
+            sollicitatieNummer="2",
             description="C Beefheart",
             voorkeur={
                 "branches": [],

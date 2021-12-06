@@ -154,7 +154,7 @@ class TestRequiredBranches(unittest.TestCase):
             erkenningsNummer="2",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="3",
+            sollicitatieNummer="0",
             description="Terry Bozio",
             voorkeur={
                 "branches": ["101-cosmic-utensils"],
