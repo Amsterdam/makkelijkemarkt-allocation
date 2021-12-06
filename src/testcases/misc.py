@@ -552,14 +552,142 @@ class TestMinimizeRejections(unittest.TestCase):
     Minimaliseer het aantal afwijzingen
     """
 
+    def setUp(self):
+        dp = MockDataprovider("../fixtures/test_input.json")
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="1",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Ton Waits",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        dp.add_merchant(
+            erkenningsNummer="3",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="3",
+            description="Frank London",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+        dp.add_rsvp(erkenningsNummer="2", attending=True)
+        dp.add_rsvp(erkenningsNummer="3", attending=True)
+
+        # dp.add_pref(erkenningsNummer="1", plaatsId="3", priority=1)
+        # dp.add_pref(erkenningsNummer="1", plaatsId="4", priority=1)
+        dp.add_page([None, "1", "2", "3", None])
+
+        # stands
+        dp.add_stand(
+            plaatsId="1",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="3",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        self.dp = dp
+
     def test_competing_min_pref(self):
         """
         bij concurrerende minimum voorkeuren
         """
-        pass
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        erk = alloc_erk("3", allocation)
+        num_rejects = len(allocation["afwijzingen"])
+        self.assertEqual(num_rejects, 2)
+        self.assertListEqual(erk["plaatsen"], ["1", "2"])
 
     def test_rejection_for_branches(self):
         """
         bij de 2de verplichte branche ondernemer als de 1ste wordt afgewezen
         """
-        pass
+        self.dp = MockDataprovider("../fixtures/test_input.json")
+        self.dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["101-goederen"],
+                "maximum": 2,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="1",
+            description="Tom Waits",
+            voorkeur={
+                "branches": ["101-goederen"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_rsvp(erkenningsNummer="1", attending=True)
+        self.dp.add_rsvp(erkenningsNummer="2", attending=True)
+        self.dp.add_page([None, "4", None])
+        self.dp.add_branche(brancheId="101-goederen", verplicht=True, maximumPlaatsen=1)
+        self.dp.add_stand(
+            plaatsId="4",
+            branches=["101-goederen"],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        erk = alloc_erk("2", allocation)
+        self.assertListEqual(erk["plaatsen"], ["4"])
