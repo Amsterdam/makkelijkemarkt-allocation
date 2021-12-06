@@ -93,7 +93,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df = self.merchants_df.query(
             "(status == 'vpl' | status == 'tvpl') & will_move == 'no' & wants_expand == True"
         ).copy()
-        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=False)
+        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
         for index, row in df.iterrows():
             erk = row["erkenningsNummer"]
             stands = row["plaatsen"]
@@ -123,7 +123,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df = self.merchants_df.query(
             "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
         ).copy()
-        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=False)
+        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
 
         failed = {}
         for index, row in df.iterrows():
@@ -156,7 +156,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df = self.merchants_df.query(
             "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
         ).copy()
-        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=False)
+        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
 
         for index, row in df.iterrows():
 
@@ -250,7 +250,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         # make sure merchants are sorted, tvplz should go first
         self.merchants_df.sort_values(
-            by=["sollicitatieNummer"], inplace=True, ascending=False
+            by=["sollicitatieNummer"], inplace=True, ascending=True
         )
         df_1 = self.merchants_df.query("status == 'tvplz'")
         df_2 = self.merchants_df.query("status != 'tvplz'")
