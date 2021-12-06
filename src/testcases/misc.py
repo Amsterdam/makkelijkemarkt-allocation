@@ -318,11 +318,75 @@ class Test_SOLL_EXP_EXPF(unittest.TestCase):
     Een sollicitant met een tijdelijke vaste plaats (exp of expf)
     """
 
+    def setUp(self):
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1"],
+            status="exp",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 4,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_merchant(
+            erkenningsNummer="3",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Dweezil Zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 4,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_page([None, "1", "2", None])
+
+        # stands
+        dp.add_stand(
+            plaatsId="1",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+
+        # rsvp
+        dp.add_rsvp(erkenningsNummer="3", attending=True)
+        # dp.add_rsvp(erkenningsNummer="1", attending=True)
+
+        self.dp = dp
+        dp.mock()
+        allocator = Allocator(dp)
+        self.market_allocation = allocation = allocator.get_allocation()
+
     def test_must_register(self):
         """
         moet zich aanmelden als aanwezig om ingedeeld te worden
         """
-        pass
+        with self.assertRaises(ErkenningsnummerNotFoudError):
+            alloc_erk("1", self.market_allocation)
+        with self.assertRaises(ErkenningsnummerNotFoudError):
+            reject_erk("1", self.market_allocation)
 
     def test_allocated_before_other_soll(self):
         """
