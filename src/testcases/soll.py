@@ -132,8 +132,7 @@ class TestSollAllocation(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        stds = allocation["toewijzingen"][0]["plaatsen"]
-        self.assertListEqual(stds, ["4"])
+        self.assertListEqual(stands_erk("1", allocation), ["2"])
 
     def test_pref_evi_locations(self):
         """
@@ -204,8 +203,7 @@ class TestSollAllocation(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        stds = allocation["toewijzingen"][0]["plaatsen"]
-        self.assertListEqual(stds, ["5"])
+        self.assertListEqual(stands_erk("1", allocation), ["5"])
 
     def test_has_alist_pref(self):
         """
@@ -215,7 +213,7 @@ class TestSollAllocation(unittest.TestCase):
             erkenningsNummer="1",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="2",
+            sollicitatieNummer="9",
             description="Frank Zappa",
             voorkeur={
                 "branches": ["101-agf"],
@@ -230,10 +228,10 @@ class TestSollAllocation(unittest.TestCase):
             erkenningsNummer="4",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="3",
+            sollicitatieNummer="6",
             description="Y Medeski",
             voorkeur={
-                "branches": ["mooie spullen"],
+                "branches": ["101-agf"],
                 "maximum": 1,
                 "minimum": 1,
                 "verkoopinrichting": [],
@@ -245,10 +243,10 @@ class TestSollAllocation(unittest.TestCase):
             erkenningsNummer="5",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="3",
+            sollicitatieNummer="7",
             description="Z Medeski",
             voorkeur={
-                "branches": ["mooie spullen"],
+                "branches": ["101-agf"],
                 "maximum": 1,
                 "minimum": 1,
                 "verkoopinrichting": [],
@@ -264,20 +262,21 @@ class TestSollAllocation(unittest.TestCase):
             plaatsId="4",
             branches=["102-vis"],
             properties=[],
-            verkoopinrichting=["eigen-materieel"],
+            verkoopinrichting=[],
         )
         self.dp.add_stand(
             plaatsId="5",
             branches=["101-agf"],
             properties=[],
-            verkoopinrichting=["eigen-materieel"],
+            verkoopinrichting=[],
         )
         self.dp.add_page(["1", "2", "4", "5"])
+        self.dp.set_alist([{"erkenningsNummer": "1"}])
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        stds = allocation["toewijzingen"][0]["plaatsen"]
-        self.assertListEqual(stds, ["5"])
+        print(allocation["afwijzingen"])
+        self.assertListEqual(stands_erk("1", allocation), ["1"])
 
     def test_branche_pref_to_other_soll(self):
         """
