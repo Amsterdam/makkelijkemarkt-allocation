@@ -108,7 +108,7 @@ class TestSollAllocation(unittest.TestCase):
             sollicitatieNummer="2",
             description="Frank Zappa",
             voorkeur={
-                "branches": ["101-agf"],
+                "branches": [],
                 "maximum": 1,
                 "minimum": 1,
                 "verkoopinrichting": [],
@@ -133,7 +133,7 @@ class TestSollAllocation(unittest.TestCase):
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
         stds = allocation["toewijzingen"][0]["plaatsen"]
-        self.assertListEqual(stds, ["5"])
+        self.assertListEqual(stds, ["4"])
 
     def test_pref_evi_locations(self):
         """
@@ -143,7 +143,7 @@ class TestSollAllocation(unittest.TestCase):
             erkenningsNummer="1",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="2",
+            sollicitatieNummer="5",
             description="Frank Zappa",
             voorkeur={
                 "branches": ["101-agf"],
@@ -158,7 +158,7 @@ class TestSollAllocation(unittest.TestCase):
             erkenningsNummer="4",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="3",
+            sollicitatieNummer="4",
             description="Y Medeski",
             voorkeur={
                 "branches": ["mooie spullen"],
@@ -173,7 +173,7 @@ class TestSollAllocation(unittest.TestCase):
             erkenningsNummer="5",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="3",
+            sollicitatieNummer="1",
             description="Z Medeski",
             voorkeur={
                 "branches": ["mooie spullen"],
@@ -221,7 +221,7 @@ class TestSollAllocation(unittest.TestCase):
                 "branches": ["101-agf"],
                 "maximum": 1,
                 "minimum": 1,
-                "verkoopinrichting": ["eigen-materieel"],
+                "verkoopinrichting": [],
                 "absentFrom": "",
                 "absentUntil": "",
             },
