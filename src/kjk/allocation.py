@@ -125,6 +125,26 @@ class Allocator(BaseAllocator, ValidatorMixin):
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
 
+        for index, row in df.iterrows():
+            try:
+                erk = row["erkenningsNummer"]
+                stands = row["plaatsen"]
+                self._allocate_stands_to_merchant(stands, erk)
+            except MarketStandDequeueError as e:
+                self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
+
+    def allocation_phase_03_(self):
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 3 ---")
+        log.info("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
+
+        df = self.merchants_df.query(
+            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
+        ).copy()
+        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
+
         failed = {}
         for index, row in df.iterrows():
 
