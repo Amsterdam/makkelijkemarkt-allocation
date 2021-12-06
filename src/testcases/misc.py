@@ -440,6 +440,7 @@ class Test_SOLL_EXP_EXPF(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
+        print_alloc(allocation)
         erk = alloc_erk("1", allocation)
         self.assertListEqual(erk["plaatsen"], ["1", "2"])
 
