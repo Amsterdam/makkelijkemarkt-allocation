@@ -324,7 +324,7 @@ class Test_SOLL_EXP_EXPF(unittest.TestCase):
         # merchants
         dp.add_merchant(
             erkenningsNummer="1",
-            plaatsen=["1"],
+            plaatsen=["1", "2"],
             status="exp",
             sollicitatieNummer="2",
             description="Frank Zappa",
@@ -372,7 +372,6 @@ class Test_SOLL_EXP_EXPF(unittest.TestCase):
 
         # rsvp
         dp.add_rsvp(erkenningsNummer="3", attending=True)
-        # dp.add_rsvp(erkenningsNummer="1", attending=True)
 
         self.dp = dp
         dp.mock()
@@ -392,13 +391,57 @@ class Test_SOLL_EXP_EXPF(unittest.TestCase):
         """
         wordt ingedeeld voor andere sollicitanten
         """
-        pass
+        self.dp.add_rsvp(erkenningsNummer="1", attending=True)
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        erk = alloc_erk("1", allocation)
+        self.assertListEqual(erk["plaatsen"], ["1", "2"])
 
     def test_can_not_move_if_fixed_stand(self):
         """
         kan niet verplaatsen als zij een vaste plaats hebben
         """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1", "2"],
+            status="exp",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.add_rsvp(erkenningsNummer="1", attending=True)
+
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="3", priority=1)
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="4", priority=1)
+        self.dp.add_page([None, "3", "4", None])
+
+        # stands
+        self.dp.add_stand(
+            plaatsId="3",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        self.dp.add_stand(
+            plaatsId="4",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        erk = alloc_erk("1", allocation)
+        self.assertListEqual(erk["plaatsen"], ["1", "2"])
 
     def test_can_not_have_min_pref(self):
         """
