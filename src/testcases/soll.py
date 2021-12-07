@@ -21,7 +21,7 @@ class TestSollAllocation(unittest.TestCase):
             sollicitatieNummer="2",
             description="Frank Zappa",
             voorkeur={
-                "branches": ["101-afg"],
+                "branches": ["101-agf"],
                 "maximum": 2,
                 "minimum": 2,
                 "verkoopinrichting": [],
@@ -34,10 +34,10 @@ class TestSollAllocation(unittest.TestCase):
             erkenningsNummer="2",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="2",
+            sollicitatieNummer="92",
             description="C Beefheart",
             voorkeur={
-                "branches": ["101-afg"],
+                "branches": ["101-agf"],
                 "maximum": 1,
                 "minimum": 1,
                 "verkoopinrichting": [],
@@ -132,7 +132,7 @@ class TestSollAllocation(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        self.assertListEqual(stands_erk("1", allocation), ["2"])
+        self.assertListEqual(stands_erk("1", allocation), ["4"])
 
     def test_pref_evi_locations(self):
         """
