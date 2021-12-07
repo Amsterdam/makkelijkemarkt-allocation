@@ -11,6 +11,7 @@ from testcases.moving_vpl import *
 from testcases.soll import *
 from testcases.expansion import *
 from testcases.misc import *
+from testcases.dapper import *
 
 # unit-test
 from test_allocation import *

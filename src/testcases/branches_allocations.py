@@ -279,6 +279,8 @@ class TestRequiredBranches(unittest.TestCase):
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
 
+        # print_alloc(allocation)
+
         twz_1 = alloc_erk("2", allocation)
         twz_2 = alloc_erk("1", allocation)
         self.assertEqual(twz_1["ondernemer"]["erkenningsNummer"], "2")
