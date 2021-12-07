@@ -141,7 +141,7 @@ class MarketStandClusterFinder:
                     branches = self.branches_dict[std]
                     if is_required and len(branches) == 0:
                         return False
-                    if len(branches) > 0:
+                    if len(branches) > 0 and is_required:
                         if merchant_branche[0] not in branches:
                             return False
                     if evi_merchant:
