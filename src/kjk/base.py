@@ -272,6 +272,9 @@ class BaseAllocator:
         self.create_expanders_set()
         self.merchants_df.set_index("erkenningsNummer", inplace=True)
         self.merchants_df["erkenningsNummer"] = self.merchants_df.index
+        self.merchants_df["sollicitatieNummer"] = pd.to_numeric(
+            self.merchants_df["sollicitatieNummer"]
+        )
 
     def prepare_stands(self):
         """prepare the stands list for allocation"""
