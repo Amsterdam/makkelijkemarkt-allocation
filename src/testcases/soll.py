@@ -132,7 +132,7 @@ class TestSollAllocation(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        self.assertListEqual(stands_erk("1", allocation), ["4"])
+        self.assertListEqual(stands_erk("1", allocation), ["2"])
 
     def test_pref_evi_locations(self):
         """
