@@ -21,7 +21,7 @@ class TestSollAllocation(unittest.TestCase):
             sollicitatieNummer="2",
             description="Frank Zappa",
             voorkeur={
-                "branches": ["101-afg"],
+                "branches": ["101-agf"],
                 "maximum": 2,
                 "minimum": 2,
                 "verkoopinrichting": [],
@@ -34,10 +34,10 @@ class TestSollAllocation(unittest.TestCase):
             erkenningsNummer="2",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="2",
+            sollicitatieNummer="92",
             description="C Beefheart",
             voorkeur={
-                "branches": ["101-afg"],
+                "branches": ["101-agf"],
                 "maximum": 1,
                 "minimum": 1,
                 "verkoopinrichting": [],
@@ -108,6 +108,43 @@ class TestSollAllocation(unittest.TestCase):
             sollicitatieNummer="2",
             description="Frank Zappa",
             voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_stand(
+            plaatsId="4",
+            branches=["102-vis"],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        self.dp.add_stand(
+            plaatsId="5",
+            branches=["101-agf"],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        self.dp.add_page(["1", "2", "4", "5"])
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        self.assertListEqual(stands_erk("1", allocation), ["4"])
+
+    def test_pref_evi_locations(self):
+        """
+        krijgt voorkeur op plaatsen zonder kraam indien zij een EVI hebben
+        """
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="5",
+            description="Frank Zappa",
+            voorkeur={
                 "branches": ["101-agf"],
                 "maximum": 1,
                 "minimum": 1,
@@ -116,6 +153,40 @@ class TestSollAllocation(unittest.TestCase):
                 "absentUntil": "",
             },
         )
+        self.dp.add_merchant(
+            erkenningsNummer="4",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="4",
+            description="Y Medeski",
+            voorkeur={
+                "branches": ["mooie spullen"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_merchant(
+            erkenningsNummer="5",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="1",
+            description="Z Medeski",
+            voorkeur={
+                "branches": ["mooie spullen"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.add_rsvp(erkenningsNummer="4", attending=True)
+        self.dp.add_rsvp(erkenningsNummer="5", attending=True)
+
         self.dp.add_stand(
             plaatsId="4",
             branches=["102-vis"],
@@ -132,20 +203,80 @@ class TestSollAllocation(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        stds = alloc_erk("1", allocation)["plaatsen"]
-        self.assertListEqual(stds, ["5"])
-
-    def test_pref_evi_locations(self):
-        """
-        krijgt voorkeur op plaatsen zonder kraam indien zij een EVI hebben
-        """
-        pass
+        self.assertListEqual(stands_erk("1", allocation), ["5"])
 
     def test_has_alist_pref(self):
         """
         krijgt voorkeur als zij op de A-lijst staan
         """
-        pass
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="9",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": ["101-agf"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_merchant(
+            erkenningsNummer="4",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="6",
+            description="Y Medeski",
+            voorkeur={
+                "branches": ["101-agf"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_merchant(
+            erkenningsNummer="5",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="7",
+            description="Z Medeski",
+            voorkeur={
+                "branches": ["101-agf"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.add_rsvp(erkenningsNummer="4", attending=True)
+        self.dp.add_rsvp(erkenningsNummer="5", attending=True)
+
+        self.dp.add_stand(
+            plaatsId="4",
+            branches=["102-vis"],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        self.dp.add_stand(
+            plaatsId="5",
+            branches=["101-agf"],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        self.dp.add_page(["1", "2", "4", "5"])
+        self.dp.set_alist([{"erkenningsNummer": "1"}])
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        print(allocation["afwijzingen"])
+        self.assertListEqual(stands_erk("1", allocation), ["1"])
 
     def test_branche_pref_to_other_soll(self):
         """
