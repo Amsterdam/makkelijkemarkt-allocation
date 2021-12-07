@@ -275,7 +275,6 @@ class TestSollAllocation(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        print(allocation["afwijzingen"])
         self.assertListEqual(stands_erk("1", allocation), ["1"])
 
     def test_branche_pref_to_other_soll(self):
