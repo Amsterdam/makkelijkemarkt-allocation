@@ -558,7 +558,7 @@ class TestMinimizeRejections(unittest.TestCase):
             erkenningsNummer="1",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="1",
+            sollicitatieNummer="3",
             description="Frank Zappa",
             voorkeur={
                 "branches": [],
@@ -588,7 +588,7 @@ class TestMinimizeRejections(unittest.TestCase):
             erkenningsNummer="3",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="3",
+            sollicitatieNummer="1",
             description="Frank London",
             voorkeur={
                 "branches": [],

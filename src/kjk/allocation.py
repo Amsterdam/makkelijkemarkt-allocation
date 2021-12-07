@@ -93,7 +93,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df = self.merchants_df.query(
             "(status == 'vpl' | status == 'tvpl') & will_move == 'no' & wants_expand == True"
         ).copy()
-        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=False)
+        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
         for index, row in df.iterrows():
             erk = row["erkenningsNummer"]
             stands = row["plaatsen"]
@@ -113,6 +113,26 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     stands = row["plaatsen"]  # no expansion possible
             self._allocate_stands_to_merchant(stands, erk)
 
+    def allocation_phase_03_(self):
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 3 ---")
+        log.info("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
+
+        df = self.merchants_df.query(
+            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
+        ).copy()
+        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
+
+        for index, row in df.iterrows():
+            try:
+                erk = row["erkenningsNummer"]
+                stands = row["plaatsen"]
+                self._allocate_stands_to_merchant(stands, erk)
+            except MarketStandDequeueError as e:
+                self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
+
     def allocation_phase_03(self):
         log.info("")
         clog.info("--- ALLOCATIE FASE 3 ---")
@@ -123,7 +143,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df = self.merchants_df.query(
             "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
         ).copy()
-        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=False)
+        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
 
         failed = {}
         for index, row in df.iterrows():
@@ -152,34 +172,73 @@ class Allocator(BaseAllocator, ValidatorMixin):
             stands_to_alloc = failed[f]
             self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
-        # reload the dataframe with the unsuccessful movers removed from the stack
+        self.fixed_set = None
+        while self.movers_left():
+
+            df = self.merchants_df.query(
+                "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
+            ).copy()
+            df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
+
+            fixed = []
+            for index, row in df.iterrows():
+                stands = row["plaatsen"]
+                fixed += stands
+
+            if fixed == self.fixed_set:
+                for index, row in df.iterrows():
+
+                    erk = row["erkenningsNummer"]
+                    stands = row["plaatsen"]
+                    pref = row["pref"]
+                    merchant_branches = row["voorkeur.branches"]
+                    maxi = row["voorkeur.maximum"]
+                    evi = row["has_evi"] == "yes"
+
+                    self._allocate_stands_to_merchant(stands, erk)
+                break
+            else:
+                for index, row in df.iterrows():
+
+                    erk = row["erkenningsNummer"]
+                    stands = row["plaatsen"]
+                    pref = row["pref"]
+                    merchant_branches = row["voorkeur.branches"]
+                    maxi = row["voorkeur.maximum"]
+                    evi = row["has_evi"] == "yes"
+
+                    valid_pref_stands = self.cluster_finder.find_valid_cluster(
+                        pref,
+                        size=len(stands),
+                        preferred=True,
+                        merchant_branche=merchant_branches,
+                        mode="any",
+                        evi_merchant=evi,
+                    )
+                    fixed_set = set(fixed)
+
+                    intersection = list(fixed_set.intersection(valid_pref_stands))
+                    own_stands = all(elem in stands for elem in intersection)
+                    unsave_move = len(intersection) > 0 and own_stands == False
+                    if unsave_move:
+                        continue
+                    if len(valid_pref_stands) < len(stands):
+                        stands_to_alloc = []
+                    else:
+                        stands_to_alloc = valid_pref_stands
+
+                    try:
+                        self._allocate_stands_to_merchant(stands_to_alloc, erk)
+                    except Exception as e:
+                        print(erk, stands_to_alloc)
+
+            self.fixed_set = fixed
+
+    def movers_left(self):
         df = self.merchants_df.query(
             "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
         ).copy()
-        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=False)
-
-        for index, row in df.iterrows():
-
-            erk = row["erkenningsNummer"]
-            stands = row["plaatsen"]
-            pref = row["pref"]
-            merchant_branches = row["voorkeur.branches"]
-            maxi = row["voorkeur.maximum"]
-            evi = row["has_evi"] == "yes"
-
-            valid_pref_stands = self.cluster_finder.find_valid_cluster(
-                pref,
-                size=len(stands),
-                preferred=True,
-                merchant_branche=merchant_branches,
-                mode="any",
-                evi_merchant=evi,
-            )
-            if len(valid_pref_stands) < len(stands):
-                stands_to_alloc = stands
-            else:
-                stands_to_alloc = valid_pref_stands
-            self._allocate_stands_to_merchant(stands_to_alloc, erk)
+        return len(df) > 0
 
     def allocation_phase_04(self):
         log.info("")
@@ -246,11 +305,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
         if len(df) == 0:
             clog.info("check status OK all vpl's allocated.")
         else:
-            clog.info("check status ERROR not all vpl's allocated.")
+            clog.error("check status ERROR not all vpl's allocated.")
 
         # make sure merchants are sorted, tvplz should go first
         self.merchants_df.sort_values(
-            by=["sollicitatieNummer"], inplace=True, ascending=False
+            by=["sollicitatieNummer"], inplace=True, ascending=True
         )
         df_1 = self.merchants_df.query("status == 'tvplz'")
         df_2 = self.merchants_df.query("status != 'tvplz'")
