@@ -124,7 +124,7 @@ class TestMovingVPL(unittest.TestCase):
         """
         kan de plaats van een andere VPL krijgen als die ook verplaatst
         """
-        self.assertTrue(false)
+        self.assertTrue(False)
 
     def test_will_not_move_if_better_moving_vpl(self):
         """
