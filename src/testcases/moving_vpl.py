@@ -214,11 +214,66 @@ class TestMovingVPL(unittest.TestCase):
         self.assertListEqual(erk["plaatsen"], ["1", "2"])
         self.assertEqual(len(erk["plaatsen"]), len(erk["ondernemer"]["plaatsen"]))
 
-    def test_pref_no_non_baking(self):
+    def test_pref_to_bak_if_baking():
         """
-        krijgt WEL voorrang boven sollicitanten die niet willen bakken
         krijgt WEL voorrang boven bak ondernemers als zij zelf ook bakken
         krijgt WEL voorrang boven EVI ondernemers als zij zelf ook een EVI hebben
         krijgt GEEN voorrang boven EVI ondernemers
         """
         pass
+
+    def test_pref_no_non_baking(self):
+        """
+        krijgt WEL voorrang boven sollicitanten die niet willen bakken
+        """
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1"],
+            status="vpl",
+            sollicitatieNummer="1",
+            description="frank zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.update_merchant(
+            erkenningsNummer="2",
+            plaatsen=["3"],
+            status="soll",
+            sollicitatieNummer="2",
+            description="c beefheart",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="9", priority=1)
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="9", priority=1)
+
+        self.dp.add_branche(brancheId="bak", verplicht=True, maximumPlaatsen=1)
+
+        self.dp.add_page([None, "9", None])
+
+        # stands
+        self.dp.add_stand(
+            plaatsId="9",
+            branches=["bak"],
+            properties=[],
+            verkoopinrichting=[],
+        )
+
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        erk = alloc_erk("1", allocation)
+        self.assertListEqual(erk["plaatsen"], ["9"])
