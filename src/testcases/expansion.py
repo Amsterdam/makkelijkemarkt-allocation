@@ -165,7 +165,7 @@ class TestExpansion(unittest.TestCase):
         """
         naar meer dan 2 plaatsen moet wachten op iedereen die 2 plaatsen wil
         """
-        pass
+        self.assertTrue(False)
 
     def test_can_have_3_stands(self):
         """
@@ -554,4 +554,4 @@ class TestExpansion(unittest.TestCase):
         """
         kan dit in een cirkelvormige marktoptstelling
         """
-        pass
+        self.assertTrue(False)

@@ -281,28 +281,28 @@ class TestSollAllocation(unittest.TestCase):
         """
         krijgt voorkeur over andere sollicitanten op een brancheplaats als zij in deze branche opereren
         """
-        pass
+        self.assertTrue(False)
 
     def test_pref_to_vpl_if_bracnhe(self):
         """
         krijgt voorkeur over VPLs op een brancheplaats als zij in deze branche opereren
         """
-        pass
+        self.assertTrue(False)
 
     def test_can_move_to_absent_vpl(self):
         """
         mag naar een plaats van een afwezige VPL
         """
-        pass
+        self.assertTrue(False)
 
     def test_will_not_go_to_pref_of_others(self):
         """
         komt liefst niet op de voorkeursplek van een ander als zij flexibel ingedeeld willen worden
         """
-        pass
+        self.assertTrue(False)
 
     def test_can_choose_to_only_want_prefs(self):
         """
         kan kiezen niet te worden ingedeeld op willekeurige plaatsen
         """
-        pass
+        self.assertTrue(False)

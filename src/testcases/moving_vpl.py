@@ -124,7 +124,7 @@ class TestMovingVPL(unittest.TestCase):
         """
         kan de plaats van een andere VPL krijgen als die ook verplaatst
         """
-        pass
+        self.assertTrue(false)
 
     def test_will_not_move_if_better_moving_vpl(self):
         """
@@ -385,7 +385,6 @@ class TestMovingVPL(unittest.TestCase):
         allocation = allocator.get_allocation()
         erk = alloc_erk("1", allocation)
         self.assertListEqual(erk["plaatsen"], ["9"])
-        pass
 
     def test_pref_to_non_baking(self):
         """

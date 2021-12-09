@@ -169,7 +169,7 @@ class TestTVPallocation(unittest.TestCase):
         """
         kan hetzelfde aantal willekeurige plaatsen krijgen als zijn eigen plaatsen niet beschikbaar zijn
         """
-        pass
+        self.assertTrue(False)
 
 
 class TestTVPLZallocation(unittest.TestCase):
@@ -370,11 +370,11 @@ class TestTVPLZallocation(unittest.TestCase):
         """
         mag zijn vaste aantal plaatsen niet verkleinen
         """
-        pass
+        self.assertTrue(False)
 
     @unittest.skip("Dit is de default, navraag markten")
     def test_can_expand_stands(self):
         """
         mag zijn vaste aantal plaatsen uitbreiden indien mogelijk
         """
-        pass
+        self.assertTrue(False)

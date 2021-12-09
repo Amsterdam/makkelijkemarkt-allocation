@@ -70,7 +70,7 @@ class TestAlistAllocations(unittest.TestCase):
         """
         krijgt voorrang over EVI- en verplichte branche sollicitanten op de B-lijst
         """
-        pass
+        self.assertTrue(False)
 
     def test_assign_pref_to_blist(self):
         """
