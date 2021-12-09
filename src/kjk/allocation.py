@@ -8,7 +8,7 @@ from kjk.base import *
 from kjk.validation import ValidatorMixin
 from kjk.logging import clog, log
 
-DEBUG = True
+DEBUG = False
 
 
 class Allocator(BaseAllocator, ValidatorMixin):
@@ -165,8 +165,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 stands = row["plaatsen"]
                 fixed += stands
 
-            print(df)
-            print(fixed)
+            # WIP: see moving_vpl.py testcase
+            # print(df)
+            # print(fixed)
 
             if fixed == self.fixed_set:
                 for index, row in df.iterrows():
@@ -187,7 +188,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         evi_merchant=evi,
                     )
 
-                    print(erk, " : ", valid_pref_stands)
+                    # print(erk, " : ", valid_pref_stands)
 
                     self._allocate_stands_to_merchant(stands, erk)
                 break

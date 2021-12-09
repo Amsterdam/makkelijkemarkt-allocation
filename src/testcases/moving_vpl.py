@@ -114,9 +114,11 @@ class TestMovingVPL(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
+        # print_alloc(allocation)
         erk = alloc_erk("1", allocation)
         erk_2 = alloc_erk("2", allocation)
-        print_alloc(allocation)
+        self.assertListEqual(erk["plaatsen"], ["3", "4"])
+        self.assertListEqual(erk_2["plaatsen"], ["1"])
 
     def test_can_take_stand_from_moved_vpl(self):
         """
@@ -266,7 +268,7 @@ class TestMovingVPL(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        print_alloc(allocation)
+        # print_alloc(allocation)
         erk = alloc_erk("2", allocation)
         self.assertListEqual(erk["plaatsen"], ["9"])
 
@@ -330,8 +332,6 @@ class TestMovingVPL(unittest.TestCase):
     def test_pref_to_bak_if_baking(self):
         """
         krijgt WEL voorrang boven bak ondernemers als zij zelf ook bakken
-        krijgt WEL voorrang boven EVI ondernemers als zij zelf ook een EVI hebben
-        krijgt GEEN voorrang boven EVI ondernemers
         """
         self.dp.update_merchant(
             erkenningsNummer="1",
