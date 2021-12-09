@@ -214,15 +214,180 @@ class TestMovingVPL(unittest.TestCase):
         self.assertListEqual(erk["plaatsen"], ["1", "2"])
         self.assertEqual(len(erk["plaatsen"]), len(erk["ondernemer"]["plaatsen"]))
 
-    def test_pref_to_bak_if_baking():
+    def test_no_pref_to_evi(self):
+        """krijgt GEEN voorrang boven EVI ondernemers"""
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1"],
+            status="vpl",
+            sollicitatieNummer="1",
+            description="frank zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.update_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="c beefheart",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": ["eigen-materieel"],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="9", priority=1)
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="9", priority=1)
+
+        self.dp.add_branche(brancheId="bak", verplicht=True, maximumPlaatsen=1)
+
+        self.dp.add_page([None, "9", None])
+        self.dp.add_rsvp(erkenningsNummer="2", attending=True)
+
+        # stands
+        self.dp.add_stand(
+            plaatsId="9",
+            branches=[],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        print_alloc(allocation)
+        erk = alloc_erk("2", allocation)
+        self.assertListEqual(erk["plaatsen"], ["9"])
+
+    def test_pref_to_evi_if_evi(self):
+        """
+        krijgt WEL voorrang boven EVI ondernemers als zij zelf ook een EVI hebben
+        """
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1"],
+            status="vpl",
+            sollicitatieNummer="1",
+            description="frank zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": ["eigen-materieel"],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.update_merchant(
+            erkenningsNummer="2",
+            plaatsen=["3"],
+            status="soll",
+            sollicitatieNummer="2",
+            description="c beefheart",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": ["eigen-materieel"],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="9", priority=1)
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="9", priority=1)
+
+        self.dp.add_branche(brancheId="bak", verplicht=True, maximumPlaatsen=1)
+
+        self.dp.add_page([None, "9", None])
+        self.dp.add_rsvp(erkenningsNummer="2", attending=True)
+
+        # stands
+        self.dp.add_stand(
+            plaatsId="9",
+            branches=["bak"],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        erk = alloc_erk("1", allocation)
+        self.assertListEqual(erk["plaatsen"], ["9"])
+
+    def test_pref_to_bak_if_baking(self):
         """
         krijgt WEL voorrang boven bak ondernemers als zij zelf ook bakken
         krijgt WEL voorrang boven EVI ondernemers als zij zelf ook een EVI hebben
         krijgt GEEN voorrang boven EVI ondernemers
         """
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1"],
+            status="vpl",
+            sollicitatieNummer="1",
+            description="frank zappa",
+            voorkeur={
+                "branches": ["bak"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.update_merchant(
+            erkenningsNummer="2",
+            plaatsen=["3"],
+            status="soll",
+            sollicitatieNummer="2",
+            description="c beefheart",
+            voorkeur={
+                "branches": ["bak"],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="9", priority=1)
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="9", priority=1)
+
+        self.dp.add_branche(brancheId="bak", verplicht=True, maximumPlaatsen=1)
+
+        self.dp.add_page([None, "9", None])
+        self.dp.add_rsvp(erkenningsNummer="2", attending=True)
+
+        # stands
+        self.dp.add_stand(
+            plaatsId="9",
+            branches=["bak"],
+            properties=[],
+            verkoopinrichting=[],
+        )
+
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        erk = alloc_erk("1", allocation)
+        self.assertListEqual(erk["plaatsen"], ["9"])
         pass
 
-    def test_pref_no_non_baking(self):
+    def test_pref_to_non_baking(self):
         """
         krijgt WEL voorrang boven sollicitanten die niet willen bakken
         """
@@ -263,6 +428,7 @@ class TestMovingVPL(unittest.TestCase):
         self.dp.add_branche(brancheId="bak", verplicht=True, maximumPlaatsen=1)
 
         self.dp.add_page([None, "9", None])
+        self.dp.add_rsvp(erkenningsNummer="2", attending=True)
 
         # stands
         self.dp.add_stand(
