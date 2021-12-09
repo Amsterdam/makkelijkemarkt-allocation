@@ -165,6 +165,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 stands = row["plaatsen"]
                 fixed += stands
 
+            print(df)
+            print(fixed)
+
             if fixed == self.fixed_set:
                 for index, row in df.iterrows():
 
@@ -174,6 +177,17 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     merchant_branches = row["voorkeur.branches"]
                     maxi = row["voorkeur.maximum"]
                     evi = row["has_evi"] == "yes"
+
+                    valid_pref_stands = self.cluster_finder.find_valid_cluster(
+                        pref,
+                        size=len(stands),
+                        preferred=True,
+                        merchant_branche=merchant_branches,
+                        mode="any",
+                        evi_merchant=evi,
+                    )
+
+                    print(erk, " : ", valid_pref_stands)
 
                     self._allocate_stands_to_merchant(stands, erk)
                 break
@@ -453,8 +467,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         if DEBUG:
             json_file = self.market_output.to_json_file()
-            # debug_redis = DebugRedisClient()
-            # debug_redis.insert_test_result(json_file)
+            debug_redis = DebugRedisClient()
+            debug_redis.insert_test_result(json_file)
 
         return self.market_output.to_data()
 

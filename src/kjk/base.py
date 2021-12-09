@@ -12,6 +12,9 @@ STRATEGY_EXP_FULL = 1
 STRATEGY_EXP_SOME = 2
 STRATEGY_EXP_NONE = 3
 
+# xls export
+XLS_EXPORT = False
+
 # dataframe views for debugging
 EXPANDERS_VIEW = [
     "description",
@@ -235,6 +238,30 @@ class BaseAllocator:
 
         # save to text for manual debugging
         self.merchants_df.to_markdown("../../merchants.md")
+
+        # export xls for debugging
+        if XLS_EXPORT:
+            cols = [
+                "description",
+                "plaatsen",
+                "sollicitatieNummer",
+                "status",
+                "voorkeur.maximum",
+                "voorkeur.minimum",
+                "voorkeur.anywhere",
+                "voorkeur.brancheId",
+                "voorkeur.inrichting",
+                "attending",
+                "pref",
+                "will_move",
+                "alist",
+                "has_evi",
+                "wants_expand",
+                "branche_required",
+            ]
+            self.merchants_df[cols].to_excel("../../ondernemers.xls")
+            self.positions_df.to_excel("../../kramen.xls")
+            self.branches_df.to_excel("../../branches.xls")
 
     def create_merchant_dict(self):
         d = {}
