@@ -409,9 +409,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
-        if DEBUG:
-            self.validate_double_allocation()
-            self.validate_evi_allocations()
+        self.validate_double_allocation()
+        self.validate_evi_allocations()
 
     def allocation_phase_11(self):
         log.info("")
