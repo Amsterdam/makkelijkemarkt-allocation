@@ -125,6 +125,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
 
+        # STEP 1:
+        # first allocate the vpl's that can not move to avoid conflicts
         failed = {}
         for index, row in df.iterrows():
 
@@ -146,12 +148,14 @@ class Allocator(BaseAllocator, ValidatorMixin):
             if len(valid_pref_stands) == 0:
                 failed[erk] = stands
 
-        # first allocate the vpl's that can not move to avoid conflicts
         for f in failed.keys():
             erk = f
             stands_to_alloc = failed[f]
             self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
+        # STEP 2:
+        # try to allocate the rest now
+        # places from step 1 have become available
         self.fixed_set = None
         while self.vpl_movers_remaining():
 
@@ -172,9 +176,17 @@ class Allocator(BaseAllocator, ValidatorMixin):
             # print(fixed)
             # print(wanted)
 
+            # if two merchants want to move to the same spot
+            # we have a conflict
             has_conflicts = len(set(wanted)) < len(wanted)
 
+            # if the free postions list does
+            # not change anymore we are out of 'save moves'
+            # time to solve the conflicts if we can
+            # NOTE: this will be the last iteration of this while loop
             if fixed == self.fixed_set:
+
+                # first check if we have rejections
                 has_rejections = False
                 for index, row in df.iterrows():
                     erk = row["erkenningsNummer"]
@@ -211,11 +223,16 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         evi_merchant=evi,
                     )
                     if has_conflicts or has_rejections:
+                        # unable to solve conflict stay on fixed positions
                         self._allocate_stands_to_merchant(stands, erk)
                     else:
+                        # no conflicts savely switch positions
                         self._allocate_stands_to_merchant(valid_pref_stands, erk)
                 break
             else:
+                # now allocate the vpl's that can move savely
+                # meaning that the wanted positions do not intefere with
+                # other fixed positions
                 for index, row in df.iterrows():
 
                     erk = row["erkenningsNummer"]
@@ -238,8 +255,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     intersection = list(fixed_set.intersection(valid_pref_stands))
                     own_stands = all(elem in stands for elem in intersection)
                     unsave_move = len(intersection) > 0 and own_stands == False
+
+                    # do not allocate if wants to miove to fixed pos of others
                     if unsave_move:
                         continue
+
                     if len(valid_pref_stands) < len(stands):
                         stands_to_alloc = []
                     else:
