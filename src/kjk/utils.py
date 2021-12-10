@@ -92,6 +92,12 @@ class MarketStandClusterFinder:
             d[ob["kraamA"]] = ob["obstakel"]
         return d
 
+    def get_branche_for_stand_id(self, stand_id):
+        try:
+            return self.branches_dict[stand_id]
+        except KeyError as e:
+            return None
+
     def get_neighbours_for_stand_id(self, stand_id):
         """
         Get the neighbouring stand for a stand_id.

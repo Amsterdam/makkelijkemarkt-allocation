@@ -20,6 +20,48 @@ class ValidatorMixin:
         else:
             clog.error("Failed")
 
+    def validate_branche_allocation(self):
+        log.info("-" * 60)
+        log.info("Valideren branche toegewezen kramen: ")
+        tws = self.market_output.to_data()["toewijzingen"]
+        status_ok = True
+        errors = [
+            (
+                "erkenningsNummer",
+                "plaatsId",
+                "branche ondernemer",
+                "branche kraam",
+                "status",
+            )
+        ]
+        for tw in tws:
+            try:
+                branches = tw["ondernemer"]["voorkeur"]["branches"]
+                if len(branches) > 0:
+                    required = self.cluster_finder.branche_is_required(branches[0])
+                    for std in tw["plaatsen"]:
+                        if required:
+                            branche = self.cluster_finder.get_branche_for_stand_id(std)
+                            if branches[0] not in branche:
+                                status_ok = False
+                                errors.append(
+                                    (
+                                        tw["ondernemer"]["erkenningsNummer"],
+                                        std,
+                                        branches[0],
+                                        branche,
+                                        tw["ondernemer"]["status"],
+                                    )
+                                )
+            except KeyError as e:
+                pass
+        if status_ok:
+            clog.info("-> OK")
+        else:
+            clog.error("Failed: \n")
+            print(tabulate(errors, headers="firstrow"))
+            clog.info("")
+
     def validate_evi_allocations(self):
         log.info("-" * 60)
         log.info("Valideren evi toegewezen kramen: ")
