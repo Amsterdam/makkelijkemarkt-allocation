@@ -20,6 +20,23 @@ from kjk.test_utils import (
     reject_erk,
     ErkenningsnummerNotFoudError,
 )
+from kjk.utils import TradePlacesSolver
+
+
+class TradePlacesSolverTestCase(unittest.TestCase):
+    def setUp(self):
+        self.data = {
+            "123": {"fixed": ["1", "2"], "wanted": ["3", "4"]},
+            "999": {"fixed": ["10", "11"], "wanted": ["7", "8"]},
+            "666": {"fixed": ["8", "7"], "wanted": ["11", "10"]},
+            "456": {"fixed": ["3"], "wanted": ["5"]},
+            "789": {"fixed": ["5"], "wanted": ["3"]},
+        }
+        self.sut = TradePlacesSolver(self.data)
+
+    def test_get_traders(self):
+        res = self.sut.get_position_traders()
+        self.assertListEqual(res, ["666", "999", "789", "456"])
 
 
 class TestUtilsTestCase(unittest.TestCase):

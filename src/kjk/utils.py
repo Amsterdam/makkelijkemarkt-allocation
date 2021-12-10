@@ -254,6 +254,38 @@ class MarketStandClusterFinder:
             return valid_options
 
 
+class TradePlacesSolver:
+    def __init__(self, data):
+        self.data = data
+        self.to_dict = {}
+        self.from_dict = {}
+
+    def get_position_traders(self):
+        traders = []
+        for erk in self.data.keys():
+            from_pos_list = self.data[erk]["fixed"]
+            to_pos_list = self.data[erk]["wanted"]
+            from_pos_list.sort()
+            to_pos_list.sort()
+            from_pos = tuple(from_pos_list)
+            to_pos = tuple(to_pos_list)
+            self.from_dict[from_pos] = erk
+            self.to_dict[to_pos] = erk
+        for to in self.to_dict.keys():
+            try:
+                erk_1 = self.to_dict[to]
+                erk = self.from_dict[to]
+                if (
+                    self.data[erk_1]["fixed"] == self.data[erk]["wanted"]
+                    and self.data[erk]["fixed"] == self.data[erk_1]["wanted"]
+                ):
+                    if erk not in traders and erk_1 not in traders:
+                        traders += [erk, erk_1]
+            except KeyError as e:
+                pass
+        return traders
+
+
 class DebugRedisClient:
     """
     This a debug only object, it will insert the json file into a local redis

@@ -178,7 +178,6 @@ class TestMovingVPL(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        # print_alloc(allocation)
         erk = alloc_erk("1", allocation)
         erk_2 = alloc_erk("2", allocation)
         erk_3 = alloc_erk("3", allocation)

@@ -7,6 +7,7 @@ from kjk.utils import DebugRedisClient
 from kjk.base import *
 from kjk.validation import ValidatorMixin
 from kjk.logging import clog, log
+from kjk.utils import TradePlacesSolver
 
 DEBUG = False
 
@@ -166,15 +167,21 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
             fixed = []
             wanted = []
+            merch_dict = {}
             for index, row in df.iterrows():
                 stands = row["plaatsen"]
                 fixed += stands
                 wanted += row["pref"]
+                merch_dict[row["erkenningsNummer"]] = {
+                    "fixed": stands,
+                    "wanted": row["pref"],
+                }
 
-            # WIP: see moving_vpl.py testcase
-            # print(df[["description", "plaatsen", "pref"]])
-            # print(fixed)
-            # print(wanted)
+            # if A wants to go from 1 to 2 and B wants to go from 2 to 1
+            res = TradePlacesSolver(merch_dict).get_position_traders()
+            for erk in res:
+                traded_stands = merch_dict[erk]["wanted"]
+                self._allocate_stands_to_merchant(traded_stands, erk)
 
             # if two merchants want to move to the same spot
             # we have a conflict
