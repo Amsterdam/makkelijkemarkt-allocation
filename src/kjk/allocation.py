@@ -153,7 +153,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
             self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
         self.fixed_set = None
-        while self.movers_left():
+        while self.vpl_movers_remaining():
 
             df = self.merchants_df.query(
                 "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
@@ -251,12 +251,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         print(erk, stands_to_alloc)
 
             self.fixed_set = fixed
-
-    def movers_left(self):
-        df = self.merchants_df.query(
-            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
-        ).copy()
-        return len(df) > 0
 
     def allocation_phase_04(self):
         log.info("")

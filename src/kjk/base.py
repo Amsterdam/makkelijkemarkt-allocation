@@ -671,6 +671,12 @@ class BaseAllocator:
                 self.cluster_finder.set_stands_allocated(stands_to_alloc)
                 self.market_output.add_allocation(erk, stands_to_alloc, merchant_obj)
 
+    def vpl_movers_remaining(self):
+        df = self.merchants_df.query(
+            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
+        ).copy()
+        return len(df) > 0
+
     def _allocate_solls_for_query(self, query):
         result_list = self.merchants_df.query(query)
         log.info("Ondernemers te alloceren in deze fase: {}".format(len(result_list)))
