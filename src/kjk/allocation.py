@@ -161,36 +161,59 @@ class Allocator(BaseAllocator, ValidatorMixin):
             df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
 
             fixed = []
+            wanted = []
             for index, row in df.iterrows():
                 stands = row["plaatsen"]
                 fixed += stands
+                wanted += row["pref"]
 
             # WIP: see moving_vpl.py testcase
-            # print(df)
+            # print(df[["description", "plaatsen", "pref"]])
             # print(fixed)
+            # print(wanted)
+
+            has_conflicts = len(set(wanted)) < len(wanted)
 
             if fixed == self.fixed_set:
+                has_rejections = False
                 for index, row in df.iterrows():
-
                     erk = row["erkenningsNummer"]
                     stands = row["plaatsen"]
                     pref = row["pref"]
                     merchant_branches = row["voorkeur.branches"]
                     maxi = row["voorkeur.maximum"]
                     evi = row["has_evi"] == "yes"
-
                     valid_pref_stands = self.cluster_finder.find_valid_cluster(
                         pref,
                         size=len(stands),
                         preferred=True,
                         merchant_branche=merchant_branches,
-                        mode="any",
+                        mode="all",
                         evi_merchant=evi,
                     )
+                    if len(valid_pref_stands) == 0:
+                        has_rejections = True
+                        break
 
-                    # print(erk, " : ", valid_pref_stands)
-
-                    self._allocate_stands_to_merchant(stands, erk)
+                for index, row in df.iterrows():
+                    erk = row["erkenningsNummer"]
+                    stands = row["plaatsen"]
+                    pref = row["pref"]
+                    merchant_branches = row["voorkeur.branches"]
+                    maxi = row["voorkeur.maximum"]
+                    evi = row["has_evi"] == "yes"
+                    valid_pref_stands = self.cluster_finder.find_valid_cluster(
+                        pref,
+                        size=len(stands),
+                        preferred=True,
+                        merchant_branche=merchant_branches,
+                        mode="all",
+                        evi_merchant=evi,
+                    )
+                    if has_conflicts or has_rejections:
+                        self._allocate_stands_to_merchant(stands, erk)
+                    else:
+                        self._allocate_stands_to_merchant(valid_pref_stands, erk)
                 break
             else:
                 for index, row in df.iterrows():

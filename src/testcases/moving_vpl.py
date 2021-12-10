@@ -114,17 +114,77 @@ class TestMovingVPL(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        # print_alloc(allocation)
         erk = alloc_erk("1", allocation)
         erk_2 = alloc_erk("2", allocation)
         self.assertListEqual(erk["plaatsen"], ["3", "4"])
         self.assertListEqual(erk_2["plaatsen"], ["1"])
 
-    def test_can_take_stand_from_moved_vpl(self):
+    def test_can_switch_stands_2(self):
         """
-        kan de plaats van een andere VPL krijgen als die ook verplaatst
+        mag ruilen met een andere VPL
         """
-        self.assertTrue(False)
+        self.dp.add_merchant(
+            erkenningsNummer="3",
+            plaatsen=["5"],
+            status="vpl",
+            sollicitatieNummer="1",
+            description="John Coltrane",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="3", priority=1)
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="4", priority=2)
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="5", priority=1)
+        self.dp.add_pref(erkenningsNummer="3", plaatsId="1", priority=1)
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        erk = alloc_erk("1", allocation)
+        erk_2 = alloc_erk("2", allocation)
+        erk_3 = alloc_erk("3", allocation)
+        self.assertListEqual(erk["plaatsen"], ["3", "4"])
+        self.assertListEqual(erk_2["plaatsen"], ["5"])
+        self.assertListEqual(erk_3["plaatsen"], ["1"])
+
+    def test_can_switch_stands_3(self):
+        """
+        mag ruilen met een andere VPL
+        """
+        self.dp.add_merchant(
+            erkenningsNummer="3",
+            plaatsen=["5"],
+            status="vpl",
+            sollicitatieNummer="3",
+            description="John Coltrane",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="3", priority=1)
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="4", priority=2)
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="5", priority=1)
+        self.dp.add_pref(erkenningsNummer="3", plaatsId="3", priority=1)
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        # print_alloc(allocation)
+        erk = alloc_erk("1", allocation)
+        erk_2 = alloc_erk("2", allocation)
+        erk_3 = alloc_erk("3", allocation)
+        self.assertListEqual(erk["plaatsen"], ["1", "2"])
+        self.assertListEqual(erk_2["plaatsen"], ["5"])
+        self.assertListEqual(erk_3["plaatsen"], ["3"])
 
     def test_will_not_move_if_better_moving_vpl(self):
         """
@@ -268,7 +328,6 @@ class TestMovingVPL(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        # print_alloc(allocation)
         erk = alloc_erk("2", allocation)
         self.assertListEqual(erk["plaatsen"], ["9"])
 
