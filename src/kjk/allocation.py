@@ -467,35 +467,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.reject_remaining_merchants()
 
     def get_allocation(self):
-        """
-        Indelen:
-        1. Deel VPHs die niet willen verplaatsen in op hun eigen vaste plaatsen;
-        2. Deel VPH's in die willen verplaatsen (bereken door of dit succesvol verloopt,
-           anders terugvallen op eigen plaats; Als één of meerdere bestemmingsplaatsen van een ándere verplaatsende VPH zijn,
-           wordt eerst gecontroleerd of laatstgenoemde nog wel ingedeeld kan worden als eerstgenoemde daar wordt ingedeeld.);
-        3. Deel ondernemers in die opereren in dezelfde branche als de vrijgekomen plaatsen.
-           Deze groep kan bestaan uit VPHs die willen verplaatsen en sollicitanten.
-           Als er meer ondernemers zijn dan beschikbare plaatsen, dan worden de resterende ondernemers afgewezen.
-        4. Resterende verplichte brancheplaatsen worden vanaf nu behandeld als normale, branchevrije plaatsen.
-        5. Deel ondernemers in met een BAK. Ook dit kunnen zowel verplaatsende VPHs als sollicitanten zijn.
-           Als er meer BAK ondernemers zijn dan beschikbare BAK plaatsen, dan worden de resterende ondernemers afgewezen.
-        6. Resterende BAK plaatsen worden vanaf nu behandeld als normale plaatsen.
-        7. Deel ondernemers in met een EVI. Ook dit kunnen zowel verplaatsende VPHs als sollicitanten zijn.
-           Als er meer EVI ondernemers zijn dan beschikbare EVI plaatsen, dan worden de resterende ondernemers afgewezen.
-        8. Resterende EVI plaatsen worden vanaf nu behandeld als normale plaatsen.
-        9. Deel de overgebleven sollicitanten in.
-
-        Uitbreiden volgens de verordening:
-        1. Uitbreiden vindt plaats in genummerde iteraties: in iteratie 2 wordt gekeken of er nog ondernemers zijn die een tweede plaats willen,
-           in iteratie 3 komen ondernemers die een derde plaats willen aan bod, enz.
-        2. De uitbreidingsfase eindigt indien er geen geschikte marktplaatsen meer zijn, of als elke ondernemer tevreden is.
-        3. Voor alle ondernemers wordt nu gecontroleerd of aan hun minimum eis wordt voldaan.
-           Als ze niet het minimum aantal plaatsen toegewezen hebben gekregen worden ze afgewezen op deze grond.
-        4. Tot slot wordt geprobeerd om tot nu toe niet ingedeelde ondernemers alsnog in te delen.
-           Vanwege afwijzingen in de voorgaande stap is er wellicht ruimte vrijgekomen voor andere ondernemers met een lagere sorteringsprioriteit.
-
-           reminder: aLijst, vervangers
-        """
 
         self.allocation_phase_00()
         self.allocation_phase_01()
