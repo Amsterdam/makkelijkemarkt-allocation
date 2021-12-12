@@ -76,7 +76,7 @@ class MarketArrangement:
     def get_assigned_stands_for_merchant(self, merchant_id):
         try:
             return self.assigned_stands[merchant_id]
-        except KeyError as e:
+        except KeyError:
             return None
 
     def set_config(self, conf=None):

@@ -272,16 +272,16 @@ class BaseAllocator:
     def merchant_object_by_id(self, merchant_id):
         try:
             return self.merchants_dict[merchant_id]
-        except KeyError as e:
+        except KeyError:
             raise MerchantNotFoundError(f"mechant not found: {merchant_id}")
 
     def create_expanders_set(self):
         def wants_to_expand(x):
             try:
                 return int(x["voorkeur.maximum"]) > int(x["voorkeur.minimum"])
-            except KeyError as e:
+            except KeyError:
                 return False
-            except ValueError as e:
+            except ValueError:
                 return False
 
         self.merchants_df["wants_expand"] = self.merchants_df.apply(
@@ -309,7 +309,7 @@ class BaseAllocator:
         def required(x):
             try:
                 return self.get_required_for_branche(x)
-            except KeyError as e:
+            except KeyError:
                 return "unknown"
 
         is_required = self.positions_df["branches"].apply(required)
@@ -326,7 +326,7 @@ class BaseAllocator:
 
             active = self.positions_df["inactive"].apply(is_inactive)
             self.positions_df = self.positions_df[active]
-        except KeyError as e:
+        except KeyError:
             # No inactive stand found in cofiguration
             pass
 
@@ -334,7 +334,7 @@ class BaseAllocator:
         try:
             if len(b) == 0:
                 return "no"
-        except TypeError as e:
+        except TypeError:
             return "no"
         # assumption:
         # if more than one branche per stand always means bak?
@@ -373,7 +373,7 @@ class BaseAllocator:
                     self.a_list_df["erkenningsNummer"] == x
                 ].copy()
                 return len(result_df) > 0
-            except KeyError as e:
+            except KeyError:
                 return False
 
         self.merchants_df["alist"] = self.merchants_df["erkenningsNummer"].apply(prefs)
@@ -382,7 +382,7 @@ class BaseAllocator:
         def required(x):
             try:
                 return self.get_required_for_branche(x)
-            except KeyError as e:
+            except KeyError:
                 return "unknown"
 
         is_required = self.merchants_df["voorkeur.branches"].apply(required)
@@ -395,7 +395,7 @@ class BaseAllocator:
                     return "yes"
                 else:
                     return "no"
-            except TypeError as e:
+            except TypeError:
                 return "unknown"
 
         hasevi = self.merchants_df["voorkeur.verkoopinrichting"].apply(has_evi)
@@ -407,7 +407,7 @@ class BaseAllocator:
         def prefs(x):
             try:
                 return self.get_prefs_for_merchant(x)
-            except KeyError as e:
+            except KeyError:
                 return []
 
         self.merchants_df["pref"] = self.merchants_df["erkenningsNummer"].apply(prefs)
@@ -415,7 +415,7 @@ class BaseAllocator:
         def will_move(x):
             try:
                 return self.get_willmove_for_merchant(x)
-            except KeyError as e:
+            except KeyError:
                 return "no"
 
         self.merchants_df["will_move"] = self.merchants_df["erkenningsNummer"].apply(
@@ -438,7 +438,7 @@ class BaseAllocator:
                     return "no"
                 else:
                     return "na"
-            except KeyError as e:
+            except KeyError:
                 return "na"
 
         self.merchants_df["attending"] = self.merchants_df["erkenningsNummer"].apply(
@@ -492,7 +492,7 @@ class BaseAllocator:
             try:
                 if branche in x:
                     return True
-            except TypeError as e:
+            except TypeError:
                 # nobranches == nan in dataframe
                 pass
             return False
@@ -511,7 +511,7 @@ class BaseAllocator:
             try:
                 if branche in x:
                     return True
-            except TypeError as e:
+            except TypeError:
                 # nobranches == nan in dataframe
                 pass
             return False
@@ -579,7 +579,7 @@ class BaseAllocator:
             try:
                 if "eigen-materieel" in x:
                     return True
-            except TypeError as e:
+            except TypeError:
                 # nobranches == nan in dataframe
                 pass
             return False
@@ -630,7 +630,7 @@ class BaseAllocator:
         self.market_output.add_rejection(erk, reason, self.merchant_object_by_id(erk))
         try:
             self.dequeue_marchant(erk)
-        except KeyError as e:
+        except KeyError:
             raise MerchantDequeueError(
                 "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
             )
@@ -649,21 +649,21 @@ class BaseAllocator:
                 allocation_allowed = self.branches_scrutenizer.allocation_allowed(
                     branches
                 )
-            except KeyError as e:
+            except KeyError:
                 clog.warning(f"ondernemer {erk} heeft geen branche in zijn voorkeur.")
-            except IndexError as e:
+            except IndexError:
                 clog.warning(f"ondernemer {erk} heeft geen branche in zijn voorkeur.")
 
             if allocation_allowed:
                 for st in stands_to_alloc:
                     try:
                         self.dequeue_market_stand(st)
-                    except KeyError as e:
+                    except KeyError:
                         raise MarketStandDequeueError(f"Allocation error: {erk} - {st}")
                 try:
                     if dequeue_merchant:
                         self.dequeue_marchant(erk)
-                except KeyError as e:
+                except KeyError:
                     raise MerchantDequeueError(
                         "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
                     )
@@ -725,7 +725,7 @@ class BaseAllocator:
             stands_available = self.get_evi_stands()
             try:
                 stands_available_list = stands_available["plaatsId"].to_list()
-            except KeyError as e:
+            except KeyError:
                 stands_available_list = []
             stds = []
             if self.strategy == STRATEGY_EXP_FULL:
@@ -760,7 +760,7 @@ class BaseAllocator:
             stands_available = self.get_stand_for_branche(merchant_branches[0])
             try:
                 stands_available_list = stands_available["plaatsId"].to_list()
-            except KeyError as e:
+            except KeyError:
                 stands_available_list = []
             stds = []
             if self.strategy == STRATEGY_EXP_FULL:

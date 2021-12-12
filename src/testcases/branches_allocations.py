@@ -356,7 +356,7 @@ class TestRequiredBranches(unittest.TestCase):
         self.assertListEqual(stands_erk("1", allocation), ["1"])
         try:
             reject_erk("2", allocation)
-        except Exception as e:
+        except Exception:
             self.fail("merchant not found in rejections")
 
 

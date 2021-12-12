@@ -53,7 +53,7 @@ class ValidatorMixin:
                                         tw["ondernemer"]["status"],
                                     )
                                 )
-            except KeyError as e:
+            except KeyError:
                 pass
         if status_ok:
             clog.info("-> OK")
@@ -96,7 +96,7 @@ class ValidatorMixin:
                                     tw["ondernemer"]["status"],
                                 )
                             )
-            except KeyError as e:
+            except KeyError:
                 pass
         if status_ok:
             clog.info("-> OK")

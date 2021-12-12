@@ -80,7 +80,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 erk = row["erkenningsNummer"]
                 stands = row["plaatsen"]
                 self._allocate_stands_to_merchant(stands, erk)
-            except MarketStandDequeueError as e:
+            except MarketStandDequeueError:
                 self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
 
     def allocation_phase_02(self):
@@ -274,7 +274,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
                     try:
                         self._allocate_stands_to_merchant(stands_to_alloc, erk)
-                    except Exception as e:
+                    except Exception:
                         print(erk, stands_to_alloc)
 
             self.fixed_set = fixed

@@ -16,14 +16,14 @@ class BranchesScrutenizer:
             try:
                 self.max_dict[b["brancheId"]] = b["maximumPlaatsen"]
                 self.counter_dict[b["brancheId"]] = 0
-            except KeyError as e:
+            except KeyError:
                 pass  # no max for branche
 
     def add_allocation(self, branches):
         for branche in branches:
             try:
                 self.counter_dict[branche] += 1
-            except KeyError as e:
+            except KeyError:
                 pass  # no max for branche
 
     def allocation_allowed(self, branches):
@@ -32,7 +32,7 @@ class BranchesScrutenizer:
             try:
                 if self.counter_dict[branche] >= self.max_dict[branche]:
                     allowed = False
-            except KeyError as e:
+            except KeyError:
                 pass
         return allowed
 
@@ -51,7 +51,7 @@ class MarketStandClusterFinder:
         for b in branches:
             try:
                 self.branche_required_dict[b["brancheId"]] = b["verplicht"]
-            except KeyError as e:
+            except KeyError:
                 self.branche_required_dict[b["brancheId"]] = False
 
         self.stands_allocated = []
@@ -69,7 +69,7 @@ class MarketStandClusterFinder:
                     try:
                         obs = self.obstacle_dict[str(stand_nr)]
                         self.flattened_list.append(obs)
-                    except KeyError as e:
+                    except KeyError:
                         pass
                     if i - 1 >= 0:
                         _prev = pl[i - 1]
@@ -95,7 +95,7 @@ class MarketStandClusterFinder:
     def get_branche_for_stand_id(self, stand_id):
         try:
             return self.branches_dict[stand_id]
-        except KeyError as e:
+        except KeyError:
             return None
 
     def get_neighbours_for_stand_id(self, stand_id):
@@ -105,7 +105,7 @@ class MarketStandClusterFinder:
         """
         try:
             return self.stands_linked_list[stand_id]
-        except KeyError as e:
+        except KeyError:
             return None
 
     def filter_preferred(self, valid_options, stand_list):
@@ -121,7 +121,7 @@ class MarketStandClusterFinder:
     def branche_is_required(self, branche_id):
         try:
             return self.branche_required_dict[branche_id]
-        except KeyError as e:
+        except KeyError:
             return False
 
     def option_is_valid_branche(self, option, merchant_branche, evi_merchant):
@@ -134,9 +134,9 @@ class MarketStandClusterFinder:
                     branches = self.branches_dict[std]
                     if len(branches) > 0:
                         return False
-            except KeyError as e:
+            except KeyError:
                 pass
-            except TypeError as e:
+            except TypeError:
                 pass
             return True
 
@@ -155,9 +155,9 @@ class MarketStandClusterFinder:
                             return False
                     else:
                         return "eigen-materieel" not in self.evi_dict[std]
-            except KeyError as e:
+            except KeyError:
                 pass
-            except TypeError as e:
+            except TypeError:
                 pass
         return True
 
@@ -287,7 +287,7 @@ class TradePlacesSolver:
                 ):
                     if erk not in traders and erk_1 not in traders:
                         traders += [erk, erk_1]
-            except KeyError as e:
+            except KeyError:
                 pass
         return traders
 

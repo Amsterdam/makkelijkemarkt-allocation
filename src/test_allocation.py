@@ -270,7 +270,7 @@ class OutputLayoutTest(unittest.TestCase):
         try:
             self.sut.add_allocation("3000187072", 101, self.mock_merchant_obj)
             output = self.sut.to_data()
-        except StandsTypeError as e:
+        except StandsTypeError:
             self.assertTrue(True)
 
     def test_add_multiple_allocation(self):
