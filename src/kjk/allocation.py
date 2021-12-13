@@ -1,10 +1,11 @@
-from pprint import pprint
 import pandas as pd
-from datetime import date
-from kjk.outputdata import MarketArrangement
-from kjk.utils import MarketStandClusterFinder
 from kjk.utils import DebugRedisClient
-from kjk.base import *
+from kjk.base import BaseAllocator
+from kjk.base import STRATEGY_EXP_NONE
+from kjk.base import STRATEGY_EXP_SOME
+from kjk.base import STRATEGY_EXP_FULL
+from kjk.base import MarketStandDequeueError
+from kjk.base import VPL_POSITION_NOT_AVAILABLE
 from kjk.validation import ValidatorMixin
 from kjk.logging import clog, log
 from kjk.utils import TradePlacesSolver
@@ -135,7 +136,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
             stands = row["plaatsen"]
             pref = row["pref"]
             merchant_branches = row["voorkeur.branches"]
-            maxi = row["voorkeur.maximum"]
             evi = row["has_evi"] == "yes"
 
             valid_pref_stands = self.cluster_finder.find_valid_cluster(
@@ -200,7 +200,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     stands = row["plaatsen"]
                     pref = row["pref"]
                     merchant_branches = row["voorkeur.branches"]
-                    maxi = row["voorkeur.maximum"]
                     evi = row["has_evi"] == "yes"
                     valid_pref_stands = self.cluster_finder.find_valid_cluster(
                         pref,
@@ -219,7 +218,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     stands = row["plaatsen"]
                     pref = row["pref"]
                     merchant_branches = row["voorkeur.branches"]
-                    maxi = row["voorkeur.maximum"]
                     evi = row["has_evi"] == "yes"
                     valid_pref_stands = self.cluster_finder.find_valid_cluster(
                         pref,
@@ -246,7 +244,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     stands = row["plaatsen"]
                     pref = row["pref"]
                     merchant_branches = row["voorkeur.branches"]
-                    maxi = row["voorkeur.maximum"]
                     evi = row["has_evi"] == "yes"
 
                     valid_pref_stands = self.cluster_finder.find_valid_cluster(

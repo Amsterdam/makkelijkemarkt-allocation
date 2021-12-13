@@ -1,4 +1,5 @@
-import sys, traceback
+import traceback
+import sys
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider
 import time

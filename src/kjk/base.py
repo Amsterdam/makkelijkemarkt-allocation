@@ -1,4 +1,3 @@
-from pprint import pprint
 import pandas as pd
 from datetime import date
 from kjk.outputdata import MarketArrangement
@@ -105,9 +104,6 @@ class BaseDataprovider:
     def get_market_locations(self):
         raise NotImplementedError
 
-    def get_market_locations(self):
-        raise NotImplementedError
-
     def get_rsvp(self):
         raise NotImplementedError
 
@@ -127,9 +123,6 @@ class BaseDataprovider:
         raise NotImplementedError
 
     def get_market_id(self):
-        raise NotImplementedError
-
-    def get_market_date(self):
         raise NotImplementedError
 
     def get_market_blocks(self):
@@ -683,7 +676,6 @@ class BaseAllocator:
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
             pref = row["pref"]
-            merchant_branches = row["voorkeur.branches"]
             maxi = row["voorkeur.maximum"]
             mini = row["voorkeur.minimum"]
 
@@ -717,7 +709,6 @@ class BaseAllocator:
         )
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
-            pref = row["pref"]
             merchant_branches = row["voorkeur.branches"]
             maxi = row["voorkeur.maximum"]
             mini = row["voorkeur.minimum"]
@@ -751,7 +742,6 @@ class BaseAllocator:
         log.info("Ondernemers te alloceren in deze fase: {}".format(len(result_list)))
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
-            pref = row["pref"]
             merchant_branches = row["voorkeur.branches"]
             maxi = row["voorkeur.maximum"]
             mini = row["voorkeur.minimum"]

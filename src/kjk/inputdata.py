@@ -1,5 +1,4 @@
 import json
-from pprint import pprint
 from kjk.base import BaseDataprovider
 
 
@@ -39,9 +38,6 @@ class DataproviderGetterMixin:
 
     def get_market_id(self):
         return self.data["marktId"]
-
-    def get_market_date(self):
-        return self.data["marktDate"]
 
 
 class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):

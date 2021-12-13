@@ -1,6 +1,4 @@
-import json
 import redis
-from pprint import pprint
 
 
 class BranchesScrutenizer:
@@ -307,7 +305,7 @@ class DebugRedisClient:
         self.r = redis.Redis(
             host=REDIS_HOST, port=REDIS_PORT, db=0, password=REDIS_PASSWORD
         )
-        res = self.r.delete("RESULT_1")
+        self.r.delete("RESULT_1")
 
     def insert_test_result(self, allocation_json):
         f = open(allocation_json, "r")
