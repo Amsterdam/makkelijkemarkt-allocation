@@ -40,6 +40,14 @@ class DataproviderGetterMixin:
         return self.data["marktId"]
 
 
+class RedisDataprovider(DataproviderGetterMixin, BaseDataprovider):
+    def __init__(self, data):
+        self.data = data
+
+    def load_data(self):
+        return self.data
+
+
 class MockDataprovider(DataproviderGetterMixin, BaseDataprovider):
     """
     Use this class to build mocked markets for unit/scenario testing

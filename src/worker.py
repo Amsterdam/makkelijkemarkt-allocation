@@ -1,10 +1,11 @@
 import redis
+import os
 import traceback
 import sys
 import json
 import time
 from kjk.allocation import Allocator
-from kjk.inputdata import FixtureDataprovider
+from kjk.inputdata import RedisDataprovider
 
 
 class JobDispatcher:
@@ -26,14 +27,11 @@ class JobDispatcher:
     """
 
     def __init__(self):
-        REDIS_HOST = "127.0.0.1"
-        REDIS_PORT = 6379
-        REDIS_PASSWORD = "Salmagundi"
         self.r = redis.StrictRedis(
-            host=REDIS_HOST,
-            port=REDIS_PORT,
+            host=os.getenv("REDIS_HOST"),
+            port=os.getenv("REDIS_PORT"),
             db=0,
-            password=REDIS_PASSWORD,
+            password=os.getenv("REDIS_PASSWORD"),
             charset="utf-8",
             decode_responses=True,
         )
@@ -53,9 +51,8 @@ class JobDispatcher:
         print("processing .....")
         job_res = self.r.hget(self.jobs, job_id)
         job = json.loads(job_res)
-        print(job)
         start = time.time()
-        dp = FixtureDataprovider("../fixtures/dapp_20211030/a_input.json")
+        dp = RedisDataprovider(job["data"])
         a = Allocator(dp)
         output = a.get_allocation()
         json_result = json.dumps(output)

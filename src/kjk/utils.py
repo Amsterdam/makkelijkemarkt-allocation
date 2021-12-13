@@ -1,4 +1,5 @@
 import redis
+import os
 
 
 class BranchesScrutenizer:
@@ -298,12 +299,13 @@ class DebugRedisClient:
     """
 
     def __init__(self):
-        REDIS_HOST = "127.0.0.1"
-        REDIS_PORT = 6379
-        REDIS_PASSWORD = "Salmagundi"
-
-        self.r = redis.Redis(
-            host=REDIS_HOST, port=REDIS_PORT, db=0, password=REDIS_PASSWORD
+        self.r = redis.StrictRedis(
+            host=os.getenv("REDIS_HOST"),
+            port=os.getenv("REDIS_PORT"),
+            db=0,
+            password=os.getenv("REDIS_PASSWORD"),
+            charset="utf-8",
+            decode_responses=True,
         )
         self.r.delete("RESULT_1")
 
