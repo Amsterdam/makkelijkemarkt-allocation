@@ -18,3 +18,12 @@ class EviCrashBugTestCase(unittest.TestCase):
 
     def test_bug(self):
         market_allocation = self.allocator.get_allocation()
+
+
+class BaranchesCrashBugTestCase(unittest.TestCase):
+    def setUp(self):
+        dp = FixtureDataprovider("../fixtures/branches-bug2.json")
+        self.allocator = Allocator(dp)
+
+    def test_bug(self):
+        market_allocation = self.allocator.get_allocation()

@@ -286,6 +286,7 @@ class BaseAllocator:
     def prepare_merchants(self):
         """prepare the merchants list for allocation"""
         self.df_for_attending_merchants()
+        self.add_mandatory_columns()
         self.add_prefs_for_merchant()
         self.add_alist_status_for_merchant()
         self.add_required_branche_for_merchant()
@@ -379,6 +380,18 @@ class BaseAllocator:
                 return False
 
         self.merchants_df["alist"] = self.merchants_df["erkenningsNummer"].apply(prefs)
+
+    def add_mandatory_columns(self):
+        for c in [
+            ("voorkeur.branches", []),
+            ("voorkeur.verkoopinrichting", []),
+            ("voorkeur.minimum", 1),
+            ("voorkeur.maximum", 1),
+        ]:
+            try:
+                self.merchants_df[c[0]]
+            except KeyError:
+                self.merchants_df[c[0]] = [c[1] for x in range(len(self.merchants_df))]
 
     def add_required_branche_for_merchant(self):
         def required(x):
