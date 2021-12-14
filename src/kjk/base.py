@@ -382,6 +382,13 @@ class BaseAllocator:
         self.merchants_df["alist"] = self.merchants_df["erkenningsNummer"].apply(prefs)
 
     def add_mandatory_columns(self):
+        """
+        Add missing columns with no data at all
+        """
+        # This script should be a drop in replacement for the TypeScript KjK
+        # allocations. We have to deal with bad data quality.
+        # For some markets on ACC (and maybe PROD) there is no 'voorkeur'
+        # for any merchant. Let's make stuff up.
         for c in [
             ("voorkeur.branches", []),
             ("voorkeur.verkoopinrichting", []),
