@@ -202,6 +202,9 @@ class BaseAllocator:
             subset="erkenningsNummer", keep="first", inplace=True
         )
 
+        self.prepare_merchants()
+        self.prepare_stands()
+
         # create a sparse datastructure for branche lookup per stand id
         plaats_ids = self.positions_df["plaatsId"].to_list()
         branches = self.positions_df["branches"].to_list()
@@ -222,8 +225,6 @@ class BaseAllocator:
             stand_evi_dict,
             self.branches,
         )
-        self.prepare_merchants()
-        self.prepare_stands()
 
         # collection for holding stand ids for evi stands
         self.evi_ids = []
@@ -310,6 +311,14 @@ class BaseAllocator:
         self.positions_df.set_index("plaatsId", inplace=True)
         self.positions_df["plaatsId"] = self.positions_df.index
 
+        def clean_branches(x):
+            if isinstance(x, list):
+                return x
+            return []
+
+        cleansed_branches = self.positions_df["branches"].apply(clean_branches)
+        self.positions_df["branches"] = cleansed_branches
+
         try:
 
             def is_inactive(x):
@@ -380,6 +389,14 @@ class BaseAllocator:
 
         is_required = self.merchants_df["voorkeur.branches"].apply(required)
         self.merchants_df["branche_required"] = is_required
+
+        def clean_branches(x):
+            if isinstance(x, list):
+                return x
+            return []
+
+        cleansed_branches = self.merchants_df["voorkeur.branches"].apply(clean_branches)
+        self.merchants_df["voorkeur.branches"] = cleansed_branches
 
     def add_evi_for_merchant(self):
         def has_evi(x):
@@ -550,17 +567,22 @@ class BaseAllocator:
     def populate_evi_stand_ids(self):
         """populate the evi stand ids collection"""
         for i, p in self.positions_df.iterrows():
-            if "eigen-materieel" in p["verkoopinrichting"]:
-                self.evi_ids.append(p["plaatsId"])
+            try:
+                if "eigen-materieel" in p["verkoopinrichting"]:
+                    self.evi_ids.append(p["plaatsId"])
+            except TypeError:
+                pass  # we have nan values in this column, asume no evi
 
     def get_evi_stands(self):
         """return a dataframe with evi stands"""
 
         def has_evi(x):
-            if "eigen-materieel" in x:
-                return True
-            else:
-                return False
+            try:
+                if "eigen-materieel" in x:
+                    return True
+            except TypeError:
+                pass  # nan is False (no evi)
+            return False
 
         hasevi = self.positions_df["verkoopinrichting"].apply(has_evi)
         return self.positions_df[hasevi]
@@ -604,8 +626,11 @@ class BaseAllocator:
 
     def get_stand_for_branche(self, branche):
         def is_branche(x):
-            if branche in x:
-                return True
+            try:
+                if branche in x:
+                    return True
+            except TypeError:
+                pass  # asume nan is False (no branche)
             return False
 
         stands = self.positions_df["branches"].apply(is_branche)

@@ -7,6 +7,8 @@ import time
 from kjk.allocation import Allocator
 from kjk.inputdata import RedisDataprovider
 
+SAVE_JOB_DATA = True
+
 
 class JobDispatcher:
     """
@@ -52,6 +54,11 @@ class JobDispatcher:
         job_res = self.r.hget(self.jobs, job_id)
         job = json.loads(job_res)
         start = time.time()
+        if SAVE_JOB_DATA:
+            data = job["data"]
+            f = open("job.json", "w")
+            json.dump(data, f, indent=4)
+            f.close()
         dp = RedisDataprovider(job["data"])
         a = Allocator(dp)
         output = a.get_allocation()
