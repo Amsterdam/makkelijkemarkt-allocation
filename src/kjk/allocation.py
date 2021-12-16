@@ -1,9 +1,6 @@
 import pandas as pd
 from kjk.utils import DebugRedisClient
 from kjk.base import BaseAllocator
-from kjk.base import STRATEGY_EXP_NONE
-from kjk.base import STRATEGY_EXP_SOME
-from kjk.base import STRATEGY_EXP_FULL
 from kjk.base import MarketStandDequeueError
 from kjk.base import VPL_POSITION_NOT_AVAILABLE
 from kjk.validation import ValidatorMixin
@@ -31,17 +28,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
         min_demand = self.merchants_df["voorkeur.minimum"].sum()
         num_available = len(self.positions_df)
 
-        self.strategy = STRATEGY_EXP_NONE
-        if max_demand < num_available:
-            self.strategy = STRATEGY_EXP_FULL
-        elif min_demand < num_available:
-            self.strategy = STRATEGY_EXP_SOME
-
         log.info("")
         log.info("max {}".format(max_demand))
         log.info("min {}".format(int(min_demand)))
         log.info("beschikbaar {}".format(num_available))
-        log.info("strategie: {}".format(self.strategy))
 
         # branche positions vs merchants rsvp
         self.branches_strategy = {}
@@ -102,7 +92,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         df = self.merchants_df.query(
-            "(status == 'exp' | status == 'expf') | ((status == 'vpl' | status == 'tvpl') & will_move == 'no' & wants_expand == False)"
+            "(status == 'exp' | status == 'expf' | status == 'vpl' | status == 'tvpl') & will_move == 'no'"
         )
         for index, row in df.iterrows():
             try:
@@ -112,37 +102,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
             except MarketStandDequeueError:
                 self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
 
-    def allocation_phase_02(self):
-        log.info("")
-        clog.info("--- ALLOCATIE FASE 2 ---")
-        log.info("ondenemers (vpl) die NIET willen verplaatsen maar WEL uitbreiden:")
-        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
-        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
-
-        # NOTE: save the expanders df for later, we need them for the extra stands iterations in tight strategies
-        df = self.merchants_df.query(
-            "(status == 'vpl' | status == 'tvpl') & will_move == 'no' & wants_expand == True"
-        ).copy()
-        df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
-        for index, row in df.iterrows():
-            erk = row["erkenningsNummer"]
-            stands = row["plaatsen"]
-            merchant_branches = row["voorkeur.branches"]
-            evi = row["has_evi"] == "yes"
-            # if we have plenty space on the merket reward the expansion now
-            if self.strategy == STRATEGY_EXP_FULL:
-                stands = self.cluster_finder.find_valid_expansion(
-                    row["plaatsen"],
-                    total_size=int(row["voorkeur.maximum"]),
-                    merchant_branche=merchant_branches,
-                    evi_merchant=evi,
-                )
-                if len(stands) > 0:
-                    stands = stands[0]
-                else:
-                    stands = row["plaatsen"]  # no expansion possible
-            self._allocate_stands_to_merchant(stands, erk)
-
     def allocation_phase_03(self):
         log.info("")
         clog.info("--- ALLOCATIE FASE 3 ---")
@@ -151,7 +110,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         df = self.merchants_df.query(
-            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
+            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
 
@@ -189,7 +148,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         while self.vpl_movers_remaining():
 
             df = self.merchants_df.query(
-                "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
+                "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
             ).copy()
             df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
 
@@ -288,7 +247,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     own_stands = all(elem in stands for elem in intersection)
                     unsave_move = len(intersection) > 0 and own_stands == False
 
-                    # do not allocate if wants to miove to fixed pos of others
+                    # do not allocate if wants to move to fixed pos of others
                     if unsave_move:
                         continue
 
@@ -303,53 +262,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         print(erk, stands_to_alloc)
 
             self.fixed_set = fixed
-
-    def allocation_phase_04(self):
-        log.info("")
-        clog.info("--- ALLOCATIE FASE 4 ---")
-        log.info("de vpl's die willen uitbreiden en verplaatsen")
-        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
-        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
-
-        df = self.merchants_df.query(
-            "(status == 'vpl' | status == 'tvpl') & wants_expand == True & will_move == 'yes'"
-        )
-        for index, row in df.iterrows():
-
-            erk = row["erkenningsNummer"]
-            stands = row["plaatsen"]
-            pref = row["pref"]
-            merchant_branches = row["voorkeur.branches"]
-            maxi = row["voorkeur.maximum"]
-            evi = row["has_evi"] == "yes"
-
-            valid_pref_stands = []
-            if self.strategy == STRATEGY_EXP_FULL:
-                # expansion possible on preferred new location?
-                valid_pref_stands = self.cluster_finder.find_valid_cluster(
-                    pref,
-                    size=int(maxi),
-                    preferred=True,
-                    merchant_branche=merchant_branches,
-                    mode="any",
-                    evi_merchant=evi,
-                )
-                if len(valid_pref_stands) == 0:
-                    # expansion possible on 'old' location?
-                    valid_pref_stands = self.cluster_finder.find_valid_expansion(
-                        row["plaatsen"],
-                        total_size=int(row["voorkeur.maximum"]),
-                        merchant_branche=merchant_branches,
-                        evi_merchant=evi,
-                    )
-                    if len(valid_pref_stands) > 0:
-                        valid_pref_stands = valid_pref_stands[0]
-
-            if len(valid_pref_stands) < len(stands):
-                stands_to_alloc = stands
-            else:
-                stands_to_alloc = valid_pref_stands
-            self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
     def allocation_phase_05(self):
         log.info("")
@@ -440,36 +352,32 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
-        # STRATEGY_EXP_NONE means no expansion possible (market space is thight)
-        # STRATEGY_EXP_FULL means expansion already done during previous phases
-
         # get the alist people first
         df_alist = self.expanders_df.query("alist == True")
         df_blist = self.expanders_df.query("alist != True")
         dataframes = [df_alist, df_blist]
 
-        if self.strategy == STRATEGY_EXP_SOME:
-            for df in dataframes:
-                for index, row in df.iterrows():
-                    erk = row["erkenningsNummer"]
-                    stands = row["plaatsen"]
-                    merchant_branches = row["voorkeur.branches"]
-                    evi = row["has_evi"] == "yes"
+        for df in dataframes:
+            for index, row in df.iterrows():
+                erk = row["erkenningsNummer"]
+                stands = row["plaatsen"]
+                merchant_branches = row["voorkeur.branches"]
+                evi = row["has_evi"] == "yes"
 
-                    assigned_stands = (
-                        self.market_output.get_assigned_stands_for_merchant(erk)
+                assigned_stands = self.market_output.get_assigned_stands_for_merchant(
+                    erk
+                )
+                stands = self.cluster_finder.find_valid_expansion(
+                    assigned_stands,
+                    total_size=int(row["voorkeur.maximum"]),
+                    merchant_branche=merchant_branches,
+                    evi_merchant=evi,
+                    ignore_check_available=assigned_stands,
+                )
+                if len(stands) > 0:
+                    self._allocate_stands_to_merchant(
+                        stands[0], erk, dequeue_merchant=False
                     )
-                    stands = self.cluster_finder.find_valid_expansion(
-                        assigned_stands,
-                        total_size=int(row["voorkeur.maximum"]),
-                        merchant_branche=merchant_branches,
-                        evi_merchant=evi,
-                        ignore_check_available=assigned_stands,
-                    )
-                    if len(stands) > 0:
-                        self._allocate_stands_to_merchant(
-                            stands[0], erk, dequeue_merchant=False
-                        )
 
     def allocation_phase_10(self):
         log.info("")
@@ -495,9 +403,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         self.allocation_phase_00()
         self.allocation_phase_01()
-        self.allocation_phase_02()
         self.allocation_phase_03()
-        self.allocation_phase_04()
         self.allocation_phase_05()
         self.allocation_phase_06()
         self.allocation_phase_07()

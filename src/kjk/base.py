@@ -7,10 +7,6 @@ from kjk.logging import clog, log
 
 pd.options.mode.chained_assignment = "raise"
 
-STRATEGY_EXP_FULL = 1
-STRATEGY_EXP_SOME = 2
-STRATEGY_EXP_NONE = 3
-
 # xls export
 XLS_EXPORT = False
 
@@ -271,12 +267,20 @@ class BaseAllocator:
 
     def create_expanders_set(self):
         def wants_to_expand(x):
-            try:
-                return int(x["voorkeur.maximum"]) > int(x["voorkeur.minimum"])
-            except KeyError:
-                return False
-            except ValueError:
-                return False
+            if x["status"] in ("vpl", "tvpl", "exp", "expf"):
+                try:
+                    return int(x["voorkeur.maximum"]) > len(x["plaatsen"])
+                except KeyError:
+                    return False
+                except ValueError:
+                    return False
+            else:
+                try:
+                    return int(x["voorkeur.maximum"]) > 1
+                except KeyError:
+                    return False
+                except ValueError:
+                    return False
 
         self.merchants_df["wants_expand"] = self.merchants_df.apply(
             wants_to_expand, axis=1
@@ -711,7 +715,7 @@ class BaseAllocator:
 
     def vpl_movers_remaining(self):
         df = self.merchants_df.query(
-            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes' & wants_expand == False"
+            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
         ).copy()
         return len(df) > 0
 
@@ -721,24 +725,13 @@ class BaseAllocator:
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
             pref = row["pref"]
-            maxi = row["voorkeur.maximum"]
             mini = row["voorkeur.minimum"]
 
             stds = []
-            if self.strategy == STRATEGY_EXP_FULL:
-                stds = self.cluster_finder.find_valid_cluster_final_phase(
-                    pref, size=maxi, preferred=True
-                )
             if len(stds) == 0:
                 stds = self.cluster_finder.find_valid_cluster_final_phase(
                     pref, size=int(mini), preferred=True
                 )
-            if len(stds) == 0:
-                stds_np = self.cluster_finder.find_valid_cluster_final_phase(
-                    pref, size=int(maxi), preferred=False, anywhere=True
-                )
-                if len(stds_np) > 0:
-                    stds = stds_np[0]
             if len(stds) == 0:
                 stds_np = self.cluster_finder.find_valid_cluster_final_phase(
                     pref, size=int(mini), preferred=False, anywhere=True
@@ -755,7 +748,6 @@ class BaseAllocator:
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
             merchant_branches = row["voorkeur.branches"]
-            maxi = row["voorkeur.maximum"]
             mini = row["voorkeur.minimum"]
             evi = row["has_evi"] == "yes"
             stands_available = self.get_evi_stands()
@@ -764,14 +756,6 @@ class BaseAllocator:
             except KeyError:
                 stands_available_list = []
             stds = []
-            if self.strategy == STRATEGY_EXP_FULL:
-                stds = self.cluster_finder.find_valid_cluster(
-                    stands_available_list,
-                    size=maxi,
-                    preferred=True,
-                    merchant_branche=merchant_branches,
-                    evi_merchant=evi,
-                )
             if len(stds) == 0:
                 stds = self.cluster_finder.find_valid_cluster(
                     stands_available_list,
@@ -788,7 +772,6 @@ class BaseAllocator:
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
             merchant_branches = row["voorkeur.branches"]
-            maxi = row["voorkeur.maximum"]
             mini = row["voorkeur.minimum"]
             evi = row["has_evi"] == "yes"
 
@@ -798,14 +781,6 @@ class BaseAllocator:
             except KeyError:
                 stands_available_list = []
             stds = []
-            if self.strategy == STRATEGY_EXP_FULL:
-                stds = self.cluster_finder.find_valid_cluster(
-                    stands_available_list,
-                    size=maxi,
-                    preferred=True,
-                    merchant_branche=merchant_branches,
-                    evi_merchant=evi,
-                )
             if len(stds) == 0:
                 stds = self.cluster_finder.find_valid_cluster(
                     stands_available_list,
