@@ -375,10 +375,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         evi_merchant=evi,
                         ignore_check_available=assigned_stands,
                     )
-                    if len(stands) > 0:
-                        self._allocate_stands_to_merchant(
-                            stands[0], erk, dequeue_merchant=False
-                        )
 
     def allocation_phase_10(self):
         log.info("")
