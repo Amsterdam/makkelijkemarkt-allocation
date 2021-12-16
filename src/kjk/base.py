@@ -1,4 +1,5 @@
 import pandas as pd
+import math
 from datetime import date
 from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder
@@ -726,6 +727,9 @@ class BaseAllocator:
             erk = row["erkenningsNummer"]
             pref = row["pref"]
             mini = row["voorkeur.minimum"]
+
+            if math.isnan(mini):
+                mini = 1
 
             stds = []
             if len(stds) == 0:
