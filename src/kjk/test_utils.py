@@ -1,7 +1,7 @@
 from pprint import pprint
 
 
-class ErkenningsnummerNotFoudError(BaseException):
+class ErkenningsnummerNotFoudError(Exception):
     pass
 
 

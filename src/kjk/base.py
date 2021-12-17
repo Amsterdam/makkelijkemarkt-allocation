@@ -37,25 +37,25 @@ BRANCHE_VIEW = [
 ]
 
 
-class VPLCollisionError(BaseException):
+class VPLCollisionError(Exception):
     """this will be raised id two VPL merchants claim the same market position. (should never happen)"""
 
     pass
 
 
-class MerchantNotFoundError(BaseException):
+class MerchantNotFoundError(Exception):
     """this will be raised id a merchant id can not be found in the input data. (should never happen)"""
 
     pass
 
 
-class MerchantDequeueError(BaseException):
+class MerchantDequeueError(Exception):
     """this will be raised id a merchant id can not be removed from the queue (should never happen)"""
 
     pass
 
 
-class MarketStandDequeueError(BaseException):
+class MarketStandDequeueError(Exception):
     """
     this will be when a stand can not be removed from the queue (should never happen)
     Assigning more than one merchant to the same stand id will cause this error.
@@ -698,19 +698,27 @@ class BaseAllocator:
             except IndexError:
                 clog.warning(f"ondernemer {erk} heeft geen branche in zijn voorkeur.")
 
+            merchant_dequeue_error = False
+            stand_dequeue_error = False
             if allocation_allowed:
                 for st in stands_to_alloc:
                     try:
                         self.dequeue_market_stand(st)
                     except KeyError:
-                        raise MarketStandDequeueError(f"Allocation error: {erk} - {st}")
+                        stand_dequeue_error = True
                 try:
                     if dequeue_merchant:
                         self.dequeue_marchant(erk)
                 except KeyError:
+                    stand_dequeue_error = True
+
+                if stand_dequeue_error:
+                    raise MarketStandDequeueError(f"Allocation error: {erk} - {st}")
+                if merchant_dequeue_error:
                     raise MerchantDequeueError(
                         "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
                     )
+
                 self.branches_scrutenizer.add_allocation(branches)
                 self.cluster_finder.set_stands_allocated(stands_to_alloc)
                 self.market_output.add_allocation(erk, stands_to_alloc, merchant_obj)

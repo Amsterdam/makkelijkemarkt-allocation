@@ -1,7 +1,7 @@
 import json
 
 
-class StandsTypeError(BaseException):
+class StandsTypeError(Exception):
     pass
 
 
