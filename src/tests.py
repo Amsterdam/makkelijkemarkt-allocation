@@ -13,7 +13,7 @@ from testcases.expansion import *
 from testcases.misc import *
 from testcases.dapper import *
 
-# from testcases.bug_fixes import *
+from testcases.bug_fixes import *
 
 # unit-test
 from test_allocation import *

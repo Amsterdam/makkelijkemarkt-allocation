@@ -20,6 +20,60 @@ class ValidatorMixin:
         else:
             clog.error("Failed")
 
+    def validate_expansion(self):
+        log.info("-" * 60)
+        log.info("Valideren uitbreidingen kramen: ")
+        tws = self.market_output.to_data()["toewijzingen"]
+        status_ok = True
+        errors = [
+            (
+                "erkenningsNummer",
+                "status",
+                "message",
+            )
+        ]
+        msgs = [
+            (
+                "erkenningsNummer",
+                "status",
+                "message",
+            )
+        ]
+        for tw in tws:
+            try:
+                erk = tw["ondernemer"]["erkenningsNummer"]
+                status = tw["ondernemer"]["status"]
+                _max = tw["ondernemer"]["voorkeur"]["maximum"]
+                _min = tw["ondernemer"]["voorkeur"]["minimum"]
+                _num = len(tw["plaatsen"])
+                if status == "vpl":
+                    len_fixed = len(tw["ondernemer"]["plaatsen"])
+                if status == "soll":
+                    len_fixed = 1
+                if len_fixed < _num:
+                    msgs.append(
+                        (erk, status, f"uitbreiding van {len_fixed} naar {_num}")
+                    )
+                if _num > _max:
+                    status_ok = False
+                    errors.append(
+                        (erk, status, f"aantal kramen {_num} groter dan max {_max}")
+                    )
+                if _min > _num:
+                    status_ok = False
+                    errors.append(
+                        (erk, status, f"aantal kramen {_num} kleiner dan min {min}")
+                    )
+            except KeyError:
+                pass
+        if status_ok:
+            clog.info("-> OK")
+            print(tabulate(msgs, headers="firstrow"))
+        else:
+            clog.error("Failed: \n")
+            print(tabulate(errors, headers="firstrow"))
+            clog.info("")
+
     def validate_branche_allocation(self):
         log.info("-" * 60)
         log.info("Valideren branche toegewezen kramen: ")

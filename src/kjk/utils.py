@@ -178,6 +178,7 @@ class MarketStandClusterFinder:
         and check if the fixed positions are contained in the
         slice. This will be a valid expansion cluster
         """
+
         valid_options = []
         for i, elem in enumerate(self.flattened_list):
             # an option is valid if it contains the fixed positions
