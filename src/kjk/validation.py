@@ -52,7 +52,7 @@ class ValidatorMixin:
                     len_fixed = 1
                 if len_fixed < _num:
                     msgs.append(
-                        (erk, status, f"soll, uitbreiding van {len_fixed} naar {_num}")
+                        (erk, status, f"uitbreiding van {len_fixed} naar {_num}")
                     )
                 if _num > _max:
                     status_ok = False
