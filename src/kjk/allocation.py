@@ -357,6 +357,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df_blist = self.expanders_df.query("alist != True")
         dataframes = [df_alist, df_blist]
 
+        # print(df_alist[["erkenningsNummer", "wants_expand", "voorkeur.minimum", "voorkeur.maximum", "voorkeur.anywhere", "plaatsen", "status", "pref"]])
+        # print(df_blist[["erkenningsNummer", "wants_expand", "voorkeur.minimum", "voorkeur.maximum", "voorkeur.anywhere", "plaatsen", "status", "pref"]])
+
         for df in dataframes:
             for index, row in df.iterrows():
                 erk = row["erkenningsNummer"]

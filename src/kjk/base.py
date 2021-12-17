@@ -227,11 +227,12 @@ class BaseAllocator:
         self.evi_ids = []
         self.populate_evi_stand_ids()
 
-        # save to text for manual debugging
-        self.merchants_df.to_markdown("../../merchants.md")
-
         # export xls for debugging
         if XLS_EXPORT:
+
+            # save to text for manual debugging
+            self.merchants_df.to_markdown("../../merchants.md")
+
             cols = [
                 "description",
                 "plaatsen",
