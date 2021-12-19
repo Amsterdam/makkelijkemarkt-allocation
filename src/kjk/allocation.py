@@ -102,14 +102,15 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 merchant_branches = row["voorkeur.branches"]
                 evi = row["has_evi"] == "yes"
                 if expand:
-                    exp = self.cluster_finder.find_valid_expansion(
+                    expansion_candidates = self.cluster_finder.find_valid_expansion(
                         stands,
                         total_size=int(row["voorkeur.maximum"]),
                         merchant_branche=merchant_branches,
                         evi_merchant=evi,
                         ignore_check_available=stands,
                     )
-                    print(erk, stands, exp)
+                    for exp in expansion_candidates:
+                        self.cluster_finder.set_stands_reserved(exp)
                 self._allocate_stands_to_merchant(stands, erk)
             except MarketStandDequeueError:
                 self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
@@ -136,9 +137,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
             pref = row["pref"]
             merchant_branches = row["voorkeur.branches"]
             evi = row["has_evi"] == "yes"
-            expand = row["wants_expand"]
-            if expand:
-                print(erk)
 
             valid_pref_stands = self.cluster_finder.find_valid_cluster(
                 pref,
@@ -149,11 +147,23 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 evi_merchant=evi,
             )
             if len(valid_pref_stands) == 0:
-                failed[erk] = stands
+                failed[erk] = (stands, row)
 
         for f in failed.keys():
             erk = f
-            stands_to_alloc = failed[f]
+            stands = stands_to_alloc = failed[f][0]
+            row = failed[f][1]
+            expand = row["wants_expand"]
+            if expand:
+                expansion_candidates = self.cluster_finder.find_valid_expansion(
+                    stands,
+                    total_size=int(row["voorkeur.maximum"]),
+                    merchant_branche=merchant_branches,
+                    evi_merchant=evi,
+                    ignore_check_available=stands,
+                )
+                for exp in expansion_candidates:
+                    self.cluster_finder.set_stands_reserved(exp)
             self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
         # STEP 2:
@@ -221,6 +231,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     pref = row["pref"]
                     merchant_branches = row["voorkeur.branches"]
                     evi = row["has_evi"] == "yes"
+                    expand = row["wants_expand"]
                     valid_pref_stands = self.cluster_finder.find_valid_cluster(
                         pref,
                         size=len(stands),
@@ -229,10 +240,35 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         mode="all",
                         evi_merchant=evi,
                     )
+
                     if has_conflicts or has_rejections:
+                        if expand:
+                            expansion_candidates = (
+                                self.cluster_finder.find_valid_expansion(
+                                    stands,
+                                    total_size=int(row["voorkeur.maximum"]),
+                                    merchant_branche=merchant_branches,
+                                    evi_merchant=evi,
+                                    ignore_check_available=stands,
+                                )
+                            )
+                            for exp in expansion_candidates:
+                                self.cluster_finder.set_stands_reserved(exp)
                         # unable to solve conflict stay on fixed positions
                         self._allocate_stands_to_merchant(stands, erk)
                     else:
+                        if expand:
+                            expansion_candidates = (
+                                self.cluster_finder.find_valid_expansion(
+                                    valid_pref_stands,
+                                    total_size=int(row["voorkeur.maximum"]),
+                                    merchant_branche=merchant_branches,
+                                    evi_merchant=evi,
+                                    ignore_check_available=valid_pref_stands,
+                                )
+                            )
+                            for exp in expansion_candidates:
+                                self.cluster_finder.set_stands_reserved(exp)
                         # no conflicts savely switch positions
                         self._allocate_stands_to_merchant(valid_pref_stands, erk)
                 break
@@ -272,6 +308,19 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         stands_to_alloc = valid_pref_stands
 
                     try:
+                        expand = row["wants_expand"]
+                        if expand:
+                            expansion_candidates = (
+                                self.cluster_finder.find_valid_expansion(
+                                    stands_to_alloc,
+                                    total_size=int(row["voorkeur.maximum"]),
+                                    merchant_branche=merchant_branches,
+                                    evi_merchant=evi,
+                                    ignore_check_available=stands_to_alloc,
+                                )
+                            )
+                            for exp in expansion_candidates:
+                                self.cluster_finder.set_stands_reserved(exp)
                         self._allocate_stands_to_merchant(stands_to_alloc, erk)
                     except Exception:
                         print(erk, stands_to_alloc)
@@ -335,6 +384,40 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "(status != 'exp' & status != 'expf') & alist != True & has_evi == 'yes'"
         )
 
+    def allocation_phase_06b(self):
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 6b ---")
+        log.info("Alle ondernemers ingedeeld, nu de uitbreidings fase voor vpl.")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
+
+        # get the alist people first
+        vpls = self.expanders_df.query("status == 'vpl'")
+        dataframes = [vpls]
+        for df in dataframes:
+            for index, row in df.iterrows():
+                erk = row["erkenningsNummer"]
+                stands = row["plaatsen"]
+                merchant_branches = row["voorkeur.branches"]
+                evi = row["has_evi"] == "yes"
+                maxi = row["voorkeur.maximum"]
+
+                assigned_stands = self.market_output.get_assigned_stands_for_merchant(
+                    erk
+                )
+                if assigned_stands is not None:
+                    stands = self.cluster_finder.find_valid_expansion(
+                        assigned_stands,
+                        total_size=int(maxi),
+                        merchant_branche=merchant_branches,
+                        evi_merchant=evi,
+                        ignore_check_available=assigned_stands,
+                    )
+                    if len(stands) > 0:
+                        self._allocate_stands_to_merchant(
+                            stands[0], erk, dequeue_merchant=False
+                        )
+
     def allocation_phase_07(self):
         log.info("")
         clog.info("--- ALLOCATIE FASE 7 ---")
@@ -371,42 +454,13 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df_alist = self.expanders_df.query("alist == True")
         df_blist = self.expanders_df.query("alist != True")
         dataframes = [df_alist, df_blist]
-
-        print(
-            df_alist[
-                [
-                    "erkenningsNummer",
-                    "wants_expand",
-                    "voorkeur.minimum",
-                    "voorkeur.maximum",
-                    "voorkeur.anywhere",
-                    "plaatsen",
-                    "status",
-                    "pref",
-                ]
-            ]
-        )
-        print(
-            df_blist[
-                [
-                    "erkenningsNummer",
-                    "wants_expand",
-                    "voorkeur.minimum",
-                    "voorkeur.maximum",
-                    "voorkeur.anywhere",
-                    "plaatsen",
-                    "status",
-                    "pref",
-                ]
-            ]
-        )
-
         for df in dataframes:
             for index, row in df.iterrows():
                 erk = row["erkenningsNummer"]
                 stands = row["plaatsen"]
                 merchant_branches = row["voorkeur.branches"]
                 evi = row["has_evi"] == "yes"
+                maxi = row["voorkeur.maximum"]
 
                 assigned_stands = self.market_output.get_assigned_stands_for_merchant(
                     erk
@@ -414,7 +468,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 if assigned_stands is not None:
                     stands = self.cluster_finder.find_valid_expansion(
                         assigned_stands,
-                        total_size=int(row["voorkeur.maximum"]),
+                        total_size=int(maxi),
                         merchant_branche=merchant_branches,
                         evi_merchant=evi,
                         ignore_check_available=assigned_stands,
@@ -452,6 +506,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.allocation_phase_03()
         self.allocation_phase_05()
         self.allocation_phase_06()
+        self.allocation_phase_06b()
         self.allocation_phase_07()
         self.allocation_phase_08()
         self.allocation_phase_09()

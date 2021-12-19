@@ -736,7 +736,6 @@ class BaseAllocator:
             erk = row["erkenningsNummer"]
             pref = row["pref"]
             mini = row["voorkeur.minimum"]
-            mini = 1
 
             if math.isnan(mini):
                 mini = 1
@@ -752,6 +751,16 @@ class BaseAllocator:
                 )
                 if len(stds_np) > 0:
                     stds = stds_np[0]
+            if len(stds) == 0:
+                stds_np = self.cluster_finder.find_valid_cluster_final_phase(
+                    pref,
+                    size=int(mini),
+                    preferred=False,
+                    anywhere=True,
+                    ignore_reserved=True,
+                )
+                if len(stds_np) > 0:
+                    stds = stds_np[0]
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_evi_for_query(self, query):
@@ -763,7 +772,6 @@ class BaseAllocator:
             erk = row["erkenningsNummer"]
             merchant_branches = row["voorkeur.branches"]
             mini = row["voorkeur.minimum"]
-            mini = 1
             evi = row["has_evi"] == "yes"
             stands_available = self.get_evi_stands()
             try:
@@ -779,6 +787,15 @@ class BaseAllocator:
                     merchant_branche=merchant_branches,
                     evi_merchant=evi,
                 )
+            if len(stds) == 0:
+                stds = self.cluster_finder.find_valid_cluster(
+                    stands_available_list,
+                    size=int(mini),
+                    preferred=True,
+                    merchant_branche=merchant_branches,
+                    evi_merchant=evi,
+                    ignore_reserved=True,
+                )
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_branche_solls_for_query(self, query):
@@ -789,7 +806,6 @@ class BaseAllocator:
             merchant_branches = row["voorkeur.branches"]
             mini = row["voorkeur.minimum"]
             evi = row["has_evi"] == "yes"
-            mini = 1
 
             stands_available = self.get_stand_for_branche(merchant_branches[0])
             try:
@@ -804,5 +820,14 @@ class BaseAllocator:
                     preferred=True,
                     merchant_branche=merchant_branches,
                     evi_merchant=evi,
+                )
+            if len(stds) == 0:
+                stds = self.cluster_finder.find_valid_cluster(
+                    stands_available_list,
+                    size=int(mini),
+                    preferred=True,
+                    merchant_branche=merchant_branches,
+                    evi_merchant=evi,
+                    ignore_reserved=True,
                 )
             self._allocate_stands_to_merchant(stds, erk)
