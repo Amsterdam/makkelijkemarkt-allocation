@@ -98,6 +98,18 @@ class Allocator(BaseAllocator, ValidatorMixin):
             try:
                 erk = row["erkenningsNummer"]
                 stands = row["plaatsen"]
+                expand = row["wants_expand"]
+                merchant_branches = row["voorkeur.branches"]
+                evi = row["has_evi"] == "yes"
+                if expand:
+                    exp = self.cluster_finder.find_valid_expansion(
+                        stands,
+                        total_size=int(row["voorkeur.maximum"]),
+                        merchant_branche=merchant_branches,
+                        evi_merchant=evi,
+                        ignore_check_available=stands,
+                    )
+                    print(erk, stands, exp)
                 self._allocate_stands_to_merchant(stands, erk)
             except MarketStandDequeueError:
                 self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
@@ -124,6 +136,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
             pref = row["pref"]
             merchant_branches = row["voorkeur.branches"]
             evi = row["has_evi"] == "yes"
+            expand = row["wants_expand"]
+            if expand:
+                print(erk)
 
             valid_pref_stands = self.cluster_finder.find_valid_cluster(
                 pref,
@@ -357,8 +372,34 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df_blist = self.expanders_df.query("alist != True")
         dataframes = [df_alist, df_blist]
 
-        # print(df_alist[["erkenningsNummer", "wants_expand", "voorkeur.minimum", "voorkeur.maximum", "voorkeur.anywhere", "plaatsen", "status", "pref"]])
-        # print(df_blist[["erkenningsNummer", "wants_expand", "voorkeur.minimum", "voorkeur.maximum", "voorkeur.anywhere", "plaatsen", "status", "pref"]])
+        print(
+            df_alist[
+                [
+                    "erkenningsNummer",
+                    "wants_expand",
+                    "voorkeur.minimum",
+                    "voorkeur.maximum",
+                    "voorkeur.anywhere",
+                    "plaatsen",
+                    "status",
+                    "pref",
+                ]
+            ]
+        )
+        print(
+            df_blist[
+                [
+                    "erkenningsNummer",
+                    "wants_expand",
+                    "voorkeur.minimum",
+                    "voorkeur.maximum",
+                    "voorkeur.anywhere",
+                    "plaatsen",
+                    "status",
+                    "pref",
+                ]
+            ]
+        )
 
         for df in dataframes:
             for index, row in df.iterrows():

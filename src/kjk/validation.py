@@ -46,13 +46,13 @@ class ValidatorMixin:
                 _max = tw["ondernemer"]["voorkeur"]["maximum"]
                 _min = tw["ondernemer"]["voorkeur"]["minimum"]
                 _num = len(tw["plaatsen"])
-                if status == "vpl":
+                if status in ("vpl", "tvpl", "exp", "expf"):
                     len_fixed = len(tw["ondernemer"]["plaatsen"])
                 if status == "soll":
                     len_fixed = 1
                 if len_fixed < _num:
                     msgs.append(
-                        (erk, status, f"uitbreiding van {len_fixed} naar {_num}")
+                        (erk, status, f" uitbreiding van {len_fixed} naar {_num}")
                     )
                 if _num > _max:
                     status_ok = False
@@ -62,16 +62,18 @@ class ValidatorMixin:
                 if _min > _num:
                     status_ok = False
                     errors.append(
-                        (erk, status, f"aantal kramen {_num} kleiner dan min {min}")
+                        (erk, status, f"aantal kramen {_num} kleiner dan min {_min}")
                     )
             except KeyError:
                 pass
         if status_ok:
             clog.info("-> OK")
-            print(tabulate(msgs, headers="firstrow"))
+            if not clog.disabled:
+                print(tabulate(msgs, headers="firstrow"))
         else:
             clog.error("Failed: \n")
-            print(tabulate(errors, headers="firstrow"))
+            if not clog.disabled:
+                print(tabulate(errors, headers="firstrow"))
             clog.info("")
 
     def validate_branche_allocation(self):
@@ -113,7 +115,8 @@ class ValidatorMixin:
             clog.info("-> OK")
         else:
             clog.error("Failed: \n")
-            print(tabulate(errors, headers="firstrow"))
+            if not clog.disabled:
+                print(tabulate(errors, headers="firstrow"))
             clog.info("")
 
     def validate_evi_allocations(self):

@@ -736,6 +736,7 @@ class BaseAllocator:
             erk = row["erkenningsNummer"]
             pref = row["pref"]
             mini = row["voorkeur.minimum"]
+            mini = 1
 
             if math.isnan(mini):
                 mini = 1
@@ -762,6 +763,7 @@ class BaseAllocator:
             erk = row["erkenningsNummer"]
             merchant_branches = row["voorkeur.branches"]
             mini = row["voorkeur.minimum"]
+            mini = 1
             evi = row["has_evi"] == "yes"
             stands_available = self.get_evi_stands()
             try:
@@ -787,6 +789,7 @@ class BaseAllocator:
             merchant_branches = row["voorkeur.branches"]
             mini = row["voorkeur.minimum"]
             evi = row["has_evi"] == "yes"
+            mini = 1
 
             stands_available = self.get_stand_for_branche(merchant_branches[0])
             try:
