@@ -303,6 +303,9 @@ class BaseAllocator:
         self.merchants_df["sollicitatieNummer"] = pd.to_numeric(
             self.merchants_df["sollicitatieNummer"]
         )
+        self.merchants_df["voorkeur.minimum"] = self.merchants_df[
+            "voorkeur.minimum"
+        ].fillna(1.0)
 
     def prepare_stands(self):
         """prepare the stands list for allocation"""

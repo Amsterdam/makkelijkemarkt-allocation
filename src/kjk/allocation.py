@@ -138,6 +138,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
             merchant_branches = row["voorkeur.branches"]
             evi = row["has_evi"] == "yes"
 
+            # some merchants have their own fixed stands as pref
+            # don't ask me why we deal with this by checking overlap
+            ignore_pref = any([x in stands for x in pref])
+
             valid_pref_stands = self.cluster_finder.find_valid_cluster(
                 pref,
                 size=len(stands),
@@ -146,7 +150,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 mode="any",
                 evi_merchant=evi,
             )
-            if len(valid_pref_stands) == 0:
+            if len(valid_pref_stands) == 0 or ignore_pref:
                 failed[erk] = (stands, row)
 
         for f in failed.keys():

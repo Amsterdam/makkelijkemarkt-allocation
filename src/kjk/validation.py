@@ -59,6 +59,8 @@ class ValidatorMixin:
                     errors.append(
                         (erk, status, f"aantal kramen {_num} groter dan max {_max}")
                     )
+                if not _min:
+                    _min = 1.0
                 if _min > _num:
                     status_ok = False
                     errors.append(
