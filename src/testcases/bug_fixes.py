@@ -94,3 +94,12 @@ class VplBugTestCase(unittest.TestCase):
 
     def test_bug(self):
         market_allocation = self.allocator.get_allocation()
+
+
+class DapperBugTestCase(unittest.TestCase):
+    def setUp(self):
+        dp = FixtureDataprovider("../fixtures/dapper-acc-bug.json")
+        self.allocator = Allocator(dp)
+
+    def test_bug(self):
+        market_allocation = self.allocator.get_allocation()
