@@ -2,6 +2,7 @@ import pandas as pd
 from kjk.utils import DebugRedisClient
 from kjk.base import BaseAllocator
 from kjk.base import MarketStandDequeueError
+from kjk.base import MerchantDequeueError
 from kjk.base import VPL_POSITION_NOT_AVAILABLE
 from kjk.validation import ValidatorMixin
 from kjk.logging import clog, log
@@ -113,7 +114,12 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         self.cluster_finder.set_stands_reserved(exp)
                 self._allocate_stands_to_merchant(stands, erk)
             except MarketStandDequeueError:
-                self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
+                try:
+                    self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
+                except MerchantDequeueError:
+                    clog.error(
+                        f"VPL plaatsen niet beschikbaar voor erkenningsNummer {erk}"
+                    )
 
     def allocation_phase_03(self):
         log.info("")
