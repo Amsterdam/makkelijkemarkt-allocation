@@ -134,6 +134,8 @@ class TestAlistAllocations(unittest.TestCase):
         # dp.add_page([None, "1", "2", "3", "4", "5", None])
         dp.add_page([None, "1", "2", "3", None])
 
+        dp.add_pref(erkenningsNummer="2", plaatsId="3", priority=1)
+
         # stands
         dp.add_stand(
             plaatsId="1",
