@@ -284,7 +284,7 @@ class TestMovingVPL(unittest.TestCase):
             sollicitatieNummer="1",
             description="frank zappa",
             voorkeur={
-                "branches": [],
+                "branches": ["trendy chemical amusement aid"],
                 "maximum": 1,
                 "minimum": 1,
                 "verkoopinrichting": [],
