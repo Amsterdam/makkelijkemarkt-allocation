@@ -146,18 +146,23 @@ class MarketStandClusterFinder:
         if len(merchant_branche) > 0:
             is_required = self.branche_is_required(merchant_branche[0])
             try:
+                valid = True
                 for std in option:
                     branches = self.branches_dict[std]
                     if is_required and len(branches) == 0:
-                        return False
+                        valid = False
+                        break
                     if len(branches) > 0 and is_required:
                         if merchant_branche[0] not in branches:
-                            return False
+                            valid = False
+                            break
                     if evi_merchant:
                         if "eigen-materieel" not in self.evi_dict[std]:
-                            return False
+                            valid = False
+                            break
                     else:
-                        return "eigen-materieel" not in self.evi_dict[std]
+                        valid = "eigen-materieel" not in self.evi_dict[std]
+                return valid
             except KeyError:
                 pass
             except TypeError:
