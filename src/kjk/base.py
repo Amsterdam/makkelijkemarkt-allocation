@@ -303,6 +303,9 @@ class BaseAllocator:
         self.merchants_df["sollicitatieNummer"] = pd.to_numeric(
             self.merchants_df["sollicitatieNummer"]
         )
+        self.merchants_df["voorkeur.minimum"] = self.merchants_df[
+            "voorkeur.minimum"
+        ].fillna(1.0)
 
     def prepare_stands(self):
         """prepare the stands list for allocation"""
@@ -751,6 +754,16 @@ class BaseAllocator:
                 )
                 if len(stds_np) > 0:
                     stds = stds_np[0]
+            if len(stds) == 0:
+                stds_np = self.cluster_finder.find_valid_cluster_final_phase(
+                    pref,
+                    size=int(mini),
+                    preferred=False,
+                    anywhere=True,
+                    ignore_reserved=True,
+                )
+                if len(stds_np) > 0:
+                    stds = stds_np[0]
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_evi_for_query(self, query):
@@ -777,6 +790,15 @@ class BaseAllocator:
                     merchant_branche=merchant_branches,
                     evi_merchant=evi,
                 )
+            if len(stds) == 0:
+                stds = self.cluster_finder.find_valid_cluster(
+                    stands_available_list,
+                    size=int(mini),
+                    preferred=True,
+                    merchant_branche=merchant_branches,
+                    evi_merchant=evi,
+                    ignore_reserved=True,
+                )
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_branche_solls_for_query(self, query):
@@ -801,5 +823,14 @@ class BaseAllocator:
                     preferred=True,
                     merchant_branche=merchant_branches,
                     evi_merchant=evi,
+                )
+            if len(stds) == 0:
+                stds = self.cluster_finder.find_valid_cluster(
+                    stands_available_list,
+                    size=int(mini),
+                    preferred=True,
+                    merchant_branche=merchant_branches,
+                    evi_merchant=evi,
+                    ignore_reserved=True,
                 )
             self._allocate_stands_to_merchant(stds, erk)

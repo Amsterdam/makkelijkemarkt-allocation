@@ -462,7 +462,10 @@ class TestExpansion(unittest.TestCase):
         allocation = allocator.get_allocation()
         # should get 8,9,10 (max)
         twz = alloc_erk("1", allocation)
-        self.assertListEqual(twz["plaatsen"], ["8", "9", "10"])
+        a = ["8", "9", "10"]
+        a.sort()
+        twz["plaatsen"].sort()
+        self.assertListEqual(twz["plaatsen"], a)
         self.assertEqual(twz["ondernemer"]["description"], "Dweezil Zappa")
 
     def test_gets_rejected_if_not_min(self):
@@ -546,7 +549,10 @@ class TestExpansion(unittest.TestCase):
         allocation = allocator.get_allocation()
         # should get 9,10,11 because 11 is pref
         twz = alloc_erk("1", allocation)
-        self.assertListEqual(twz["plaatsen"], ["9", "10", "11"])
+        twz["plaatsen"].sort()
+        a = ["10", "11", "9"]
+        a.sort()
+        self.assertListEqual(twz["plaatsen"], a)
         self.assertEqual(twz["ondernemer"]["description"], "Dweezil Zappa")
 
     @unittest.skip("Navragen markten wat is een cirkelvormige oppstelling?")

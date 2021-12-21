@@ -54,6 +54,7 @@ class MarketStandClusterFinder:
                 self.branche_required_dict[b["brancheId"]] = False
 
         self.stands_allocated = []
+        self.stands_reserved_for_expansion = []
         self.branches_dict = branches_dict
         self.evi_dict = evi_dict
         self.obstacle_dict = self._process_obstacle_dict(obstacles)
@@ -84,6 +85,9 @@ class MarketStandClusterFinder:
 
     def set_stands_allocated(self, allocated_stands):
         self.stands_allocated += allocated_stands
+
+    def set_stands_reserved(self, stands_to_reserve):
+        self.stands_reserved_for_expansion += stands_to_reserve
 
     def _process_obstacle_dict(self, obs):
         d = {}
@@ -142,18 +146,23 @@ class MarketStandClusterFinder:
         if len(merchant_branche) > 0:
             is_required = self.branche_is_required(merchant_branche[0])
             try:
+                valid = True
                 for std in option:
                     branches = self.branches_dict[std]
                     if is_required and len(branches) == 0:
-                        return False
+                        valid = False
+                        break
                     if len(branches) > 0 and is_required:
                         if merchant_branche[0] not in branches:
-                            return False
+                            valid = False
+                            break
                     if evi_merchant:
                         if "eigen-materieel" not in self.evi_dict[std]:
-                            return False
+                            valid = False
+                            break
                     else:
-                        return "eigen-materieel" not in self.evi_dict[std]
+                        valid = "eigen-materieel" not in self.evi_dict[std]
+                return valid
             except KeyError:
                 pass
             except TypeError:
@@ -161,7 +170,19 @@ class MarketStandClusterFinder:
         return True
 
     def option_is_available(self, option):
-        return not any(elem in option for elem in self.stands_allocated)
+        if "STW" in option:
+            return False
+        stands_not_available = (
+            self.stands_reserved_for_expansion + self.stands_allocated
+        )
+        # stands_not_available = self.stands_allocated
+        return not any(elem in option for elem in stands_not_available)
+
+    def option_is_available_for_expansion(self, option):
+        if "STW" in option:
+            return False
+        stands_not_available = self.stands_allocated
+        return not any(elem in option for elem in stands_not_available)
 
     def find_valid_expansion(
         self,
@@ -194,7 +215,9 @@ class MarketStandClusterFinder:
                     )
                 if ignore_check_available:
                     option = list(set(option) - set(ignore_check_available))
-                if branche_valid_for_option and self.option_is_available(option):
+                if branche_valid_for_option and self.option_is_available_for_expansion(
+                    option
+                ):
                     valid_options.append(option)
         if preferred:
             return self.filter_preferred(valid_options, prefs)
@@ -209,6 +232,7 @@ class MarketStandClusterFinder:
         merchant_branche=None,
         mode="all",
         evi_merchant=False,
+        ignore_reserved=False,
     ):
         """
         check all adjacent clusters of the requested size
@@ -229,15 +253,28 @@ class MarketStandClusterFinder:
                     branche_valid_for_option = self.option_is_valid_branche(
                         option, merchant_branche, evi_merchant
                     )
-                if branche_valid_for_option and self.option_is_available(option):
-                    valid_options.append(option)
+                if ignore_reserved:
+                    if (
+                        branche_valid_for_option
+                        and self.option_is_available_for_expansion(option)
+                    ):
+                        valid_options.append(option)
+                else:
+                    if branche_valid_for_option and self.option_is_available(option):
+                        valid_options.append(option)
         if preferred:
             return self.filter_preferred(valid_options, stand_list)
         else:
             return valid_options
 
     def find_valid_cluster_final_phase(
-        self, stand_list, size=2, preferred=False, merchant_branche=None, anywhere=False
+        self,
+        stand_list,
+        size=2,
+        preferred=False,
+        merchant_branche=None,
+        anywhere=False,
+        ignore_reserved=False,
     ):
         """
         check all adjacent clusters of the requested size
@@ -252,8 +289,12 @@ class MarketStandClusterFinder:
                 valid = any(elem in stand_list for elem in option) and all(
                     isinstance(x, str) for x in option
                 )
-            if valid and self.option_is_available(option):
-                valid_options.append(option)
+            if ignore_reserved:
+                if valid and self.option_is_available_for_expansion(option):
+                    valid_options.append(option)
+            else:
+                if valid and self.option_is_available(option):
+                    valid_options.append(option)
         if preferred:
             return self.filter_preferred(valid_options, stand_list)
         else:

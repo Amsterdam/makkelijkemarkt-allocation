@@ -22,5 +22,11 @@ if __name__ == "__main__":
     from kjk.logging import *
 
     logging.disable(logging.CRITICAL)
+    clog.disabled = True
+    log.disabled = True
+
     unittest.main()
+
+    clog.disabled = False
+    log.disabled = False
     logging.disable(logging.NOTSET)
