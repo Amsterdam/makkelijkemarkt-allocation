@@ -127,10 +127,18 @@ class MarketStandClusterFinder:
         except KeyError:
             return False
 
+    def stand_has_required_branche(self, branches):
+        for br in branches:
+            if self.branche_is_required(br):
+                return True
+        return False
+
     def option_is_valid_branche(self, option, merchant_branche, evi_merchant):
         """
         check if a merchant is trying to move to a branche incompatible stand
         """
+        # once we have the data sorted out this block can be removed
+        # all merchants should have a branche
         if merchant_branche is None or len(merchant_branche) == 0:
             try:
                 for std in option:
@@ -152,6 +160,10 @@ class MarketStandClusterFinder:
                     if is_required and len(branches) == 0:
                         valid = False
                         break
+                    if not is_required and len(branches) > 0:
+                        if self.stand_has_required_branche(branches):
+                            valid = False
+                            break
                     if len(branches) > 0 and is_required:
                         if merchant_branche[0] not in branches:
                             valid = False

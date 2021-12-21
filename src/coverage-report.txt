@@ -1,0 +1,27 @@
+Name                                Stmts   Miss  Cover
+-------------------------------------------------------
+kjk/__init__.py                         0      0   100%
+kjk/allocation.py                     310     12    96%
+kjk/base.py                           490     66    87%
+kjk/inputdata.py                       86      4    95%
+kjk/logging.py                         25      7    72%
+kjk/outputdata.py                      74      4    95%
+kjk/test_utils.py                      27      8    70%
+kjk/utils.py                          237     23    90%
+kjk/validation.py                     101     12    88%
+test_allocation.py                    216      5    98%
+testcases/__init__.py                   0      0   100%
+testcases/alist_allocations.py         67      1    99%
+testcases/basic_allocations.py        101      0   100%
+testcases/branches_allocations.py     120      2    98%
+testcases/bug_fixes.py                 65      0   100%
+testcases/dapper.py                    13      0   100%
+testcases/evi.py                      111      0   100%
+testcases/expansion.py                148      2    99%
+testcases/misc.py                     180      0   100%
+testcases/moving_vpl.py               170      0   100%
+testcases/soll.py                     125      1    99%
+testcases/vpl_allocations.py          117     13    89%
+tests.py                               22      3    86%
+-------------------------------------------------------
+TOTAL                                2805    163    94%

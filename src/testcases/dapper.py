@@ -13,4 +13,4 @@ class DapperTestCase(unittest.TestCase):
 
     def test_evi_alloc(self):
         res = alloc_erk("9012002010", self.market_allocation)
-        self.assertListEqual(res["plaatsen"], ["18"])
+        self.assertListEqual(res["plaatsen"], ["195"])
