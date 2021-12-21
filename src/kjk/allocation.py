@@ -93,7 +93,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         df = self.merchants_df.query(
-            "(status == 'exp' | status == 'expf' | status == 'vpl' | status == 'tvpl') & will_move == 'no'"
+            "(status == 'exp' | status == 'expf') | (( status == 'vpl' | status == 'tvpl') & will_move == 'no')"
         )
         for index, row in df.iterrows():
             try:
@@ -471,6 +471,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 merchant_branches = row["voorkeur.branches"]
                 evi = row["has_evi"] == "yes"
                 maxi = row["voorkeur.maximum"]
+                status = row["status"]
+
+                # exp, expf can not expand
+                if status in ("exp", "expf"):
+                    continue
 
                 assigned_stands = self.market_output.get_assigned_stands_for_merchant(
                     erk
