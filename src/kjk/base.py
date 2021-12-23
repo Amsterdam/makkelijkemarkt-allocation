@@ -21,7 +21,6 @@ EXPANDERS_VIEW = [
     "voorkeur.anywhere",
 ]
 MERCHANTS_SORTED_VIEW = [
-    "erkenningsNummer",
     "sollicitatieNummer",
     "pref",
     "voorkeur.branches",
@@ -732,8 +731,14 @@ class BaseAllocator:
         ).copy()
         return len(df) > 0
 
-    def _allocate_solls_for_query(self, query):
+    def _allocate_solls_for_query(self, query, print_df=False):
         result_list = self.merchants_df.query(query)
+
+        if print_df:
+            print(result_list[MERCHANTS_SORTED_VIEW])
+            print(result_list[["pref"]])
+            print(self.cluster_finder.stands_allocated)
+
         log.info("Ondernemers te alloceren in deze fase: {}".format(len(result_list)))
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]

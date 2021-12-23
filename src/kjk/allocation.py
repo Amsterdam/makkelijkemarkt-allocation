@@ -112,6 +112,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     )
                     for exp in expansion_candidates:
                         self.cluster_finder.set_stands_reserved(exp)
+                    if len(expansion_candidates) > 0:
+                        self._allocate_stands_to_merchant(
+                            expansion_candidates[0], erk, dequeue_merchant=False
+                        )
                 self._allocate_stands_to_merchant(stands, erk)
             except MarketStandDequeueError:
                 try:
@@ -174,6 +178,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 )
                 for exp in expansion_candidates:
                     self.cluster_finder.set_stands_reserved(exp)
+                if len(expansion_candidates) > 0:
+                    self._allocate_stands_to_merchant(
+                        expansion_candidates[0], erk, dequeue_merchant=False
+                    )
             self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
         # STEP 2:
@@ -264,6 +272,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
                             )
                             for exp in expansion_candidates:
                                 self.cluster_finder.set_stands_reserved(exp)
+                            if len(expansion_candidates) > 0:
+                                self._allocate_stands_to_merchant(
+                                    expansion_candidates[0], erk, dequeue_merchant=False
+                                )
                         # unable to solve conflict stay on fixed positions
                         self._allocate_stands_to_merchant(stands, erk)
                     else:
@@ -279,6 +291,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
                             )
                             for exp in expansion_candidates:
                                 self.cluster_finder.set_stands_reserved(exp)
+                            if len(expansion_candidates) > 0:
+                                self._allocate_stands_to_merchant(
+                                    expansion_candidates[0], erk, dequeue_merchant=False
+                                )
                         # no conflicts savely switch positions
                         self._allocate_stands_to_merchant(valid_pref_stands, erk)
                 break
@@ -331,6 +347,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
                             )
                             for exp in expansion_candidates:
                                 self.cluster_finder.set_stands_reserved(exp)
+                            if len(expansion_candidates) > 0:
+                                self._allocate_stands_to_merchant(
+                                    expansion_candidates[0], erk, dequeue_merchant=False
+                                )
                         self._allocate_stands_to_merchant(stands_to_alloc, erk)
                     except Exception:
                         print(erk, stands_to_alloc)
@@ -451,7 +471,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         self._allocate_solls_for_query(
             # "alist == True & branche_required != 'yes' & has_evi != 'yes'"
-            "(status != 'exp' & status != 'expf') & alist == True & branche_required != 'yes'"
+            "(status != 'exp' & status != 'expf') & alist == True & branche_required != 'yes'",
+            print_df=False,
         )
 
     def allocation_phase_10(self):
