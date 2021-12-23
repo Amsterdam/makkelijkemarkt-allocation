@@ -85,21 +85,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "num_merchants": len(evi_merchants),
         }
 
-    def _prepare_expansion(self, erk, stands, size, merchant_branches, evi):
-        expansion_candidates = self.cluster_finder.find_valid_expansion(
-            stands,
-            total_size=size,
-            merchant_branche=merchant_branches,
-            evi_merchant=evi,
-            ignore_check_available=stands,
-        )
-        for exp in expansion_candidates:
-            self.cluster_finder.set_stands_reserved(exp)
-        if len(expansion_candidates) > 0 and self.expansion_mode == "greedy":
-            self._allocate_stands_to_merchant(
-                expansion_candidates[0], erk, dequeue_merchant=False
-            )
-
     def allocation_phase_02(self):
         log.info("")
         clog.info("--- ALLOCATIE FASE 2 ---")

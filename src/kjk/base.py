@@ -260,6 +260,21 @@ class BaseAllocator:
     def set_expansion_mode(self, mode):
         self.expansion_mode = mode
 
+    def _prepare_expansion(self, erk, stands, size, merchant_branches, evi):
+        expansion_candidates = self.cluster_finder.find_valid_expansion(
+            stands,
+            total_size=size,
+            merchant_branche=merchant_branches,
+            evi_merchant=evi,
+            ignore_check_available=stands,
+        )
+        for exp in expansion_candidates:
+            self.cluster_finder.set_stands_reserved(exp)
+        if len(expansion_candidates) > 0 and self.expansion_mode == "greedy":
+            self._allocate_stands_to_merchant(
+                expansion_candidates[0], erk, dequeue_merchant=False
+            )
+
     def create_merchant_dict(self):
         d = {}
         for m in self.merchants:
