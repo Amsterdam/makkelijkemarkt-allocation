@@ -273,7 +273,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         if expand:
                             self._prepare_expansion(
                                 erk,
-                                stands,
+                                valid_pref_stands,
                                 int(row["voorkeur.maximum"]),
                                 merchant_branches,
                                 evi,
@@ -321,7 +321,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         if expand:
                             self._prepare_expansion(
                                 erk,
-                                stands,
+                                stands_to_alloc,
                                 int(row["voorkeur.maximum"]),
                                 merchant_branches,
                                 evi,
