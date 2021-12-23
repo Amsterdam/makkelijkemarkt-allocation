@@ -18,9 +18,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
     So we can focus on the actual allocation phases here
     """
 
-    def allocation_phase_00(self):
+    def allocation_phase_01(self):
         clog.info("--- Makkelijkemarkt Allocatie ---")
-        clog.info("--- ALLOCATIE FASE 0 ---")
+        clog.info("--- ALLOCATIE FASE 1 ---")
         log.info("analyseer de markt en kijk (globaal) of er genoeg plaatsen zijn:")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {} ".format(len(self.merchants_df)))
@@ -85,9 +85,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "num_merchants": len(evi_merchants),
         }
 
-    def allocation_phase_01(self):
+    def allocation_phase_02(self):
         log.info("")
-        clog.info("--- ALLOCATIE FASE 1 ---")
+        clog.info("--- ALLOCATIE FASE 2 ---")
         log.info("ondenemers (vpl) die niet willen verplaatsen of uitbreiden:")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
@@ -337,13 +337,13 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
             self.fixed_set = fixed
 
-    def allocation_phase_05(self):
+    def allocation_phase_04(self):
         log.info("")
         clog.info(
             "## Alle vpls's zijn ingedeeld we gaan de plaatsen die nog vrij zijn verdelen"
         )
         log.info("")
-        clog.info("--- ALLOCATIE FASE 5 ---")
+        clog.info("--- ALLOCATIE FASE 4 ---")
         log.info(
             "de soll's die een kraam willen in een verplichte branche en op de A-lijst staan"
         )
@@ -370,6 +370,13 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "(status != 'exp' & status != 'expf') & alist == True & branche_required == 'yes'"
         )
 
+    def allocation_phase_05(self):
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 5 ---")
+        log.info("de soll's die een kraam willen met een EVI en op de A-lijst staan")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
+
         # A-list EVI
         self._allocate_evi_for_query(
             "(status != 'exp' & status != 'expf') & alist == True & has_evi == 'yes'"
@@ -378,9 +385,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
     def allocation_phase_06(self):
         log.info("")
         clog.info("--- ALLOCATIE FASE 6 ---")
-        log.info(
-            "A-lijst ingedeeld voor verplichte branches, nu de B-lijst for verplichte branches"
-        )
+        log.info("B-lijst for verplichte branches")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
@@ -389,14 +394,21 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "(status != 'exp' & status != 'expf') & alist != True & branche_required == 'yes' & has_evi != 'yes'"
         )
 
+    def allocation_phase_07(self):
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 7 ---")
+        log.info("B-lijst voor ondernemers met EVI")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
+
         # AB-list EVI
         self._allocate_evi_for_query(
             "(status != 'exp' & status != 'expf') & alist != True & has_evi == 'yes'"
         )
 
-    def allocation_phase_06b(self):
+    def allocation_phase_08(self):
         log.info("")
-        clog.info("--- ALLOCATIE FASE 6b ---")
+        clog.info("--- ALLOCATIE FASE 8 ---")
         log.info("Alle ondernemers ingedeeld, nu de uitbreidings fase voor vpl.")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
@@ -428,9 +440,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
                             stands[0], erk, dequeue_merchant=False
                         )
 
-    def allocation_phase_07(self):
+    def allocation_phase_09(self):
         log.info("")
-        clog.info("--- ALLOCATIE FASE 7 ---")
+        clog.info("--- ALLOCATIE FASE 9 ---")
         log.info(
             "B-lijst ingedeeld voor verplichte branches, overige solls op de A-lijst"
         )
@@ -442,9 +454,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "(status != 'exp' & status != 'expf') & alist == True & branche_required != 'yes'"
         )
 
-    def allocation_phase_08(self):
+    def allocation_phase_10(self):
         log.info("")
-        clog.info("--- ALLOCATIE FASE 8 ---")
+        clog.info("--- ALLOCATIE FASE 10 ---")
         log.info("A-list gedaan, overige solls")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
@@ -453,9 +465,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "(status != 'exp' & status != 'expf') & alist == False & branche_required != 'yes' & has_evi != 'yes'"
         )
 
-    def allocation_phase_09(self):
+    def allocation_phase_11(self):
         log.info("")
-        clog.info("--- ALLOCATIE FASE 9 ---")
+        clog.info("--- ALLOCATIE FASE 11 ---")
         log.info("Alle ondernemers ingedeeld, nu de uitbreidings fase.")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
@@ -493,9 +505,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
                             stands[0], erk, dequeue_merchant=False
                         )
 
-    def allocation_phase_10(self):
+    def allocation_phase_12(self):
         log.info("")
-        clog.info("--- ALLOCATIE FASE 10 ---")
+        clog.info("--- ALLOCATIE FASE  12 ---")
         log.info("Markt allocatie ingedeeld, nu de validatie.")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
@@ -505,9 +517,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.validate_branche_allocation()
         self.validate_expansion()
 
-    def allocation_phase_11(self):
+    def allocation_phase_13(self):
         log.info("")
-        clog.info("--- ALLOCATIE FASE 11 ---")
+        clog.info("--- ALLOCATIE FASE 13 ---")
         log.info("Markt allocatie gevalideerd")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
@@ -516,17 +528,19 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
     def get_allocation(self):
 
-        self.allocation_phase_00()
         self.allocation_phase_01()
+        self.allocation_phase_02()
         self.allocation_phase_03()
+        self.allocation_phase_04()
         self.allocation_phase_05()
         self.allocation_phase_06()
-        self.allocation_phase_06b()
         self.allocation_phase_07()
         self.allocation_phase_08()
         self.allocation_phase_09()
         self.allocation_phase_10()
         self.allocation_phase_11()
+        self.allocation_phase_12()
+        self.allocation_phase_13()
 
         if DEBUG:
             json_file = self.market_output.to_json_file()
