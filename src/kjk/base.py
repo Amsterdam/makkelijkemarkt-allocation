@@ -226,6 +226,9 @@ class BaseAllocator:
         self.evi_ids = []
         self.populate_evi_stand_ids()
 
+        # lazy or greedy expansions
+        self.expansion_mode = "lazy"
+
         # export xls for debugging
         if XLS_EXPORT:
 
@@ -253,6 +256,9 @@ class BaseAllocator:
             self.merchants_df[cols].to_excel("../../ondernemers.xls")
             self.positions_df.to_excel("../../kramen.xls")
             self.branches_df.to_excel("../../branches.xls")
+
+    def set_expansion_mode(self, mode):
+        self.expansion_mode = mode
 
     def create_merchant_dict(self):
         d = {}
