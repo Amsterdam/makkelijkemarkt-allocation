@@ -156,6 +156,10 @@ class BaseAllocator:
         self.market_blocks = dp.get_market_blocks()
         self.obstacles = dp.get_obstacles()
 
+        # do some bookkeeping
+        self.allocations_per_phase = {}
+        self.phase_id = "Phase 1"
+
         # guard the max branch positions
         self.branches_scrutenizer = BranchesScrutenizer(self.branches)
 
@@ -259,6 +263,9 @@ class BaseAllocator:
             self.merchants_df[cols].to_excel("../../ondernemers.xls")
             self.positions_df.to_excel("../../kramen.xls")
             self.branches_df.to_excel("../../branches.xls")
+
+    def set_allocation_phase(self, phase_id):
+        self.phase_id = phase_id
 
     def set_expansion_mode(self, mode):
         self.expansion_mode = mode
@@ -732,6 +739,13 @@ class BaseAllocator:
             merchant_dequeue_error = False
             stand_dequeue_error = False
             if allocation_allowed:
+                # some times we need to know the phase in wich a merchant is allocated
+                # mostly for debugging but we may decide to report this to market-dep
+                if self.phase_id not in self.allocations_per_phase:
+                    self.allocations_per_phase[self.phase_id] = []
+                self.allocations_per_phase[self.phase_id].append(
+                    {"erk": erk, "stands": stands_to_alloc}
+                )
                 for st in stands_to_alloc:
                     try:
                         self.dequeue_market_stand(st)
