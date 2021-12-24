@@ -163,3 +163,46 @@ class ValidatorMixin:
             clog.error("Failed: \n")
             print(tabulate(errors, headers="firstrow"))
             clog.info("")
+
+    def validate_preferences(self):
+        log.info("-" * 60)
+        log.info("Valideren plaatsvookeuren.")
+        tws = self.market_output.to_data()["toewijzingen"]
+        pref_dict = {}
+        status_ok = True
+        errors = [
+            (
+                "erkenningsNummer",
+                "voorkeur",
+                "toegewezen plaatsen",
+                "status",
+                "flexibel",
+            )
+        ]
+        for pref in self.prefs:
+            erk = pref["erkenningsNummer"]
+            pl = pref["plaatsId"]
+            if erk not in pref_dict:
+                pref_dict[erk] = []
+            pref_dict[erk].append(pl)
+        for tw in tws:
+            erk = tw["erkenningsNummer"]
+            status = tw["ondernemer"]["status"]
+            try:
+                flex = tw["ondernemer"]["voorkeur"]["anywhere"]
+            except KeyError:
+                flex = None
+            for p in tw["plaatsen"]:
+                try:
+                    prefs = pref_dict[erk]
+                    if p not in prefs and flex is False and status == "soll":
+                        status_ok = False
+                        errors.append((erk, prefs, p, status, flex))
+                except KeyError:
+                    pass
+        if status_ok:
+            clog.info("-> OK")
+        else:
+            clog.error("Failed: \n")
+            print(tabulate(errors, headers="firstrow"))
+            clog.info("")

@@ -497,6 +497,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.validate_evi_allocations()
         self.validate_branche_allocation()
         self.validate_expansion()
+        self.validate_preferences()
 
     def allocation_phase_13(self):
         log.info("")
