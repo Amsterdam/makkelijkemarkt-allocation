@@ -103,15 +103,13 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 merchant_branches = row["voorkeur.branches"]
                 evi = row["has_evi"] == "yes"
                 if expand:
-                    expansion_candidates = self.cluster_finder.find_valid_expansion(
+                    self._prepare_expansion(
+                        erk,
                         stands,
-                        total_size=int(row["voorkeur.maximum"]),
-                        merchant_branche=merchant_branches,
-                        evi_merchant=evi,
-                        ignore_check_available=stands,
+                        int(row["voorkeur.maximum"]),
+                        merchant_branches,
+                        evi,
                     )
-                    for exp in expansion_candidates:
-                        self.cluster_finder.set_stands_reserved(exp)
                 self._allocate_stands_to_merchant(stands, erk)
             except MarketStandDequeueError:
                 try:
@@ -165,15 +163,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
             row = failed[f][1]
             expand = row["wants_expand"]
             if expand:
-                expansion_candidates = self.cluster_finder.find_valid_expansion(
-                    stands,
-                    total_size=int(row["voorkeur.maximum"]),
-                    merchant_branche=merchant_branches,
-                    evi_merchant=evi,
-                    ignore_check_available=stands,
+                self._prepare_expansion(
+                    erk, stands, int(row["voorkeur.maximum"]), merchant_branches, evi
                 )
-                for exp in expansion_candidates:
-                    self.cluster_finder.set_stands_reserved(exp)
             self._allocate_stands_to_merchant(stands_to_alloc, erk)
 
         # STEP 2:
@@ -253,32 +245,24 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
                     if has_conflicts or has_rejections:
                         if expand:
-                            expansion_candidates = (
-                                self.cluster_finder.find_valid_expansion(
-                                    stands,
-                                    total_size=int(row["voorkeur.maximum"]),
-                                    merchant_branche=merchant_branches,
-                                    evi_merchant=evi,
-                                    ignore_check_available=stands,
-                                )
+                            self._prepare_expansion(
+                                erk,
+                                stands,
+                                int(row["voorkeur.maximum"]),
+                                merchant_branches,
+                                evi,
                             )
-                            for exp in expansion_candidates:
-                                self.cluster_finder.set_stands_reserved(exp)
                         # unable to solve conflict stay on fixed positions
                         self._allocate_stands_to_merchant(stands, erk)
                     else:
                         if expand:
-                            expansion_candidates = (
-                                self.cluster_finder.find_valid_expansion(
-                                    valid_pref_stands,
-                                    total_size=int(row["voorkeur.maximum"]),
-                                    merchant_branche=merchant_branches,
-                                    evi_merchant=evi,
-                                    ignore_check_available=valid_pref_stands,
-                                )
+                            self._prepare_expansion(
+                                erk,
+                                valid_pref_stands,
+                                int(row["voorkeur.maximum"]),
+                                merchant_branches,
+                                evi,
                             )
-                            for exp in expansion_candidates:
-                                self.cluster_finder.set_stands_reserved(exp)
                         # no conflicts savely switch positions
                         self._allocate_stands_to_merchant(valid_pref_stands, erk)
                 break
@@ -320,17 +304,13 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     try:
                         expand = row["wants_expand"]
                         if expand:
-                            expansion_candidates = (
-                                self.cluster_finder.find_valid_expansion(
-                                    stands_to_alloc,
-                                    total_size=int(row["voorkeur.maximum"]),
-                                    merchant_branche=merchant_branches,
-                                    evi_merchant=evi,
-                                    ignore_check_available=stands_to_alloc,
-                                )
+                            self._prepare_expansion(
+                                erk,
+                                stands_to_alloc,
+                                int(row["voorkeur.maximum"]),
+                                merchant_branches,
+                                evi,
                             )
-                            for exp in expansion_candidates:
-                                self.cluster_finder.set_stands_reserved(exp)
                         self._allocate_stands_to_merchant(stands_to_alloc, erk)
                     except Exception:
                         print(erk, stands_to_alloc)
@@ -451,7 +431,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         self._allocate_solls_for_query(
             # "alist == True & branche_required != 'yes' & has_evi != 'yes'"
-            "(status != 'exp' & status != 'expf') & alist == True & branche_required != 'yes'"
+            "(status != 'exp' & status != 'expf') & alist == True & branche_required != 'yes'",
+            print_df=False,
         )
 
     def allocation_phase_10(self):

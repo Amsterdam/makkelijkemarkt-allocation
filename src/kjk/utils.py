@@ -161,7 +161,10 @@ class MarketStandClusterFinder:
                         valid = False
                         break
                     if not is_required and len(branches) > 0:
-                        if self.stand_has_required_branche(branches):
+                        if (
+                            self.stand_has_required_branche(branches)
+                            and not evi_merchant
+                        ):
                             valid = False
                             break
                     if len(branches) > 0 and is_required:

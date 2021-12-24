@@ -13,4 +13,7 @@ class DapperTestCase(unittest.TestCase):
 
     def test_evi_alloc(self):
         res = alloc_erk("9012002010", self.market_allocation)
-        self.assertListEqual(res["plaatsen"], ["195"])
+        for p in res["plaatsen"]:
+            for mp in self.market_allocation["marktplaatsen"]:
+                if mp["plaatsId"] == p:
+                    self.assertIn("eigen-materieel", mp["verkoopinrichting"])

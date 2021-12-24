@@ -21,7 +21,6 @@ EXPANDERS_VIEW = [
     "voorkeur.anywhere",
 ]
 MERCHANTS_SORTED_VIEW = [
-    "erkenningsNummer",
     "sollicitatieNummer",
     "pref",
     "voorkeur.branches",
@@ -81,6 +80,9 @@ VPL_POSITION_NOT_AVAILABLE = {
     "code": 5,
     "message": "De vaste plaatsen voor de vpl zijn niet beschikbaar",
 }
+
+EXPANSION_MODE_GREEDY = 1
+EXPANSION_MODE_LAZY = 2
 
 
 class BaseDataprovider:
@@ -227,6 +229,9 @@ class BaseAllocator:
         self.evi_ids = []
         self.populate_evi_stand_ids()
 
+        # lazy or greedy expansions
+        self.expansion_mode = EXPANSION_MODE_LAZY
+
         # export xls for debugging
         if XLS_EXPORT:
 
@@ -254,6 +259,29 @@ class BaseAllocator:
             self.merchants_df[cols].to_excel("../../ondernemers.xls")
             self.positions_df.to_excel("../../kramen.xls")
             self.branches_df.to_excel("../../branches.xls")
+
+    def set_expansion_mode(self, mode):
+        self.expansion_mode = mode
+
+    def _prepare_expansion(self, erk, stands, size, merchant_branches, evi):
+        if len(stands) == 0:
+            return
+        expansion_candidates = self.cluster_finder.find_valid_expansion(
+            stands,
+            total_size=size,
+            merchant_branche=merchant_branches,
+            evi_merchant=evi,
+            ignore_check_available=stands,
+        )
+        for exp in expansion_candidates:
+            self.cluster_finder.set_stands_reserved(exp)
+        if (
+            len(expansion_candidates) > 0
+            and self.expansion_mode == EXPANSION_MODE_GREEDY
+        ):
+            self._allocate_stands_to_merchant(
+                expansion_candidates[0], erk, dequeue_merchant=False
+            )
 
     def create_merchant_dict(self):
         d = {}
@@ -732,8 +760,14 @@ class BaseAllocator:
         ).copy()
         return len(df) > 0
 
-    def _allocate_solls_for_query(self, query):
+    def _allocate_solls_for_query(self, query, print_df=False):
         result_list = self.merchants_df.query(query)
+
+        if print_df:
+            print(result_list[MERCHANTS_SORTED_VIEW])
+            print(result_list[["pref"]])
+            print(self.cluster_finder.stands_allocated)
+
         log.info("Ondernemers te alloceren in deze fase: {}".format(len(result_list)))
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
