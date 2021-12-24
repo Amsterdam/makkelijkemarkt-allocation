@@ -81,6 +81,9 @@ VPL_POSITION_NOT_AVAILABLE = {
     "message": "De vaste plaatsen voor de vpl zijn niet beschikbaar",
 }
 
+EXPANSION_MODE_GREEDY = 1
+EXPANSION_MODE_LAZY = 2
+
 
 class BaseDataprovider:
     """
@@ -227,7 +230,7 @@ class BaseAllocator:
         self.populate_evi_stand_ids()
 
         # lazy or greedy expansions
-        self.expansion_mode = "lazy"
+        self.expansion_mode = EXPANSION_MODE_LAZY
 
         # export xls for debugging
         if XLS_EXPORT:
@@ -261,6 +264,8 @@ class BaseAllocator:
         self.expansion_mode = mode
 
     def _prepare_expansion(self, erk, stands, size, merchant_branches, evi):
+        if len(stands) == 0:
+            return
         expansion_candidates = self.cluster_finder.find_valid_expansion(
             stands,
             total_size=size,
@@ -270,7 +275,10 @@ class BaseAllocator:
         )
         for exp in expansion_candidates:
             self.cluster_finder.set_stands_reserved(exp)
-        if len(expansion_candidates) > 0 and self.expansion_mode == "greedy":
+        if (
+            len(expansion_candidates) > 0
+            and self.expansion_mode == EXPANSION_MODE_GREEDY
+        ):
             self._allocate_stands_to_merchant(
                 expansion_candidates[0], erk, dequeue_merchant=False
             )
