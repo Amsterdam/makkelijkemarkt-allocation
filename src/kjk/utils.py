@@ -316,6 +316,33 @@ class MarketStandClusterFinder:
             return valid_options
 
 
+class AllocationDebugger:
+    def __init__(self, data):
+        self.data = data
+
+    def get_allocation_phase_for_stand(self, stand_id):
+        for k in self.data.keys():
+            allocs = self.data[k]
+            try:
+                for alloc in allocs:
+                    if stand_id in alloc["stands"]:
+                        return k
+            except TypeError:
+                pass
+        return None
+
+    def get_allocation_phase_for_merchant(self, erk):
+        for k in self.data.keys():
+            allocs = self.data[k]
+            try:
+                for alloc in allocs:
+                    if erk == alloc["erk"]:
+                        return k
+            except TypeError:
+                pass
+        return None
+
+
 class TradePlacesSolver:
     def __init__(self, data):
         self.data = data

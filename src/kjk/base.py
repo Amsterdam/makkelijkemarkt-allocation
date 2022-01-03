@@ -778,7 +778,7 @@ class BaseAllocator:
         result_list = self.merchants_df.query(query)
 
         if print_df:
-            print(result_list[MERCHANTS_SORTED_VIEW])
+            print(result_list[EXPANDERS_VIEW])
             print(result_list[["pref"]])
             print(self.cluster_finder.stands_allocated)
 

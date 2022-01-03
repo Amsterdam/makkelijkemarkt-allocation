@@ -13,6 +13,7 @@ from kjk.outputdata import (
 )
 from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
+from kjk.utils import AllocationDebugger
 from kjk.test_utils import (
     print_alloc,
     stands_erk,
@@ -21,6 +22,41 @@ from kjk.test_utils import (
     ErkenningsnummerNotFoudError,
 )
 from kjk.utils import TradePlacesSolver
+
+
+class AllocationDebuggerTestCase(unittest.TestCase):
+    def setUp(self):
+        data = {
+            "Phase 10": [
+                {"erk": "0162016063", "stands": ["64", "66"]},
+                {"erk": "6012021081", "stands": ["8"]},
+            ],
+            "Phase 11": [
+                {"erk": "4021992092", "stands": ["126"]},
+                {"erk": "6041993100", "stands": ["98"]},
+                {"erk": "3021997061", "stands": ["115"]},
+                {"erk": "9022021060", "stands": ["224"]},
+                {"erk": "1052016011", "stands": ["26"]},
+            ],
+            "Phase x": None,
+        }
+        self.sut = AllocationDebugger(data)
+
+    def test_by_stand(self):
+        result = self.sut.get_allocation_phase_for_stand("98")
+        self.assertEqual("Phase 11", result)
+
+    def test_by_merchant(self):
+        result = self.sut.get_allocation_phase_for_merchant("6041993100")
+        self.assertEqual("Phase 11", result)
+
+    def test_by_unknwon_merchant(self):
+        result = self.sut.get_allocation_phase_for_merchant("xx6041993100")
+        self.assertEqual(None, result)
+
+    def test_by_unknwon_merchant(self):
+        result = self.sut.get_allocation_phase_for_stand("1234")
+        self.assertEqual(None, result)
 
 
 class TradePlacesSolverTestCase(unittest.TestCase):

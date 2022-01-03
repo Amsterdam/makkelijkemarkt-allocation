@@ -441,7 +441,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self._allocate_solls_for_query(
             # "alist == True & branche_required != 'yes' & has_evi != 'yes'"
             "(status != 'exp' & status != 'expf') & alist == True & branche_required != 'yes'",
-            print_df=False,
+            print_df=True,
         )
 
     def allocation_phase_10(self):
