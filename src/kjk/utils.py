@@ -326,7 +326,7 @@ class AllocationDebugger:
             try:
                 for alloc in allocs:
                     if stand_id in alloc["stands"]:
-                        return k
+                        return f"stand: {stand_id} -> {k}"
             except TypeError:
                 pass
         return None
@@ -337,7 +337,7 @@ class AllocationDebugger:
             try:
                 for alloc in allocs:
                     if erk == alloc["erk"]:
-                        return k
+                        return f"merchant: {erk} -> {k}"
             except TypeError:
                 pass
         return None

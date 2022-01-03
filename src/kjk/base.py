@@ -5,6 +5,7 @@ from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
 from kjk.logging import clog, log
+from kjk.rejection_reasons import MARKET_FULL
 
 pd.options.mode.chained_assignment = "raise"
 
@@ -62,24 +63,6 @@ class MarketStandDequeueError(Exception):
 
     pass
 
-
-BRANCHE_FULL = {
-    "code": 1,
-    "message": "Alle marktplaatsen voor deze branche zijn reeds ingedeeld.",
-}
-ADJACENT_UNAVAILABLE = {
-    "code": 2,
-    "message": "Geen geschikte locatie gevonden met huidige voorkeuren.",
-}
-MINIMUM_UNAVAILABLE = {
-    "code": 3,
-    "message": "Minimum aantal plaatsen niet beschikbaar.",
-}
-MARKET_FULL = {"code": 4, "message": "Alle marktplaatsen zijn reeds ingedeeld."}
-VPL_POSITION_NOT_AVAILABLE = {
-    "code": 5,
-    "message": "De vaste plaatsen voor de vpl zijn niet beschikbaar",
-}
 
 EXPANSION_MODE_GREEDY = 1
 EXPANSION_MODE_LAZY = 2

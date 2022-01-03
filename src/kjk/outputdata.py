@@ -1,23 +1,13 @@
 import json
+from kjk.rejection_reasons import PREF_NOT_AVAILABLE
 
 
 class StandsTypeError(Exception):
     pass
 
 
-BRANCHE_FULL = {
-    "code": 1,
-    "message": "Alle marktplaatsen voor deze branche zijn reeds ingedeeld.",
-}
-ADJACENT_UNAVAILABLE = {
-    "code": 2,
-    "message": "Geen geschikte locatie gevonden met huidige voorkeuren.",
-}
-MINIMUM_UNAVAILABLE = {
-    "code": 3,
-    "message": "Minimum aantal plaatsen niet beschikbaar.",
-}
-MARKET_FULL = {"code": 4, "message": "Alle marktplaatsen zijn reeds ingedeeld."}
+class ConvertToRejectionError(Exception):
+    pass
 
 
 class MarketArrangement:
@@ -41,6 +31,22 @@ class MarketArrangement:
         self.merchants = []
 
         self.assigned_stands = {}
+
+    def convert_to_rejection(self, merchant_id=None):
+        try:
+            allocation_object = self.allocation_dict[merchant_id]
+            rejection_obj = {
+                "marktId": self.market_id,
+                "ondernemer": allocation_object["ondernemer"],
+                "reason": PREF_NOT_AVAILABLE,
+                "marktDate": self.market_date,
+                "erkenningsNummer": merchant_id,
+            }
+            self.rejection_list.append(rejection_obj)
+            del self.allocation_dict[merchant_id]
+            return len(allocation_object["plaatsen"])
+        except Exception:
+            raise ConvertToRejectionError("Could not convert allocation to rejection")
 
     def add_allocation(self, merchant_id=None, stand_ids=None, merchant_object=None):
         if type(stand_ids) is not list:

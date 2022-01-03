@@ -5,7 +5,7 @@ from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider, MockDataprovider
 from kjk.outputdata import MarketArrangement
 from kjk.outputdata import StandsTypeError
-from kjk.outputdata import (
+from kjk.rejection_reasons import (
     MINIMUM_UNAVAILABLE,
     MARKET_FULL,
     BRANCHE_FULL,
@@ -44,11 +44,11 @@ class AllocationDebuggerTestCase(unittest.TestCase):
 
     def test_by_stand(self):
         result = self.sut.get_allocation_phase_for_stand("98")
-        self.assertEqual("Phase 11", result)
+        self.assertEqual("stand: 98 -> Phase 11", result)
 
     def test_by_merchant(self):
         result = self.sut.get_allocation_phase_for_merchant("6041993100")
-        self.assertEqual("Phase 11", result)
+        self.assertEqual("merchant: 6041993100 -> Phase 11", result)
 
     def test_by_unknwon_merchant(self):
         result = self.sut.get_allocation_phase_for_merchant("xx6041993100")

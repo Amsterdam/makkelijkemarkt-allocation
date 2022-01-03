@@ -1,13 +1,15 @@
 import pandas as pd
-from pprint import pprint
 from kjk.utils import DebugRedisClient
 from kjk.base import BaseAllocator
 from kjk.base import MarketStandDequeueError
 from kjk.base import MerchantDequeueError
-from kjk.base import VPL_POSITION_NOT_AVAILABLE
+from kjk.rejection_reasons import VPL_POSITION_NOT_AVAILABLE
 from kjk.validation import ValidatorMixin
 from kjk.logging import clog, log
 from kjk.utils import TradePlacesSolver
+from kjk.outputdata import ConvertToRejectionError
+
+# from kjk.utils import AllocationDebugger
 
 DEBUG = False
 
@@ -439,9 +441,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         self._allocate_solls_for_query(
-            # "alist == True & branche_required != 'yes' & has_evi != 'yes'"
             "(status != 'exp' & status != 'expf') & alist == True & branche_required != 'yes'",
-            print_df=True,
+            print_df=False,
         )
 
     def allocation_phase_10(self):
@@ -505,19 +506,33 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
+        # merhants who have 'anywhere' false
+        # and do not have a preferred stand
+        rejected = self.correct_preferences()
+        self.reclaimed_number_stands = 0
+        for r in rejected:
+            try:
+                num_freed = self.market_output.convert_to_rejection(r)
+            except ConvertToRejectionError:
+                num_freed = 0
+            self.reclaimed_number_stands += num_freed
+
         self.validate_double_allocation()
         self.validate_evi_allocations()
         self.validate_branche_allocation()
         self.validate_expansion()
         self.validate_preferences()
-        pprint(self.allocations_per_phase)
 
     def allocation_phase_13(self):
         self.set_allocation_phase("Phase 13")
         log.info("")
         clog.info("--- ALLOCATIE FASE 13 ---")
         log.info("Markt allocatie gevalideerd")
-        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info(
+            "nog open plaatsen: {}".format(
+                len(self.positions_df) + self.reclaimed_number_stands
+            )
+        )
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         self.reject_remaining_merchants()

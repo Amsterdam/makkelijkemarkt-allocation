@@ -164,12 +164,17 @@ class ValidatorMixin:
             print(tabulate(errors, headers="firstrow"))
             clog.info("")
 
-    def validate_preferences(self):
-        log.info("-" * 60)
-        log.info("Valideren plaatsvookeuren.")
+    def correct_preferences(self):
+        return self.validate_preferences(verbose=False)
+
+    def validate_preferences(self, verbose=True):
+        if verbose:
+            log.info("-" * 60)
+            log.info("Valideren plaatsvookeuren.")
         tws = self.market_output.to_data()["toewijzingen"]
         pref_dict = {}
         status_ok = True
+        merchants_to_be_rejected = []
         errors = [
             (
                 "erkenningsNummer",
@@ -198,11 +203,14 @@ class ValidatorMixin:
                     if p not in prefs and flex is False and status == "soll":
                         status_ok = False
                         errors.append((erk, prefs, p, status, flex))
+                        merchants_to_be_rejected.append(erk)
                 except KeyError:
                     pass
-        if status_ok:
-            clog.info("-> OK")
-        else:
-            clog.error("Failed: \n")
-            print(tabulate(errors, headers="firstrow"))
-            clog.info("")
+        if verbose:
+            if status_ok:
+                clog.info("-> OK")
+            else:
+                clog.error("Failed: \n")
+                print(tabulate(errors, headers="firstrow"))
+                clog.info("")
+        return merchants_to_be_rejected
