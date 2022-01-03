@@ -5,6 +5,7 @@ from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
 from kjk.logging import clog, log
+from kjk.rejection_reasons import MARKET_FULL
 
 pd.options.mode.chained_assignment = "raise"
 
@@ -62,24 +63,6 @@ class MarketStandDequeueError(Exception):
 
     pass
 
-
-BRANCHE_FULL = {
-    "code": 1,
-    "message": "Alle marktplaatsen voor deze branche zijn reeds ingedeeld.",
-}
-ADJACENT_UNAVAILABLE = {
-    "code": 2,
-    "message": "Geen geschikte locatie gevonden met huidige voorkeuren.",
-}
-MINIMUM_UNAVAILABLE = {
-    "code": 3,
-    "message": "Minimum aantal plaatsen niet beschikbaar.",
-}
-MARKET_FULL = {"code": 4, "message": "Alle marktplaatsen zijn reeds ingedeeld."}
-VPL_POSITION_NOT_AVAILABLE = {
-    "code": 5,
-    "message": "De vaste plaatsen voor de vpl zijn niet beschikbaar",
-}
 
 EXPANSION_MODE_GREEDY = 1
 EXPANSION_MODE_LAZY = 2
@@ -155,6 +138,10 @@ class BaseAllocator:
         self.open_positions = dp.get_market_locations()
         self.market_blocks = dp.get_market_blocks()
         self.obstacles = dp.get_obstacles()
+
+        # do some bookkeeping
+        self.allocations_per_phase = {}
+        self.phase_id = "Phase 1"
 
         # guard the max branch positions
         self.branches_scrutenizer = BranchesScrutenizer(self.branches)
@@ -259,6 +246,9 @@ class BaseAllocator:
             self.merchants_df[cols].to_excel("../../ondernemers.xls")
             self.positions_df.to_excel("../../kramen.xls")
             self.branches_df.to_excel("../../branches.xls")
+
+    def set_allocation_phase(self, phase_id):
+        self.phase_id = phase_id
 
     def set_expansion_mode(self, mode):
         self.expansion_mode = mode
@@ -732,6 +722,13 @@ class BaseAllocator:
             merchant_dequeue_error = False
             stand_dequeue_error = False
             if allocation_allowed:
+                # some times we need to know the phase in wich a merchant is allocated
+                # mostly for debugging but we may decide to report this to market-dep
+                if self.phase_id not in self.allocations_per_phase:
+                    self.allocations_per_phase[self.phase_id] = []
+                self.allocations_per_phase[self.phase_id].append(
+                    {"erk": erk, "stands": stands_to_alloc}
+                )
                 for st in stands_to_alloc:
                     try:
                         self.dequeue_market_stand(st)
@@ -764,7 +761,7 @@ class BaseAllocator:
         result_list = self.merchants_df.query(query)
 
         if print_df:
-            print(result_list[MERCHANTS_SORTED_VIEW])
+            print(result_list[EXPANDERS_VIEW])
             print(result_list[["pref"]])
             print(self.cluster_finder.stands_allocated)
 
