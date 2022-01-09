@@ -840,6 +840,7 @@ class BaseAllocator:
             merchant_branches = row["voorkeur.branches"]
             mini = row["voorkeur.minimum"]
             evi = row["has_evi"] == "yes"
+            pref = row["pref"]
 
             stands_available = self.get_stand_for_branche(merchant_branches[0])
             try:
@@ -847,6 +848,15 @@ class BaseAllocator:
             except KeyError:
                 stands_available_list = []
             stds = []
+            if len(stds) == 0:
+                stds = self.cluster_finder.find_valid_cluster(
+                    pref,
+                    size=int(mini),
+                    preferred=True,
+                    merchant_branche=merchant_branches,
+                    evi_merchant=evi,
+                    mode="any",
+                )
             if len(stds) == 0:
                 stds = self.cluster_finder.find_valid_cluster(
                     stands_available_list,
