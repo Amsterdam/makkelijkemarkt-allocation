@@ -38,19 +38,25 @@ BRANCHE_VIEW = [
 
 
 class VPLCollisionError(Exception):
-    """this will be raised id two VPL merchants claim the same market position. (should never happen)"""
+    """this will be raised if two VPL merchants claim the same market position. (should never happen)"""
 
     pass
 
 
 class MerchantNotFoundError(Exception):
-    """this will be raised id a merchant id can not be found in the input data. (should never happen)"""
+    """this will be raised if a merchant id can not be found in the input data. (should never happen)"""
 
     pass
 
 
 class MerchantDequeueError(Exception):
-    """this will be raised id a merchant id can not be removed from the queue (should never happen)"""
+    """this will be raised if a merchant id can not be removed from the queue (should never happen)"""
+
+    pass
+
+
+class NoMerchantsForMarketError(Exception):
+    """this will be raised when no merchants are found for the market"""
 
     pass
 
@@ -310,6 +316,10 @@ class BaseAllocator:
     def prepare_merchants(self):
         """prepare the merchants list for allocation"""
         self.df_for_attending_merchants()
+        if len(self.merchants_df) == 0:
+            raise NoMerchantsForMarketError(
+                "Geen ondernemers aangemeld voor deze markt"
+            )
         self.add_mandatory_columns()
         self.add_prefs_for_merchant()
         self.add_alist_status_for_merchant()
