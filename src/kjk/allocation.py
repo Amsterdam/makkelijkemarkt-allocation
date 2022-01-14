@@ -146,6 +146,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
 
+        self.cluster_finder.set_prevent_evi(True)
+
         # STEP 1:
         # first allocate the vpl's that can not move to avoid conflicts
         failed = {}
@@ -331,6 +333,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         print(erk, stands_to_alloc)
 
             self.fixed_set = fixed
+        self.cluster_finder.set_prevent_evi(False)
 
     def allocation_phase_04(self):
         self.set_allocation_phase("Phase 4")
@@ -389,7 +392,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         # B-list required branches
         self._allocate_branche_solls_for_query(
-            "(status != 'exp' & status != 'expf') & alist != True & branche_required == 'yes' & has_evi != 'yes'"
+            # "(status != 'exp' & status != 'expf') & alist != True & branche_required == 'yes' & has_evi != 'yes'"
+            "(status != 'exp' & status != 'expf') & alist != True & branche_required == 'yes'"
         )
 
     def allocation_phase_07(self):
@@ -455,6 +459,29 @@ class Allocator(BaseAllocator, ValidatorMixin):
             print_df=False,
         )
 
+    def allocation_phase_09b(self):
+        self.set_allocation_phase("Phase 11")
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 11 ---")
+        log.info("Alle ondernemers ingedeeld, nu de uitbreidings fase.")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
+
+        # get the alist people first
+        df_alist = self.expanders_df.query("alist == True & branche_required == 'yes'")
+        df_blist = self.expanders_df.query("alist != True & branche_required == 'yes'")
+        dataframes = [df_alist, df_blist]
+        self._expand_for_merchants(dataframes)
+
+        df_alist = self.expanders_df.query(
+            "alist == True & branche_required != 'yes' & has_evi == 'yes'"
+        )
+        df_blist = self.expanders_df.query(
+            "alist != True & branche_required != 'yes' & has_evi == 'yes'"
+        )
+        dataframes = [df_alist, df_blist]
+        self._expand_for_merchants(dataframes)
+
     def allocation_phase_10(self):
         self.set_allocation_phase("Phase 10")
         log.info("")
@@ -465,7 +492,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         self._allocate_solls_for_query(
             "(status != 'exp' & status != 'expf') & alist == False & branche_required != 'yes' & has_evi != 'yes'",
-            print_df=True,
+            print_df=False,
         )
 
     def allocation_phase_11(self):
@@ -477,9 +504,16 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         # get the alist people first
-        df_alist = self.expanders_df.query("alist == True")
-        df_blist = self.expanders_df.query("alist != True")
+        df_alist = self.expanders_df.query(
+            "alist == True & branche_required != 'yes' & has_evi != 'yes'"
+        )
+        df_blist = self.expanders_df.query(
+            "alist != True & branche_required != 'yes' & has_evi != 'yes'"
+        )
         dataframes = [df_alist, df_blist]
+        self._expand_for_merchants(dataframes)
+
+    def _expand_for_merchants(self, dataframes):
         for df in dataframes:
             for index, row in df.iterrows():
                 erk = row["erkenningsNummer"]
@@ -559,6 +593,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.allocation_phase_07()
         self.allocation_phase_08()
         self.allocation_phase_09()
+        self.allocation_phase_09b()
         self.allocation_phase_10()
         self.allocation_phase_11()
         self.allocation_phase_12()

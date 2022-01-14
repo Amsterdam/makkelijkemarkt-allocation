@@ -45,7 +45,7 @@ class MarketStandClusterFinder:
     """
 
     def __init__(self, data, obstacles, branches_dict, evi_dict, branches):
-
+        self.prevent_evi = False
         self.branche_required_dict = {}
         for b in branches:
             try:
@@ -82,6 +82,9 @@ class MarketStandClusterFinder:
                         _next = None
                     self.stands_linked_list[_mid] = {"prev": _prev, "next": _next}
         self.flattened_list.append(None)
+
+    def set_prevent_evi(self, prevent_evi):
+        self.prevent_evi = prevent_evi
 
     def set_stands_allocated(self, allocated_stands):
         self.stands_allocated += allocated_stands
@@ -133,7 +136,9 @@ class MarketStandClusterFinder:
                 return True
         return False
 
-    def option_is_valid_branche(self, option, merchant_branche, evi_merchant):
+    def option_is_valid_branche(
+        self, option, merchant_branche, evi_merchant, prevent_evi=False
+    ):
         """
         check if a merchant is trying to move to a branche incompatible stand
         """
@@ -176,7 +181,8 @@ class MarketStandClusterFinder:
                             valid = False
                             break
                     else:
-                        valid = "eigen-materieel" not in self.evi_dict[std]
+                        if self.prevent_evi:
+                            return "eigen-materieel" not in self.evi_dict[std]
                 return valid
             except KeyError:
                 pass

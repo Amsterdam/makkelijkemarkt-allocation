@@ -778,8 +778,7 @@ class BaseAllocator:
         result_list = self.merchants_df.query(query)
 
         if print_df:
-            print(result_list[EXPANDERS_VIEW])
-            print(result_list[["pref"]])
+            print(result_list)
             print(self.cluster_finder.stands_allocated)
 
         log.info("Ondernemers te alloceren in deze fase: {}".format(len(result_list)))
@@ -826,6 +825,7 @@ class BaseAllocator:
             # maxi = row["voorkeur.maximum"]
             evi = row["has_evi"] == "yes"
             pref = row["pref"]
+            expand = row["wants_expand"]
 
             stands_available = self.get_evi_stands()
             try:
@@ -858,6 +858,15 @@ class BaseAllocator:
                     merchant_branche=merchant_branches,
                     evi_merchant=evi,
                     ignore_reserved=True,
+                )
+
+            if expand:
+                self._prepare_expansion(
+                    erk,
+                    stds,
+                    int(row["voorkeur.maximum"]),
+                    merchant_branches,
+                    evi,
                 )
             self._allocate_stands_to_merchant(stds, erk)
 
