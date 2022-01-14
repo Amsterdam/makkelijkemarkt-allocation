@@ -1,0 +1,1834 @@
+{
+    "naam": "?",
+    "marktId": "50",
+    "marktDate": "2022-01-19",
+    "markt": {
+        "id": 50,
+        "afkorting": "EES-B",
+        "naam": "Eesterenlaan Biomarkt",
+        "soort": "week",
+        "geoArea": null,
+        "marktDagen": [
+            "wo"
+        ],
+        "standaardKraamAfmeting": 3,
+        "extraMetersMogelijk": true,
+        "aanwezigeOpties": {
+            "3mKramen": true,
+            "4mKramen": true,
+            "extraMeters": true,
+            "elektra": true,
+            "afvaleiland": true
+        },
+        "perfectViewNummer": 43,
+        "aantalKramen": 20,
+        "aantalMeter": 80,
+        "auditMax": 10,
+        "kiesJeKraamMededelingActief": false,
+        "kiesJeKraamMededelingTitel": null,
+        "kiesJeKraamMededelingTekst": null,
+        "kiesJeKraamActief": true,
+        "marktBeeindigd": null,
+        "kiesJeKraamFase": "wenperiode",
+        "kiesJeKraamGeblokkeerdePlaatsen": null,
+        "kiesJeKraamGeblokkeerdeData": null,
+        "kiesJeKraamEmailKramenzetter": null,
+        "marktDagenTekst": "Woensdag, donderdag, vrijdag",
+        "indelingsTijdstipTekst": null,
+        "telefoonNummerContact": null,
+        "makkelijkeMarktActief": true,
+        "indelingstype": "traditioneel",
+        "isABlijstIndeling": false
+    },
+    "marktplaatsen": [
+        {
+            "plaatsId": "1",
+            "branches": [
+                "101-agf"
+            ],
+            "verkoopinrichting": [],
+            "properties": []
+        },
+        {
+            "plaatsId": "2",
+            "branches": [
+                "101-agf"
+            ],
+            "verkoopinrichting": [],
+            "properties": []
+        },
+        {
+            "plaatsId": "3",
+            "branches": [
+                "109-zuivel-eieren"
+            ],
+            "verkoopinrichting": [],
+            "properties": []
+        },
+        {
+            "plaatsId": "4",
+            "branches": [
+                "109-zuivel-eieren"
+            ],
+            "verkoopinrichting": [],
+            "properties": []
+        },
+        {
+            "plaatsId": "5",
+            "branches": [
+                "201-broodjes-belegd"
+            ],
+            "verkoopinrichting": [],
+            "properties": [
+                "electra"
+            ]
+        },
+        {
+            "plaatsId": "6",
+            "branches": [
+                "201-broodjes-belegd"
+            ],
+            "verkoopinrichting": [],
+            "properties": []
+        },
+        {
+            "plaatsId": "7",
+            "branches": [
+                "211-delicatessen-hapjes"
+            ],
+            "verkoopinrichting": [],
+            "properties": []
+        },
+        {
+            "plaatsId": "8",
+            "branches": [
+                "102-bio-health-fairtrade"
+            ],
+            "verkoopinrichting": [],
+            "properties": []
+        },
+        {
+            "plaatsId": "9",
+            "branches": [
+                "103-brood-banket",
+                "bak"
+            ],
+            "verkoopinrichting": [
+                "eigen-materieel"
+            ],
+            "properties": []
+        },
+        {
+            "plaatsId": "10",
+            "branches": [
+                "103-brood-banket",
+                "bak"
+            ],
+            "verkoopinrichting": [
+                "eigen-materieel"
+            ],
+            "properties": []
+        },
+        {
+            "plaatsId": "11",
+            "branches": [
+                "313-parfumerie-drogisterij-persoonlijke-verzorging"
+            ],
+            "verkoopinrichting": [],
+            "properties": []
+        },
+        {
+            "plaatsId": "12",
+            "branches": [
+                "102-bio-health-fairtrade"
+            ],
+            "verkoopinrichting": [],
+            "properties": []
+        },
+        {
+            "plaatsId": "13",
+            "branches": [],
+            "verkoopinrichting": [],
+            "properties": []
+        },
+        {
+            "plaatsId": "14",
+            "branches": [
+                "108-vleeswaren",
+                "bak"
+            ],
+            "verkoopinrichting": [
+                "eigen-materieel"
+            ],
+            "properties": []
+        },
+        {
+            "plaatsId": "15",
+            "branches": [
+                "105-noten-zuidvruchten",
+                "bak"
+            ],
+            "verkoopinrichting": [
+                "eigen-materieel"
+            ],
+            "properties": []
+        },
+        {
+            "plaatsId": "16",
+            "branches": [
+                "105-noten-zuidvruchten",
+                "bak"
+            ],
+            "verkoopinrichting": [
+                "eigen-materieel"
+            ],
+            "properties": []
+        },
+        {
+            "plaatsId": "17",
+            "branches": [
+                "107-vis-nat",
+                "bak"
+            ],
+            "verkoopinrichting": [
+                "eigen-materieel"
+            ],
+            "properties": []
+        },
+        {
+            "plaatsId": "18",
+            "branches": [
+                "107-vis-nat",
+                "bak"
+            ],
+            "verkoopinrichting": [
+                "eigen-materieel"
+            ],
+            "properties": []
+        },
+        {
+            "plaatsId": "19",
+            "branches": [],
+            "verkoopinrichting": [],
+            "properties": []
+        },
+        {
+            "plaatsId": "20",
+            "branches": [],
+            "verkoopinrichting": [],
+            "properties": []
+        }
+    ],
+    "rows": [
+        [
+            {
+                "plaatsId": "18",
+                "branches": [
+                    "107-vis-nat",
+                    "bak"
+                ],
+                "verkoopinrichting": [
+                    "eigen-materieel"
+                ],
+                "properties": []
+            },
+            {
+                "plaatsId": "17",
+                "branches": [
+                    "107-vis-nat",
+                    "bak"
+                ],
+                "verkoopinrichting": [
+                    "eigen-materieel"
+                ],
+                "properties": []
+            },
+            {
+                "plaatsId": "16",
+                "branches": [
+                    "105-noten-zuidvruchten",
+                    "bak"
+                ],
+                "verkoopinrichting": [
+                    "eigen-materieel"
+                ],
+                "properties": []
+            },
+            {
+                "plaatsId": "15",
+                "branches": [
+                    "105-noten-zuidvruchten",
+                    "bak"
+                ],
+                "verkoopinrichting": [
+                    "eigen-materieel"
+                ],
+                "properties": []
+            },
+            {
+                "plaatsId": "14",
+                "branches": [
+                    "108-vleeswaren",
+                    "bak"
+                ],
+                "verkoopinrichting": [
+                    "eigen-materieel"
+                ],
+                "properties": []
+            },
+            {
+                "plaatsId": "13",
+                "branches": [],
+                "verkoopinrichting": [],
+                "properties": []
+            },
+            {
+                "plaatsId": "12",
+                "branches": [
+                    "102-bio-health-fairtrade"
+                ],
+                "verkoopinrichting": [],
+                "properties": []
+            },
+            {
+                "plaatsId": "11",
+                "branches": [
+                    "313-parfumerie-drogisterij-persoonlijke-verzorging"
+                ],
+                "verkoopinrichting": [],
+                "properties": []
+            },
+            {
+                "plaatsId": "10",
+                "branches": [
+                    "103-brood-banket",
+                    "bak"
+                ],
+                "verkoopinrichting": [
+                    "eigen-materieel"
+                ],
+                "properties": []
+            },
+            {
+                "plaatsId": "9",
+                "branches": [
+                    "103-brood-banket",
+                    "bak"
+                ],
+                "verkoopinrichting": [
+                    "eigen-materieel"
+                ],
+                "properties": []
+            },
+            {
+                "plaatsId": "20",
+                "branches": [],
+                "verkoopinrichting": [],
+                "properties": []
+            },
+            {
+                "plaatsId": "19",
+                "branches": [],
+                "verkoopinrichting": [],
+                "properties": []
+            }
+        ],
+        [
+            {
+                "plaatsId": "1",
+                "branches": [
+                    "101-agf"
+                ],
+                "verkoopinrichting": [],
+                "properties": []
+            },
+            {
+                "plaatsId": "2",
+                "branches": [
+                    "101-agf"
+                ],
+                "verkoopinrichting": [],
+                "properties": []
+            },
+            {
+                "plaatsId": "3",
+                "branches": [
+                    "109-zuivel-eieren"
+                ],
+                "verkoopinrichting": [],
+                "properties": []
+            },
+            {
+                "plaatsId": "4",
+                "branches": [
+                    "109-zuivel-eieren"
+                ],
+                "verkoopinrichting": [],
+                "properties": []
+            },
+            {
+                "plaatsId": "5",
+                "branches": [
+                    "201-broodjes-belegd"
+                ],
+                "verkoopinrichting": [],
+                "properties": [
+                    "electra"
+                ]
+            },
+            {
+                "plaatsId": "6",
+                "branches": [
+                    "201-broodjes-belegd"
+                ],
+                "verkoopinrichting": [],
+                "properties": []
+            },
+            {
+                "plaatsId": "7",
+                "branches": [
+                    "211-delicatessen-hapjes"
+                ],
+                "verkoopinrichting": [],
+                "properties": []
+            },
+            {
+                "plaatsId": "8",
+                "branches": [
+                    "102-bio-health-fairtrade"
+                ],
+                "verkoopinrichting": [],
+                "properties": []
+            }
+        ]
+    ],
+    "branches": [
+        {
+            "brancheId": "101-agf",
+            "number": 101,
+            "description": "AGF",
+            "color": "#73ab4f",
+            "verplicht": true,
+            "maximumPlaatsen": 2
+        },
+        {
+            "brancheId": "102-bio-health-fairtrade",
+            "number": 102,
+            "description": "Biologisch, health & fairtrade producten",
+            "color": "#abce92",
+            "verplicht": true,
+            "maximumPlaatsen": 2
+        },
+        {
+            "brancheId": "103-brood-banket",
+            "number": 103,
+            "description": "Brood & banket",
+            "color": "#c75819",
+            "verplicht": true,
+            "maximumPlaatsen": 2
+        },
+        {
+            "brancheId": "104-hummus-kruiden-olijven",
+            "number": 104,
+            "description": "Hummus, kruiden & olijven",
+            "color": "#385527"
+        },
+        {
+            "brancheId": "105-noten-zuidvruchten",
+            "number": 105,
+            "description": "Noten & zuidvruchten",
+            "color": "#aeaaaa",
+            "verplicht": true,
+            "maximumPlaatsen": 2
+        },
+        {
+            "brancheId": "106-o-k-oliebollen",
+            "number": 106,
+            "description": "O&K - Oliebollen",
+            "color": "#815f10"
+        },
+        {
+            "brancheId": "107-vis-nat",
+            "number": 107,
+            "description": "Vis (nat)",
+            "color": "#8cabd9",
+            "verplicht": true,
+            "maximumPlaatsen": 2
+        },
+        {
+            "brancheId": "108-vleeswaren",
+            "number": 108,
+            "description": "Vleeswaren (geen poelier)",
+            "color": "#ff0000",
+            "verplicht": true,
+            "maximumPlaatsen": 1
+        },
+        {
+            "brancheId": "109-zuivel-eieren",
+            "number": 109,
+            "description": "Zuivel & eieren",
+            "color": "#fffc3b",
+            "verplicht": true,
+            "maximumPlaatsen": 2
+        },
+        {
+            "brancheId": "110-poelier",
+            "number": 110,
+            "description": "Poelier",
+            "color": "#fffc3b"
+        },
+        {
+            "brancheId": "111-exotische-groenten",
+            "number": 111,
+            "description": "Exotische groenten",
+            "color": "#73ab4f"
+        },
+        {
+            "brancheId": "201-broodjes-belegd",
+            "number": 201,
+            "description": "Broodjes belegd",
+            "color": "#6d389d",
+            "verplicht": true,
+            "maximumPlaatsen": 2
+        },
+        {
+            "brancheId": "202-hotdogs",
+            "number": 202,
+            "description": "Hotdogs",
+            "color": "#f5af86"
+        },
+        {
+            "brancheId": "203-ijs",
+            "number": 203,
+            "description": "IJs",
+            "color": "#ffbd2a"
+        },
+        {
+            "brancheId": "204-koffie-versnaperingen",
+            "number": 204,
+            "description": "Koffie & versnaperingen",
+            "color": "#0d0d0d"
+        },
+        {
+            "brancheId": "205-loempias",
+            "number": 205,
+            "description": "Loempia's",
+            "color": "#843b11"
+        },
+        {
+            "brancheId": "206-oudhollands-gebak",
+            "number": 206,
+            "description": "Oudhollands gebak",
+            "color": "#cc0000"
+        },
+        {
+            "brancheId": "207-grill-frituur",
+            "number": 207,
+            "description": "Grill & frituur",
+            "color": "##808080"
+        },
+        {
+            "brancheId": "208-smoothies",
+            "number": 208,
+            "description": "Smoothies",
+            "color": "#00b2ee"
+        },
+        {
+            "brancheId": "209-vis-gebakken",
+            "number": 209,
+            "description": "Vis (gebakken)",
+            "color": "#3d76c1"
+        },
+        {
+            "brancheId": "210-snoepwaren",
+            "number": 210,
+            "description": "Snoepwaren",
+            "color": "#cc0000"
+        },
+        {
+            "brancheId": "211-delicatessen-hapjes",
+            "number": 211,
+            "description": "Delicatessen (hapjes)",
+            "color": "#03071e",
+            "verplicht": true,
+            "maximumPlaatsen": 1
+        },
+        {
+            "brancheId": "301-antiek-kunst",
+            "number": 301,
+            "description": "Antiek & kunst",
+            "color": "#dbdbdb"
+        },
+        {
+            "brancheId": "302-bloemen-planten",
+            "number": 302,
+            "description": "Bloemen & planten",
+            "color": "#fe3996"
+        },
+        {
+            "brancheId": "303-boeken-stripboeken-muziek-film",
+            "number": 303,
+            "description": "Boeken, stripboeken, muziek & film",
+            "color": "#ca24c8"
+        },
+        {
+            "brancheId": "304-dierenbijnodigdheden",
+            "number": 304,
+            "description": "Dierenbenodigdheden",
+            "color": "#990332"
+        },
+        {
+            "brancheId": "305-horloges-brillen-sieraden",
+            "number": 305,
+            "description": "Horloges, brillen & sieraden",
+            "color": "#cffd9f"
+        },
+        {
+            "brancheId": "306-huishoudelijke-artikelen-meubels-apparatuur",
+            "number": 306,
+            "description": "Huishoudelijke artikelen, meubels & apparatuur ",
+            "color": "#69fecf"
+        },
+        {
+            "brancheId": "307-kleding-baby-kinder",
+            "number": 307,
+            "description": "Kleding - baby & kinder",
+            "color": "#6efc73"
+        },
+        {
+            "brancheId": "308-kleding-onder-beenmode-sokken",
+            "number": 308,
+            "description": "Kleding - onder, beenmode en sokken",
+            "color": "#13cb9c"
+        },
+        {
+            "brancheId": "309-kleding-volwassenen-hoofddeksels",
+            "number": 309,
+            "description": "Kleding - volwassenen & hoofddeksels",
+            "color": "#369869"
+        },
+        {
+            "brancheId": "310-kleding-vintage-2ehands",
+            "number": 310,
+            "description": "Kleding - vintage & 2e hands",
+            "color": "#646897"
+        },
+        {
+            "brancheId": "311-lampen",
+            "number": 311,
+            "description": "Lampen",
+            "color": "#cfc92d"
+        },
+        {
+            "brancheId": "312-o-k-kerstbomen",
+            "number": 312,
+            "description": "O&K - Kerstbomen",
+            "color": "#808080"
+        },
+        {
+            "brancheId": "313-parfumerie-drogisterij-persoonlijke-verzorging",
+            "number": 313,
+            "description": "Parfumerie/ drogisterij & persoonlijke verzorging",
+            "color": "#827e18",
+            "verplicht": true,
+            "maximumPlaatsen": 1
+        },
+        {
+            "brancheId": "314-partijhandel-inboedels",
+            "number": 314,
+            "description": "Partijhandel & inboedels",
+            "color": "#000d64"
+        },
+        {
+            "brancheId": "315-schoenen-tassen-lederwaren",
+            "number": 315,
+            "description": "Schoenen, tassen & lederwaren",
+            "color": "#0030fa"
+        },
+        {
+            "brancheId": "316-souvenirs",
+            "number": 316,
+            "description": "Souvenirs",
+            "color": "#343205"
+        },
+        {
+            "brancheId": "317-speelgoed-spellen",
+            "number": 317,
+            "description": "Speelgoed & spellen",
+            "color": "#c99dfc"
+        },
+        {
+            "brancheId": "318-doe-het-zelf-gereedschap-ijzerwaren",
+            "number": 318,
+            "description": "Tech - Doe-het-zelf, gereedschap & ijzerwaren ",
+            "color": "#ff9999"
+        },
+        {
+            "brancheId": "319-elektronica-mobieltjes-accessoires",
+            "number": 319,
+            "description": "Tech - Elektronica, mobieltjes en accessoires",
+            "color": "#650d64"
+        },
+        {
+            "brancheId": "320-fietsen-auto-accessoires",
+            "number": 320,
+            "description": "Tech - Fietsen & auto accessoires ",
+            "color": "#676536"
+        },
+        {
+            "brancheId": "321-stoffen-textiel-fornituren",
+            "number": 321,
+            "description": "Textiel - Stoffen, textiel & fournituren",
+            "color": "#2cfc3b"
+        },
+        {
+            "brancheId": "322-tapijten-vloerkleden",
+            "number": 322,
+            "description": "Textiel - Tapijten en vloerkleden",
+            "color": "#ffffff"
+        },
+        {
+            "brancheId": "323-raam-muurdecoratie",
+            "number": 323,
+            "description": "Textiel - Raam & muur (wand) decoratie",
+            "color": "#ff9869"
+        },
+        {
+            "number": 401,
+            "brancheId": "401 - Overig markt - Experimentele zone",
+            "description": "Experimentele zone",
+            "color": "#ffca1c"
+        },
+        {
+            "brancheId": "bak",
+            "description": "Bakplaats",
+            "color": "",
+            "verplicht": true,
+            "maximumPlaatsen": 7
+        }
+    ],
+    "obstakels": [],
+    "paginas": [
+        {
+            "title": "van Eesterenlaan BIO",
+            "indelingslijstGroup": [
+                {
+                    "class": "block-left",
+                    "title": "9 -20",
+                    "landmarkTop": "Bloemenkiosk",
+                    "landmarkBottom": "",
+                    "plaatsList": [
+                        "18",
+                        "17",
+                        "16",
+                        "15",
+                        "14",
+                        "13",
+                        "12",
+                        "11",
+                        "10",
+                        "9",
+                        "20",
+                        "19"
+                    ]
+                },
+                {
+                    "class": "block-right",
+                    "title": "",
+                    "landmarkTop": "",
+                    "landmarkBottom": "",
+                    "plaatsList": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8"
+                    ]
+                }
+            ]
+        }
+    ],
+    "aanmeldingen": [
+        {
+            "id": 15509,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "6171995040",
+            "attending": true,
+            "createdAt": "2022-01-13T14:05:38.556Z",
+            "updatedAt": "2022-01-13T14:05:38.556Z"
+        },
+        {
+            "id": 15518,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "3022019042",
+            "attending": true,
+            "createdAt": "2022-01-13T14:06:00.298Z",
+            "updatedAt": "2022-01-13T14:06:00.298Z"
+        },
+        {
+            "id": 15521,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "9012010012",
+            "attending": true,
+            "createdAt": "2022-01-13T14:06:32.277Z",
+            "updatedAt": "2022-01-13T14:20:10.415Z"
+        },
+        {
+            "id": 15538,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "0012019022",
+            "attending": true,
+            "createdAt": "2022-01-13T14:06:47.750Z",
+            "updatedAt": "2022-01-13T14:06:47.750Z"
+        },
+        {
+            "id": 15541,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "9012019021",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:05.698Z",
+            "updatedAt": "2022-01-13T14:07:05.698Z"
+        },
+        {
+            "id": 15550,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "0012010102",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:16.882Z",
+            "updatedAt": "2022-01-13T14:07:16.882Z"
+        },
+        {
+            "id": 15547,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "7022013071",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:15.011Z",
+            "updatedAt": "2022-01-13T14:07:15.011Z"
+        },
+        {
+            "id": 15551,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "9012015081",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:21.670Z",
+            "updatedAt": "2022-01-13T14:07:21.670Z"
+        },
+        {
+            "id": 15555,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "7012011020",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:36.918Z",
+            "updatedAt": "2022-01-13T14:07:36.918Z"
+        },
+        {
+            "id": 15558,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "9021998072",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:52.771Z",
+            "updatedAt": "2022-01-13T14:07:52.771Z"
+        },
+        {
+            "id": 15554,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "4022014112",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:33.306Z",
+            "updatedAt": "2022-01-13T14:07:33.306Z"
+        },
+        {
+            "id": 15556,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "2022011030",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:51.403Z",
+            "updatedAt": "2022-01-13T14:07:51.403Z"
+        },
+        {
+            "id": 15570,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "3032019051",
+            "attending": true,
+            "createdAt": "2022-01-13T14:09:03.895Z",
+            "updatedAt": "2022-01-13T14:09:03.895Z"
+        },
+        {
+            "id": 15582,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "2022018110",
+            "attending": false,
+            "createdAt": "2022-01-13T14:19:24.748Z",
+            "updatedAt": "2022-01-13T14:19:24.748Z"
+        }
+    ],
+    "voorkeuren": [
+        {
+            "id": 6674,
+            "marktId": 50,
+            "erkenningsNummer": "3022019042",
+            "plaatsId": "14",
+            "priority": 1,
+            "createdAt": "2021-10-15T10:02:51.774Z",
+            "updatedAt": "2021-10-15T10:02:51.774Z"
+        },
+        {
+            "id": 6760,
+            "marktId": 50,
+            "erkenningsNummer": "9012015081",
+            "plaatsId": "12",
+            "priority": 1,
+            "createdAt": "2022-01-13T14:17:07.251Z",
+            "updatedAt": "2022-01-13T14:17:07.251Z"
+        },
+        {
+            "id": 6762,
+            "marktId": 50,
+            "erkenningsNummer": "6171995040",
+            "plaatsId": "3",
+            "priority": 1,
+            "createdAt": "2022-01-13T14:19:14.399Z",
+            "updatedAt": "2022-01-13T14:19:14.399Z"
+        }
+    ],
+    "ondernemers": [
+        {
+            "description": "van Kasteelen",
+            "erkenningsNummer": "6171995040",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "6171995040",
+                "maximum": 2,
+                "id": 608,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "109-zuivel-eieren",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:46:48.051Z",
+                "updatedAt": "2022-01-13T14:19:14.416Z",
+                "branches": [
+                    "109-zuivel-eieren"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 1,
+            "status": "soll"
+        },
+        {
+            "description": "de Graaf",
+            "erkenningsNummer": "9012010012",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "9012010012",
+                "maximum": 2,
+                "id": 610,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "105-noten-zuidvruchten",
+                "parentBrancheId": "bak",
+                "inrichting": "eigen-materieel",
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:49:30.257Z",
+                "updatedAt": "2022-01-13T14:20:36.434Z",
+                "branches": [
+                    "105-noten-zuidvruchten",
+                    "bak"
+                ],
+                "verkoopinrichting": [
+                    "eigen-materieel"
+                ]
+            },
+            "sollicitatieNummer": 33,
+            "status": "soll"
+        },
+        {
+            "description": "van Duivenvoorde",
+            "erkenningsNummer": "0012010102",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "0012010102",
+                "maximum": 2,
+                "id": 612,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "103-brood-banket",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:51:04.574Z",
+                "updatedAt": "2021-10-15T09:51:09.749Z",
+                "branches": [
+                    "103-brood-banket"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 34,
+            "status": "soll"
+        },
+        {
+            "description": "Schuurmans",
+            "erkenningsNummer": "7012011020",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "7012011020",
+                "maximum": 2,
+                "id": 611,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "107-vis-nat",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:50:23.991Z",
+                "updatedAt": "2021-10-15T09:50:32.142Z",
+                "branches": [
+                    "107-vis-nat"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 37,
+            "status": "soll"
+        },
+        {
+            "description": "van Wijland",
+            "erkenningsNummer": "2022011030",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "2022011030",
+                "maximum": 1,
+                "id": 613,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "201-broodjes-belegd",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:52:29.807Z",
+                "updatedAt": "2021-10-15T09:52:39.459Z",
+                "branches": [
+                    "201-broodjes-belegd"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 43,
+            "status": "soll"
+        },
+        {
+            "description": "Bave",
+            "erkenningsNummer": "9021998072",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "9021998072",
+                "maximum": 2,
+                "id": 614,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "101-agf",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:53:25.802Z",
+                "updatedAt": "2021-10-15T09:53:43.778Z",
+                "branches": [
+                    "101-agf"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 45,
+            "status": "soll"
+        },
+        {
+            "description": "van der Strigt",
+            "erkenningsNummer": "4022014112",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "4022014112",
+                "maximum": 1,
+                "id": 615,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "211-delicatessen-hapjes",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:54:05.122Z",
+                "updatedAt": "2021-10-15T09:54:05.122Z",
+                "branches": [
+                    "211-delicatessen-hapjes"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 55,
+            "status": "soll"
+        },
+        {
+            "description": "Vermeulen",
+            "erkenningsNummer": "9012015081",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "9012015081",
+                "maximum": 2,
+                "id": 620,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 2,
+                "brancheId": "105-noten-zuidvruchten",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T10:00:34.168Z",
+                "updatedAt": "2022-01-13T14:17:07.262Z",
+                "branches": [
+                    "105-noten-zuidvruchten"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 106,
+            "status": "soll"
+        },
+        {
+            "description": "Hoeks",
+            "erkenningsNummer": "7022013071",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "7022013071",
+                "maximum": 1,
+                "id": 621,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "108-vleeswaren",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T10:03:45.575Z",
+                "updatedAt": "2021-10-15T10:03:45.575Z",
+                "branches": [
+                    "108-vleeswaren"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 142,
+            "status": "soll"
+        },
+        {
+            "description": "Butselaar",
+            "erkenningsNummer": "9012019021",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "9012019021",
+                "maximum": 2,
+                "id": 622,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "201-broodjes-belegd",
+                "parentBrancheId": "bak",
+                "inrichting": "eigen-materieel",
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T10:04:24.184Z",
+                "updatedAt": "2022-01-13T14:21:47.949Z",
+                "branches": [
+                    "201-broodjes-belegd",
+                    "bak"
+                ],
+                "verkoopinrichting": [
+                    "eigen-materieel"
+                ]
+            },
+            "sollicitatieNummer": 148,
+            "status": "soll"
+        },
+        {
+            "description": "Jansse",
+            "erkenningsNummer": "0012019022",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "0012019022",
+                "maximum": 2,
+                "id": 623,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "315-schoenen-tassen-lederwaren",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T10:05:23.313Z",
+                "updatedAt": "2022-01-13T14:17:46.141Z",
+                "branches": [
+                    "315-schoenen-tassen-lederwaren"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 149,
+            "status": "soll"
+        },
+        {
+            "description": "de Jong",
+            "erkenningsNummer": "3022019042",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "3022019042",
+                "maximum": 1,
+                "id": 616,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "108-vleeswaren",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:54:57.029Z",
+                "updatedAt": "2021-10-15T10:02:51.788Z",
+                "branches": [
+                    "108-vleeswaren"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 154,
+            "status": "soll"
+        },
+        {
+            "description": "van Maaren",
+            "erkenningsNummer": "3032019051",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "3032019051",
+                "maximum": 2,
+                "id": 639,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 2,
+                "brancheId": "107-vis-nat",
+                "parentBrancheId": "bak",
+                "inrichting": "eigen-materieel",
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2022-01-13T14:08:57.880Z",
+                "updatedAt": "2022-01-13T14:14:56.260Z",
+                "branches": [
+                    "107-vis-nat",
+                    "bak"
+                ],
+                "verkoopinrichting": [
+                    "eigen-materieel"
+                ]
+            },
+            "sollicitatieNummer": 155,
+            "status": "soll"
+        },
+        {
+            "description": "Potters",
+            "erkenningsNummer": "4022019060",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "4022019060",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 157,
+            "status": "soll"
+        },
+        {
+            "description": "Bekbergen",
+            "erkenningsNummer": "4012019061",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "4012019061",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 158,
+            "status": "soll"
+        },
+        {
+            "description": "Heinrichs",
+            "erkenningsNummer": "4032019090",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "4032019090",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 159,
+            "status": "soll"
+        },
+        {
+            "description": "Salet",
+            "erkenningsNummer": "0012019051",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "0012019051",
+                "maximum": 1,
+                "id": 617,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "313-parfumerie-drogisterij-persoonlijke-verzorging",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:55:46.876Z",
+                "updatedAt": "2021-10-15T09:55:58.623Z",
+                "branches": [
+                    "313-parfumerie-drogisterij-persoonlijke-verzorging"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 160,
+            "status": "soll"
+        },
+        {
+            "description": "Gnodde",
+            "erkenningsNummer": "6062020010",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "6062020010",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 161,
+            "status": "soll"
+        },
+        {
+            "description": "Stichter",
+            "erkenningsNummer": "5022020020",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "5022020020",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 162,
+            "status": "soll"
+        },
+        {
+            "description": "Kathagen",
+            "erkenningsNummer": "2012020021",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "2012020021",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 163,
+            "status": "soll"
+        },
+        {
+            "description": "Kramer",
+            "erkenningsNummer": "7012020040",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "7012020040",
+                "maximum": 1,
+                "id": 618,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "102-bio-health-fairtrade",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:57:55.531Z",
+                "updatedAt": "2021-10-15T09:58:02.755Z",
+                "branches": [
+                    "102-bio-health-fairtrade"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 164,
+            "status": "soll"
+        },
+        {
+            "description": "Saxo",
+            "erkenningsNummer": "4042020041",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "4042020041",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 165,
+            "status": "soll"
+        },
+        {
+            "description": "van der Sloot",
+            "erkenningsNummer": "2052020051",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "2052020051",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 166,
+            "status": "soll"
+        },
+        {
+            "description": "van Boulogne",
+            "erkenningsNummer": "5022019051",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "5022019051",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 167,
+            "status": "soll"
+        },
+        {
+            "description": "Zuidweg",
+            "erkenningsNummer": "0102020052",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "0102020052",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 168,
+            "status": "soll"
+        },
+        {
+            "description": "Scuylenborchs",
+            "erkenningsNummer": "3042020071",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "3042020071",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 169,
+            "status": "soll"
+        },
+        {
+            "description": "van den Brink",
+            "erkenningsNummer": "4042020082",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "4042020082",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 170,
+            "status": "soll"
+        },
+        {
+            "description": "Fran\u00e7ois",
+            "erkenningsNummer": "2032013012",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "2032013012",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 171,
+            "status": "soll"
+        },
+        {
+            "description": "Thomas",
+            "erkenningsNummer": "2012020102",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "2012020102",
+                "maximum": 1,
+                "id": 619,
+                "marktDate": null,
+                "anywhere": true,
+                "minimum": 1,
+                "brancheId": "201-broodjes-belegd",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:59:13.640Z",
+                "updatedAt": "2021-10-15T10:25:20.545Z",
+                "branches": [
+                    "201-broodjes-belegd"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 172,
+            "status": "soll"
+        },
+        {
+            "description": "Mijsberg",
+            "erkenningsNummer": "7012020111",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "7012020111",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 173,
+            "status": "soll"
+        },
+        {
+            "description": "Bronder",
+            "erkenningsNummer": "4012020101",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "4012020101",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 174,
+            "status": "soll"
+        },
+        {
+            "description": "Huel",
+            "erkenningsNummer": "4022021010",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "4022021010",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 175,
+            "status": "soll"
+        },
+        {
+            "description": "Bijlsma",
+            "erkenningsNummer": "1012021011",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "1012021011",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 176,
+            "status": "soll"
+        },
+        {
+            "description": "van der Heiden",
+            "erkenningsNummer": "9041995050",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "9041995050",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 177,
+            "status": "soll"
+        },
+        {
+            "description": "Arnold",
+            "erkenningsNummer": "5012021012",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "5012021012",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 178,
+            "status": "soll"
+        },
+        {
+            "description": "Cant",
+            "erkenningsNummer": "4082021010",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "4082021010",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 179,
+            "status": "soll"
+        },
+        {
+            "description": "Bastiaense",
+            "erkenningsNummer": "2032019010",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "2032019010",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 180,
+            "status": "soll"
+        },
+        {
+            "description": "Lamotte",
+            "erkenningsNummer": "1012019082",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "1012019082",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 181,
+            "status": "soll"
+        },
+        {
+            "description": "Bruggeman",
+            "erkenningsNummer": "2012021072",
+            "plaatsen": [],
+            "voorkeur": {
+                "marktId": "50",
+                "erkenningsNummer": "2012021072",
+                "maximum": 1,
+                "absentFrom": null,
+                "absentUntil": null
+            },
+            "sollicitatieNummer": 182,
+            "status": "soll"
+        },
+        {
+            "description": "de Backer",
+            "erkenningsNummer": "2022018110",
+            "plaatsen": [
+                "3"
+            ],
+            "voorkeur": {
+                "marktId": 50,
+                "erkenningsNummer": "2022018110",
+                "maximum": 1,
+                "id": 609,
+                "marktDate": null,
+                "anywhere": false,
+                "minimum": 1,
+                "brancheId": "202-hotdogs",
+                "parentBrancheId": null,
+                "inrichting": null,
+                "absentFrom": null,
+                "absentUntil": null,
+                "createdAt": "2021-10-15T09:48:20.134Z",
+                "updatedAt": "2021-10-15T09:48:20.134Z",
+                "branches": [
+                    "202-hotdogs"
+                ],
+                "verkoopinrichting": []
+            },
+            "sollicitatieNummer": 183,
+            "status": "vpl"
+        }
+    ],
+    "aanwezigheid": [
+        {
+            "id": 15509,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "6171995040",
+            "attending": true,
+            "createdAt": "2022-01-13T14:05:38.556Z",
+            "updatedAt": "2022-01-13T14:05:38.556Z"
+        },
+        {
+            "id": 15518,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "3022019042",
+            "attending": true,
+            "createdAt": "2022-01-13T14:06:00.298Z",
+            "updatedAt": "2022-01-13T14:06:00.298Z"
+        },
+        {
+            "id": 15521,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "9012010012",
+            "attending": true,
+            "createdAt": "2022-01-13T14:06:32.277Z",
+            "updatedAt": "2022-01-13T14:20:10.415Z"
+        },
+        {
+            "id": 15538,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "0012019022",
+            "attending": true,
+            "createdAt": "2022-01-13T14:06:47.750Z",
+            "updatedAt": "2022-01-13T14:06:47.750Z"
+        },
+        {
+            "id": 15541,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "9012019021",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:05.698Z",
+            "updatedAt": "2022-01-13T14:07:05.698Z"
+        },
+        {
+            "id": 15550,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "0012010102",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:16.882Z",
+            "updatedAt": "2022-01-13T14:07:16.882Z"
+        },
+        {
+            "id": 15547,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "7022013071",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:15.011Z",
+            "updatedAt": "2022-01-13T14:07:15.011Z"
+        },
+        {
+            "id": 15551,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "9012015081",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:21.670Z",
+            "updatedAt": "2022-01-13T14:07:21.670Z"
+        },
+        {
+            "id": 15555,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "7012011020",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:36.918Z",
+            "updatedAt": "2022-01-13T14:07:36.918Z"
+        },
+        {
+            "id": 15558,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "9021998072",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:52.771Z",
+            "updatedAt": "2022-01-13T14:07:52.771Z"
+        },
+        {
+            "id": 15554,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "4022014112",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:33.306Z",
+            "updatedAt": "2022-01-13T14:07:33.306Z"
+        },
+        {
+            "id": 15556,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "2022011030",
+            "attending": true,
+            "createdAt": "2022-01-13T14:07:51.403Z",
+            "updatedAt": "2022-01-13T14:07:51.403Z"
+        },
+        {
+            "id": 15570,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "3032019051",
+            "attending": true,
+            "createdAt": "2022-01-13T14:09:03.895Z",
+            "updatedAt": "2022-01-13T14:09:03.895Z"
+        },
+        {
+            "id": 15582,
+            "marktId": 50,
+            "marktDate": "2022-01-19",
+            "erkenningsNummer": "2022018110",
+            "attending": false,
+            "createdAt": "2022-01-13T14:19:24.748Z",
+            "updatedAt": "2022-01-13T14:19:24.748Z"
+        }
+    ],
+    "aLijst": []
+}
