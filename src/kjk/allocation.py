@@ -14,7 +14,7 @@ from kjk.outputdata import ConvertToRejectionError
 
 # from kjk.utils import AllocationDebugger
 
-DEBUG = True
+DEBUG = False
 
 
 class Allocator(BaseAllocator, ValidatorMixin):
@@ -146,6 +146,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
 
+        # moving vpl can not go to evi stands
+        # if they do not have an evi, in later phases this is allowed
+        # to fill up the market
         self.cluster_finder.set_prevent_evi(True)
 
         # STEP 1:
@@ -333,6 +336,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         print(erk, stands_to_alloc)
 
             self.fixed_set = fixed
+
+        # restore the evi mode
         self.cluster_finder.set_prevent_evi(False)
 
     def allocation_phase_04(self):

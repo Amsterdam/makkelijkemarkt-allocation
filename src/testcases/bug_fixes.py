@@ -23,10 +23,32 @@ class NonRequiredBrancheBugTestCase(unittest.TestCase):
 
     def test_bug(self):
         market_allocation = self.allocator.get_allocation()
-        print_alloc(market_allocation)
-        db = AllocationDebugger(self.allocator.get_debug_data())
-        res = db.get_allocation_phase_for_merchant("2019022001")
-        print(res)
+
+        # print_alloc(market_allocation)
+        # db = AllocationDebugger(self.allocator.get_debug_data())
+        # res = db.get_allocation_phase_for_merchant("2019022001")
+        # print(res)
+
+        erk = alloc_erk("7022013071", market_allocation)
+        self.assertListEqual(erk["plaatsen"], ["14"])
+
+        erk = alloc_erk("7012011020", market_allocation)
+        erk["plaatsen"].sort()
+        a = ["18", "17"]
+        a.sort()
+        self.assertListEqual(erk["plaatsen"], a)
+
+        erk = alloc_erk("9012010012", market_allocation)
+        erk["plaatsen"].sort()
+        a = ["16", "15"]
+        a.sort()
+        self.assertListEqual(erk["plaatsen"], a)
+
+        num_afw = len(market_allocation["afwijzingen"])
+        num_tw = len(market_allocation["toewijzingen"])
+
+        self.assertEqual(num_afw, 4)
+        self.assertEqual(num_tw, 9)
 
 
 class EviCrashBugTestCase(unittest.TestCase):
