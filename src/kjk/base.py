@@ -36,6 +36,10 @@ BRANCHE_VIEW = [
     "branche_required",
 ]
 
+STRATEGY_EXP_FULL = 1
+STRATEGY_EXP_SOME = 2
+STRATEGY_EXP_NONE = 3
+
 
 class VPLCollisionError(Exception):
     """this will be raised if two VPL merchants claim the same market position. (should never happen)"""
@@ -252,6 +256,9 @@ class BaseAllocator:
             self.merchants_df[cols].to_excel("../../ondernemers.xls")
             self.positions_df.to_excel("../../kramen.xls")
             self.branches_df.to_excel("../../branches.xls")
+
+    def get_debug_data(self):
+        return self.allocations_per_phase
 
     def set_allocation_phase(self, phase_id):
         self.phase_id = phase_id
@@ -816,6 +823,7 @@ class BaseAllocator:
             erk = row["erkenningsNummer"]
             merchant_branches = row["voorkeur.branches"]
             mini = row["voorkeur.minimum"]
+            # maxi = row["voorkeur.maximum"]
             evi = row["has_evi"] == "yes"
             pref = row["pref"]
 

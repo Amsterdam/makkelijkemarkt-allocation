@@ -1,5 +1,6 @@
 import unittest
 from pprint import pprint
+from kjk.utils import AllocationDebugger
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider
 from kjk.test_utils import (
@@ -13,6 +14,19 @@ from kjk.test_utils import (
 # These tests all expose data quality bugs
 # The bugs occurred while testing allocations on ACC data
 # NOTE: There are no assertions, tests succeed if no exeptions are raised
+
+
+class NonRequiredBrancheBugTestCase(unittest.TestCase):
+    def setUp(self):
+        dp = FixtureDataprovider("../fixtures/bug_13-01-2022.json")
+        self.allocator = Allocator(dp)
+
+    def test_bug(self):
+        market_allocation = self.allocator.get_allocation()
+        print_alloc(market_allocation)
+        db = AllocationDebugger(self.allocator.get_debug_data())
+        res = db.get_allocation_phase_for_merchant("2019022001")
+        print(res)
 
 
 class EviCrashBugTestCase(unittest.TestCase):

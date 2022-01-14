@@ -1,6 +1,9 @@
 import pandas as pd
 from kjk.utils import DebugRedisClient
 from kjk.base import BaseAllocator
+from kjk.base import STRATEGY_EXP_NONE
+from kjk.base import STRATEGY_EXP_SOME
+from kjk.base import STRATEGY_EXP_FULL
 from kjk.base import MarketStandDequeueError
 from kjk.base import MerchantDequeueError
 from kjk.rejection_reasons import VPL_POSITION_NOT_AVAILABLE
@@ -11,7 +14,7 @@ from kjk.outputdata import ConvertToRejectionError
 
 # from kjk.utils import AllocationDebugger
 
-DEBUG = False
+DEBUG = True
 
 
 class Allocator(BaseAllocator, ValidatorMixin):
@@ -32,10 +35,17 @@ class Allocator(BaseAllocator, ValidatorMixin):
         min_demand = self.merchants_df["voorkeur.minimum"].sum()
         num_available = len(self.positions_df)
 
+        self.strategy = STRATEGY_EXP_NONE
+        if max_demand < num_available:
+            self.strategy = STRATEGY_EXP_FULL
+        elif min_demand < num_available:
+            self.strategy = STRATEGY_EXP_SOME
+
         log.info("")
         log.info("max {}".format(max_demand))
         log.info("min {}".format(int(min_demand)))
         log.info("beschikbaar {}".format(num_available))
+        log.info("strategie: {}".format(self.strategy))
 
         # branche positions vs merchants rsvp
         self.branches_strategy = {}
@@ -454,7 +464,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         self._allocate_solls_for_query(
-            "(status != 'exp' & status != 'expf') & alist == False & branche_required != 'yes' & has_evi != 'yes'"
+            "(status != 'exp' & status != 'expf') & alist == False & branche_required != 'yes' & has_evi != 'yes'",
+            print_df=True,
         )
 
     def allocation_phase_11(self):
