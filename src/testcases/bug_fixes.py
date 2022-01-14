@@ -1,5 +1,6 @@
 import unittest
 from pprint import pprint
+from kjk.utils import AllocationDebugger
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider
 from kjk.test_utils import (
@@ -13,6 +14,41 @@ from kjk.test_utils import (
 # These tests all expose data quality bugs
 # The bugs occurred while testing allocations on ACC data
 # NOTE: There are no assertions, tests succeed if no exeptions are raised
+
+
+class NonRequiredBrancheBugTestCase(unittest.TestCase):
+    def setUp(self):
+        dp = FixtureDataprovider("../fixtures/bug_13-01-2022.json")
+        self.allocator = Allocator(dp)
+
+    def test_bug(self):
+        market_allocation = self.allocator.get_allocation()
+
+        # print_alloc(market_allocation)
+        # db = AllocationDebugger(self.allocator.get_debug_data())
+        # res = db.get_allocation_phase_for_merchant("2019022001")
+        # print(res)
+
+        erk = alloc_erk("7022013071", market_allocation)
+        self.assertListEqual(erk["plaatsen"], ["14"])
+
+        erk = alloc_erk("7012011020", market_allocation)
+        erk["plaatsen"].sort()
+        a = ["18", "17"]
+        a.sort()
+        self.assertListEqual(erk["plaatsen"], a)
+
+        erk = alloc_erk("9012010012", market_allocation)
+        erk["plaatsen"].sort()
+        a = ["16", "15"]
+        a.sort()
+        self.assertListEqual(erk["plaatsen"], a)
+
+        num_afw = len(market_allocation["afwijzingen"])
+        num_tw = len(market_allocation["toewijzingen"])
+
+        self.assertEqual(num_afw, 4)
+        self.assertEqual(num_tw, 9)
 
 
 class EviCrashBugTestCase(unittest.TestCase):

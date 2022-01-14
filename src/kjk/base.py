@@ -36,6 +36,10 @@ BRANCHE_VIEW = [
     "branche_required",
 ]
 
+STRATEGY_EXP_FULL = 1
+STRATEGY_EXP_SOME = 2
+STRATEGY_EXP_NONE = 3
+
 
 class VPLCollisionError(Exception):
     """this will be raised if two VPL merchants claim the same market position. (should never happen)"""
@@ -252,6 +256,9 @@ class BaseAllocator:
             self.merchants_df[cols].to_excel("../../ondernemers.xls")
             self.positions_df.to_excel("../../kramen.xls")
             self.branches_df.to_excel("../../branches.xls")
+
+    def get_debug_data(self):
+        return self.allocations_per_phase
 
     def set_allocation_phase(self, phase_id):
         self.phase_id = phase_id
@@ -771,8 +778,7 @@ class BaseAllocator:
         result_list = self.merchants_df.query(query)
 
         if print_df:
-            print(result_list[EXPANDERS_VIEW])
-            print(result_list[["pref"]])
+            print(result_list)
             print(self.cluster_finder.stands_allocated)
 
         log.info("Ondernemers te alloceren in deze fase: {}".format(len(result_list)))
@@ -816,8 +822,10 @@ class BaseAllocator:
             erk = row["erkenningsNummer"]
             merchant_branches = row["voorkeur.branches"]
             mini = row["voorkeur.minimum"]
+            # maxi = row["voorkeur.maximum"]
             evi = row["has_evi"] == "yes"
             pref = row["pref"]
+            expand = row["wants_expand"]
 
             stands_available = self.get_evi_stands()
             try:
@@ -850,6 +858,15 @@ class BaseAllocator:
                     merchant_branche=merchant_branches,
                     evi_merchant=evi,
                     ignore_reserved=True,
+                )
+
+            if expand:
+                self._prepare_expansion(
+                    erk,
+                    stds,
+                    int(row["voorkeur.maximum"]),
+                    merchant_branches,
+                    evi,
                 )
             self._allocate_stands_to_merchant(stds, erk)
 
