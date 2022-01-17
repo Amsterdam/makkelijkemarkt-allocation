@@ -1,5 +1,5 @@
 #!groovy
-String PROJECTNAME = "kiesjekraam_allocation"
+String PROJECTNAME = "makkelijkemarkt-kiesjekraam_allocation"
 String CONTAINERDIR = "."
 String CONTAINERNAME = "salmagundi/${PROJECTNAME}"
 String DOCKERFILE = "Dockerfile"
