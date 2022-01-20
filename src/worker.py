@@ -6,6 +6,7 @@ import json
 import time
 from kjk.allocation import Allocator
 from kjk.inputdata import RedisDataprovider
+from kjk.logging import clog
 
 SAVE_JOB_DATA = True
 
@@ -64,6 +65,9 @@ class JobDispatcher:
         output = a.get_allocation()
         json_result = json.dumps(output)
         self.r.set(f"RESULT_{job_id}", json_result)
+        log_result = json.dumps(clog.get_logs())
+        self.r.set(f"LOGS_{job_id}", log_result)
+        clog.purge()
         stop = time.time()
         print("Concept allocation completed in ", round(stop - start, 2), "sec")
 
