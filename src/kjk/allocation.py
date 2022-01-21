@@ -145,6 +145,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
+        print(df[["description", "plaatsen", "pref"]])
 
         # moving vpl can not go to evi stands
         # if they do not have an evi, in later phases this is allowed
@@ -186,7 +187,15 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 self._prepare_expansion(
                     erk, stands, int(row["voorkeur.maximum"]), merchant_branches, evi
                 )
-            self._allocate_stands_to_merchant(stands_to_alloc, erk)
+            try:
+                self._allocate_stands_to_merchant(stands_to_alloc, erk)
+            except MarketStandDequeueError:
+                try:
+                    self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
+                except MerchantDequeueError:
+                    clog.error(
+                        f"VPL plaatsen niet beschikbaar voor erkenningsNummer {erk}"
+                    )
 
         # STEP 2:
         # try to allocate the rest now
