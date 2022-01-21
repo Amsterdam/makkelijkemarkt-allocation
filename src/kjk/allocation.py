@@ -145,6 +145,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
+        print(df[["description", "plaatsen", "pref"]])
 
         # moving vpl can not go to evi stands
         # if they do not have an evi, in later phases this is allowed
@@ -186,7 +187,15 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 self._prepare_expansion(
                     erk, stands, int(row["voorkeur.maximum"]), merchant_branches, evi
                 )
-            self._allocate_stands_to_merchant(stands_to_alloc, erk)
+            try:
+                self._allocate_stands_to_merchant(stands_to_alloc, erk)
+            except MarketStandDequeueError:
+                try:
+                    self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
+                except MerchantDequeueError:
+                    clog.error(
+                        f"VPL plaatsen niet beschikbaar voor erkenningsNummer {erk}"
+                    )
 
         # STEP 2:
         # try to allocate the rest now
@@ -425,29 +434,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         # get the alist people first
         vpls = self.expanders_df.query("status == 'vpl'")
         dataframes = [vpls]
-        for df in dataframes:
-            for index, row in df.iterrows():
-                erk = row["erkenningsNummer"]
-                stands = row["plaatsen"]
-                merchant_branches = row["voorkeur.branches"]
-                evi = row["has_evi"] == "yes"
-                maxi = row["voorkeur.maximum"]
-
-                assigned_stands = self.market_output.get_assigned_stands_for_merchant(
-                    erk
-                )
-                if assigned_stands is not None:
-                    stands = self.cluster_finder.find_valid_expansion(
-                        assigned_stands,
-                        total_size=int(maxi),
-                        merchant_branche=merchant_branches,
-                        evi_merchant=evi,
-                        ignore_check_available=assigned_stands,
-                    )
-                    if len(stands) > 0:
-                        self._allocate_stands_to_merchant(
-                            stands[0], erk, dequeue_merchant=False
-                        )
+        self._expand_for_merchants(dataframes)
 
     def allocation_phase_09(self):
         self.set_allocation_phase("Phase 9")
@@ -464,11 +451,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
             print_df=False,
         )
 
-    def allocation_phase_09b(self):
-        self.set_allocation_phase("Phase 11")
+    def allocation_phase_10(self):
+        self.set_allocation_phase("Phase 10")
         log.info("")
-        clog.info("--- ALLOCATIE FASE 11 ---")
-        log.info("Alle ondernemers ingedeeld, nu de uitbreidings fase.")
+        clog.info("--- ALLOCATIE FASE 10 ---")
+        log.info("Uitbreidings fase verplichte branches en EVI ondernemers.")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
@@ -487,10 +474,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
         dataframes = [df_alist, df_blist]
         self._expand_for_merchants(dataframes)
 
-    def allocation_phase_10(self):
-        self.set_allocation_phase("Phase 10")
+    def allocation_phase_11(self):
+        self.set_allocation_phase("Phase 11")
         log.info("")
-        clog.info("--- ALLOCATIE FASE 10 ---")
+        clog.info("--- ALLOCATIE FASE 11 ---")
         log.info("A-list gedaan, overige solls")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
@@ -500,10 +487,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
             print_df=False,
         )
 
-    def allocation_phase_11(self):
-        self.set_allocation_phase("Phase 11")
+    def allocation_phase_12(self):
+        self.set_allocation_phase("Phase 12")
         log.info("")
-        clog.info("--- ALLOCATIE FASE 11 ---")
+        clog.info("--- ALLOCATIE FASE 12 ---")
         log.info("Alle ondernemers ingedeeld, nu de uitbreidings fase.")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
@@ -518,40 +505,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
         dataframes = [df_alist, df_blist]
         self._expand_for_merchants(dataframes)
 
-    def _expand_for_merchants(self, dataframes):
-        for df in dataframes:
-            for index, row in df.iterrows():
-                erk = row["erkenningsNummer"]
-                stands = row["plaatsen"]
-                merchant_branches = row["voorkeur.branches"]
-                evi = row["has_evi"] == "yes"
-                maxi = row["voorkeur.maximum"]
-                status = row["status"]
-
-                # exp, expf can not expand
-                if status in ("exp", "expf"):
-                    continue
-
-                assigned_stands = self.market_output.get_assigned_stands_for_merchant(
-                    erk
-                )
-                if assigned_stands is not None:
-                    stands = self.cluster_finder.find_valid_expansion(
-                        assigned_stands,
-                        total_size=int(maxi),
-                        merchant_branche=merchant_branches,
-                        evi_merchant=evi,
-                        ignore_check_available=assigned_stands,
-                    )
-                    if len(stands) > 0:
-                        self._allocate_stands_to_merchant(
-                            stands[0], erk, dequeue_merchant=False
-                        )
-
-    def allocation_phase_12(self):
-        self.set_allocation_phase("Phase 12")
+    def allocation_phase_13(self):
+        self.set_allocation_phase("Phase 13")
         log.info("")
-        clog.info("--- ALLOCATIE FASE  12 ---")
+        clog.info("--- ALLOCATIE FASE  13 ---")
         log.info("Markt allocatie ingedeeld, nu de validatie.")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
@@ -573,10 +530,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.validate_expansion()
         self.validate_preferences()
 
-    def allocation_phase_13(self):
-        self.set_allocation_phase("Phase 13")
+    def allocation_phase_14(self):
+        self.set_allocation_phase("Phase 14")
         log.info("")
-        clog.info("--- ALLOCATIE FASE 13 ---")
+        clog.info("--- ALLOCATIE FASE 14 ---")
         log.info("Markt allocatie gevalideerd")
         log.info(
             "nog open plaatsen: {}".format(
@@ -598,11 +555,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.allocation_phase_07()
         self.allocation_phase_08()
         self.allocation_phase_09()
-        self.allocation_phase_09b()
         self.allocation_phase_10()
         self.allocation_phase_11()
         self.allocation_phase_12()
         self.allocation_phase_13()
+        self.allocation_phase_14()
 
         if DEBUG:
             json_file = self.market_output.to_json_file()

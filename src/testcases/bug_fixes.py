@@ -16,6 +16,38 @@ from kjk.test_utils import (
 # NOTE: There are no assertions, tests succeed if no exeptions are raised
 
 
+class DapperMovingVplBugTestCase_2(unittest.TestCase):
+    """Tuithof must be on 53 !"""
+
+    def setUp(self):
+        dp = FixtureDataprovider("../fixtures/bug_21-01-2022.json")
+        self.allocator = Allocator(dp)
+
+    def test_bug(self):
+        market_allocation = self.allocator.get_allocation()
+        print_alloc(market_allocation)
+
+
+class DapperMovingVplBugTestCase(unittest.TestCase):
+    """should not crash on missing stand 122"""
+
+    def setUp(self):
+        dp = FixtureDataprovider("../fixtures/bug_20-01-2022.json")
+        self.allocator = Allocator(dp)
+
+    def test_bug(self):
+        market_allocation = self.allocator.get_allocation()
+
+        # print_alloc(market_allocation)
+        db = AllocationDebugger(self.allocator.get_debug_data())
+        res = db.get_allocation_phase_for_merchant("1991061901")
+        # print(res)
+        settings = self.allocator.raw_merchants_df.query(
+            "erkenningsNummer == '1012003061'"
+        )
+        print(settings)
+
+
 class NonRequiredBrancheBugTestCase(unittest.TestCase):
     def setUp(self):
         dp = FixtureDataprovider("../fixtures/bug_13-01-2022.json")

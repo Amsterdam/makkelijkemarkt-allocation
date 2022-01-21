@@ -913,3 +913,33 @@ class BaseAllocator:
                     ignore_reserved=True,
                 )
             self._allocate_stands_to_merchant(stds, erk)
+
+    def _expand_for_merchants(self, dataframes):
+        for df in dataframes:
+            for index, row in df.iterrows():
+                erk = row["erkenningsNummer"]
+                stands = row["plaatsen"]
+                merchant_branches = row["voorkeur.branches"]
+                evi = row["has_evi"] == "yes"
+                maxi = row["voorkeur.maximum"]
+                status = row["status"]
+
+                # exp, expf can not expand
+                if status in ("exp", "expf"):
+                    continue
+
+                assigned_stands = self.market_output.get_assigned_stands_for_merchant(
+                    erk
+                )
+                if assigned_stands is not None:
+                    stands = self.cluster_finder.find_valid_expansion(
+                        assigned_stands,
+                        total_size=int(maxi),
+                        merchant_branche=merchant_branches,
+                        evi_merchant=evi,
+                        ignore_check_available=assigned_stands,
+                    )
+                    if len(stands) > 0:
+                        self._allocate_stands_to_merchant(
+                            stands[0], erk, dequeue_merchant=False
+                        )
