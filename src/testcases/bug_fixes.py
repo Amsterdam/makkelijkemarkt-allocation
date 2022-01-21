@@ -25,7 +25,7 @@ class DapperMovingVplBugTestCase_2(unittest.TestCase):
 
     def test_bug(self):
         market_allocation = self.allocator.get_allocation()
-        print_alloc(market_allocation)
+        # print_alloc(market_allocation)
 
 
 class DapperMovingVplBugTestCase(unittest.TestCase):
