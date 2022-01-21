@@ -14,7 +14,7 @@ from kjk.outputdata import ConvertToRejectionError
 
 # from kjk.utils import AllocationDebugger
 
-DEBUG = False
+DEBUG = True
 
 
 class Allocator(BaseAllocator, ValidatorMixin):
@@ -145,7 +145,17 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
-        print(df[["description", "plaatsen", "pref"]])
+        print(
+            df[
+                [
+                    "description",
+                    "plaatsen",
+                    "pref",
+                    "voorkeur.minimum",
+                    "voorkeur.maximum",
+                ]
+            ]
+        )
 
         # moving vpl can not go to evi stands
         # if they do not have an evi, in later phases this is allowed
@@ -341,8 +351,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
                                 evi,
                             )
                         self._allocate_stands_to_merchant(stands_to_alloc, erk)
-                    except Exception:
-                        print(erk, stands_to_alloc)
+                    except Exception as e:
+                        print(e)
+                        print(erk, stands_to_alloc, row["sollicitatieNummer"])
 
             self.fixed_set = fixed
 

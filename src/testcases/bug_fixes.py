@@ -38,14 +38,11 @@ class DapperMovingVplBugTestCase(unittest.TestCase):
     def test_bug(self):
         market_allocation = self.allocator.get_allocation()
 
-        # print_alloc(market_allocation)
-        db = AllocationDebugger(self.allocator.get_debug_data())
-        res = db.get_allocation_phase_for_merchant("1991061901")
+        # db = AllocationDebugger(self.allocator.get_debug_data())
+        # res = db.get_allocation_phase_for_merchant("1991061901")
         # print(res)
-        settings = self.allocator.raw_merchants_df.query(
-            "erkenningsNummer == '1012003061'"
-        )
-        print(settings)
+        res = reject_erk("1012003061", market_allocation)
+        self.assertEqual(res["reason"]["code"], 5)
 
 
 class NonRequiredBrancheBugTestCase(unittest.TestCase):
