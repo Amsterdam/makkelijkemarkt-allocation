@@ -83,6 +83,9 @@ class MarketStandClusterFinder:
                     self.stands_linked_list[_mid] = {"prev": _prev, "next": _next}
         self.flattened_list.append(None)
 
+    def set_market_info_delegate(self, delegate):
+        self.market_info_delegate = delegate
+
     def set_prevent_evi(self, prevent_evi):
         self.prevent_evi = prevent_evi
 
@@ -169,6 +172,7 @@ class MarketStandClusterFinder:
                         if (
                             self.stand_has_required_branche(branches)
                             and not evi_merchant
+                            and not self.market_info_delegate.market_has_unused_evi_space()
                         ):
                             valid = False
                             break
@@ -182,6 +186,8 @@ class MarketStandClusterFinder:
                             break
                     else:
                         if self.prevent_evi:
+                            if self.market_info_delegate.market_has_unused_evi_space():
+                                return True
                             return "eigen-materieel" not in self.evi_dict[std]
                 return valid
             except KeyError:
