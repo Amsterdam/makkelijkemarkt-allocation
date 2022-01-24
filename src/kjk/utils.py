@@ -160,8 +160,9 @@ class MarketStandClusterFinder:
                 "branches_match",
                 "stand_has_evi",
                 "prevent_evi",
+                "market_has_unused_branche_space",
             ],
-            defaults=(None,) * 8,
+            defaults=(None,) * 9,
         )
 
         illegal_combos = [
@@ -189,6 +190,12 @@ class MarketStandClusterFinder:
                 merchant_has_evi=False,
             ),
             AV(market_has_unused_evi_space=False, prevent_evi=True, stand_has_evi=True),
+            AV(
+                market_has_unused_branche_space=False,
+                prevent_evi=True,
+                stand_has_required_branche=True,
+                branches_match=False,
+            ),
         ]
 
         is_required = self.branche_is_required(merchant_branches[0])
@@ -233,6 +240,17 @@ class MarketStandClusterFinder:
                 stand_has_evi=self.stand_has_evi(std),
             )
             if evi_moving_vpl in illegal_combos:
+                return False
+
+            branches_moving_vpl = AV(
+                market_has_unused_branche_space=self.market_info_delegate.market_has_unused_branche_space(
+                    branches
+                ),
+                prevent_evi=self.prevent_evi,
+                stand_has_required_branche=self.stand_has_required_branche(branches),
+                branches_match=merchant_branches[0] in branches,
+            )
+            if branches_moving_vpl in illegal_combos:
                 return False
         return True
 
