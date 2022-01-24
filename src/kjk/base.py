@@ -885,6 +885,7 @@ class BaseAllocator:
             mini = row["voorkeur.minimum"]
             evi = row["has_evi"] == "yes"
             pref = row["pref"]
+            expand = row["wants_expand"]
 
             stands_available = self.get_stand_for_branche(merchant_branches[0])
             try:
@@ -917,6 +918,14 @@ class BaseAllocator:
                     merchant_branche=merchant_branches,
                     evi_merchant=evi,
                     ignore_reserved=True,
+                )
+            if expand:
+                self._prepare_expansion(
+                    erk,
+                    stds,
+                    int(row["voorkeur.maximum"]),
+                    merchant_branches,
+                    evi,
                 )
             self._allocate_stands_to_merchant(stds, erk)
 

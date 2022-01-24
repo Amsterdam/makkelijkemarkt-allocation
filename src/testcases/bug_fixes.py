@@ -56,8 +56,10 @@ class NonRequiredBrancheBugTestCase(unittest.TestCase):
         market_allocation = self.allocator.get_allocation()
 
         # print_alloc(market_allocation)
-        # db = AllocationDebugger(self.allocator.get_debug_data())
-        # res = db.get_allocation_phase_for_merchant("2019022001")
+        db = AllocationDebugger(self.allocator.get_debug_data())
+        res = db.get_allocation_phase_for_merchant("0012019022")  # Jansse
+        # print(res)
+        res = db.get_allocation_phase_for_merchant("7012011020")  # Schuurmans
         # print(res)
 
         erk = alloc_erk("7022013071", market_allocation)
