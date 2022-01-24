@@ -222,6 +222,8 @@ class BaseAllocator:
             self.branches,
         )
 
+        self.cluster_finder.set_market_info_delegate(self)
+
         # collection for holding stand ids for evi stands
         self.evi_ids = []
         self.populate_evi_stand_ids()
@@ -256,6 +258,10 @@ class BaseAllocator:
             self.merchants_df[cols].to_excel("../../ondernemers.xls")
             self.positions_df.to_excel("../../kramen.xls")
             self.branches_df.to_excel("../../branches.xls")
+
+    def market_has_unused_evi_space(self):
+        df = self.merchants_df.query("has_evi == 'yes'")
+        return df["voorkeur.maximum"].sum() < len(self.get_evi_stands())
 
     def get_debug_data(self):
         return self.allocations_per_phase

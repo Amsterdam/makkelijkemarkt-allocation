@@ -145,7 +145,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
         ).copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
-        print(df[["description", "plaatsen", "pref"]])
 
         # moving vpl can not go to evi stands
         # if they do not have an evi, in later phases this is allowed
@@ -342,7 +341,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
                             )
                         self._allocate_stands_to_merchant(stands_to_alloc, erk)
                     except Exception:
-                        print(erk, stands_to_alloc)
+                        clog.error(
+                            f"VPL plaatsen (verplaatsing) niet beschikbaar voor erkenningsNummer {erk}"
+                        )
 
             self.fixed_set = fixed
 
