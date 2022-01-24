@@ -25,7 +25,9 @@ class DapperMovingVplBugTestCase_2(unittest.TestCase):
 
     def test_bug(self):
         market_allocation = self.allocator.get_allocation()
-        # print_alloc(market_allocation)
+
+        erk = alloc_erk("8061993072", market_allocation)
+        self.assertListEqual(erk["plaatsen"], ["53"])
 
 
 class DapperMovingVplBugTestCase(unittest.TestCase):
