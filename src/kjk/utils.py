@@ -1,8 +1,6 @@
 import redis
-import sys
 import os
 from collections import namedtuple
-import traceback
 
 
 class BranchesScrutenizer:
@@ -194,60 +192,49 @@ class MarketStandClusterFinder:
         ]
 
         is_required = self.branche_is_required(merchant_branches[0])
-        try:
-            for std in option:
-                branches = self.branches_dict[std]
+        for std in option:
+            branches = self.branches_dict[std]
 
-                # do the branches match?
-                branch_vars = AV(
-                    merchant_has_required_branche=is_required,
-                    branches_match=merchant_branches[0] in branches,
-                )
-                if branch_vars in illegal_combos:
-                    return False
+            branch_vars = AV(
+                merchant_has_required_branche=is_required,
+                branches_match=merchant_branches[0] in branches,
+            )
+            if branch_vars in illegal_combos:
+                return False
 
-                # do evi spec match?
-                evi_vars = AV(
-                    merchant_has_evi=evi_merchant,
-                    stand_has_evi=self.stand_has_evi(std),
-                )
-                if evi_vars in illegal_combos:
-                    return False
+            evi_vars = AV(
+                merchant_has_evi=evi_merchant,
+                stand_has_evi=self.stand_has_evi(std),
+            )
+            if evi_vars in illegal_combos:
+                return False
 
-                # do evi spec match?
-                evi_space_vars = AV(
-                    market_has_unused_evi_space=self.market_info_delegate.market_has_unused_evi_space(),
-                    merchant_has_evi=evi_merchant,
-                    stand_has_evi=self.stand_has_evi(std),
-                )
-                if evi_space_vars in illegal_combos:
-                    return False
+            evi_space_vars = AV(
+                market_has_unused_evi_space=self.market_info_delegate.market_has_unused_evi_space(),
+                merchant_has_evi=evi_merchant,
+                stand_has_evi=self.stand_has_evi(std),
+            )
+            if evi_space_vars in illegal_combos:
+                return False
 
-                # do evi spec match?
-                evi_space_vars = AV(
-                    market_has_unused_evi_space=self.market_info_delegate.market_has_unused_evi_space(),
-                    stand_has_branche=len(branches) > 0,
-                    stand_has_required_branche=self.stand_has_required_branche(
-                        branches
-                    ),
-                    merchant_has_required_branche=is_required,
-                    merchant_has_evi=evi_merchant,
-                )
-                if evi_space_vars in illegal_combos:
-                    return False
+            evi_space_vars = AV(
+                market_has_unused_evi_space=self.market_info_delegate.market_has_unused_evi_space(),
+                stand_has_branche=len(branches) > 0,
+                stand_has_required_branche=self.stand_has_required_branche(branches),
+                merchant_has_required_branche=is_required,
+                merchant_has_evi=evi_merchant,
+            )
+            if evi_space_vars in illegal_combos:
+                return False
 
-                evi_moving_vpl = AV(
-                    market_has_unused_evi_space=self.market_info_delegate.market_has_unused_evi_space(),
-                    prevent_evi=self.prevent_evi,
-                    stand_has_evi=self.stand_has_evi(std),
-                )
-                if evi_moving_vpl in illegal_combos:
-                    return False
-
-            return True
-        except Exception as e:
-            print("error", e)
-            traceback.print_exc(file=sys.stdout)
+            evi_moving_vpl = AV(
+                market_has_unused_evi_space=self.market_info_delegate.market_has_unused_evi_space(),
+                prevent_evi=self.prevent_evi,
+                stand_has_evi=self.stand_has_evi(std),
+            )
+            if evi_moving_vpl in illegal_combos:
+                return False
+        return True
 
     def option_is_available(self, option):
         if "STW" in option:

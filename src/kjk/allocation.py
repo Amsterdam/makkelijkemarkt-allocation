@@ -67,29 +67,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
             clog.warning("--------------------------------------------")
             self.branches_df["maximumPlaatsen"] = 100
 
-        if len(self.branches_df) > 0:
-            df = self.branches_df.query("verplicht == True")
-            for index, row in df.iterrows():
-                br_id = row["brancheId"]
-                br = self.get_merchant_for_branche(br_id)
-                std = self.get_stand_for_branche(br_id)
-                try:
-                    maxi = int(row["maximumPlaatsen"])
-                except ValueError:
-                    clog.warning("--------------------------------------------")
-                    clog.warning(
-                        f"Field 'maximumPlaatsen' is Nan for branche id: {br_id}"
-                    )
-                    clog.warning("Assume default value '100'")
-                    clog.warning("--------------------------------------------")
-                    maxi = 100
-                self.branches_strategy[br_id] = {
-                    "max": int(maxi),
-                    "num_stands": len(std),
-                    "num_merchants": len(br),
-                    "will_fit": len(std) > len(br),
-                }
-
         # evi positions vs merchants rsvp
         evi_stands = self.get_evi_stands()
         evi_merchants = self.get_merchants_with_evi()
