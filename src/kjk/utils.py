@@ -202,8 +202,8 @@ class MarketStandClusterFinder:
         for std in option:
             branches = self.branches_dict[std]
             evi_space = self.market_info_delegate.market_has_unused_evi_space()
-            stand_required_br = (self.stand_has_required_branche(branches),)
-            std_has_evi = (self.stand_has_evi(std),)
+            stand_required_br = self.stand_has_required_branche(branches)
+            std_has_evi = self.stand_has_evi(std)
 
             branch_vars = AV(
                 merchant_has_required_branche=is_required,
