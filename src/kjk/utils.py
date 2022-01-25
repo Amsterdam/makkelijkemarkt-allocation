@@ -201,6 +201,9 @@ class MarketStandClusterFinder:
         is_required = self.branche_is_required(merchant_branches[0])
         for std in option:
             branches = self.branches_dict[std]
+            evi_space = self.market_info_delegate.market_has_unused_evi_space()
+            stand_required_br = (self.stand_has_required_branche(branches),)
+            std_has_evi = (self.stand_has_evi(std),)
 
             branch_vars = AV(
                 merchant_has_required_branche=is_required,
@@ -211,23 +214,23 @@ class MarketStandClusterFinder:
 
             evi_vars = AV(
                 merchant_has_evi=evi_merchant,
-                stand_has_evi=self.stand_has_evi(std),
+                stand_has_evi=std_has_evi,
             )
             if evi_vars in illegal_combos:
                 return False
 
             evi_space_vars = AV(
-                market_has_unused_evi_space=self.market_info_delegate.market_has_unused_evi_space(),
+                market_has_unused_evi_space=evi_space,
                 merchant_has_evi=evi_merchant,
-                stand_has_evi=self.stand_has_evi(std),
+                stand_has_evi=std_has_evi,
             )
             if evi_space_vars in illegal_combos:
                 return False
 
             evi_space_vars = AV(
-                market_has_unused_evi_space=self.market_info_delegate.market_has_unused_evi_space(),
+                market_has_unused_evi_space=evi_space,
                 stand_has_branche=len(branches) > 0,
-                stand_has_required_branche=self.stand_has_required_branche(branches),
+                stand_has_required_branche=stand_required_br,
                 merchant_has_required_branche=is_required,
                 merchant_has_evi=evi_merchant,
             )
@@ -235,9 +238,9 @@ class MarketStandClusterFinder:
                 return False
 
             evi_moving_vpl = AV(
-                market_has_unused_evi_space=self.market_info_delegate.market_has_unused_evi_space(),
+                market_has_unused_evi_space=evi_space,
                 prevent_evi=self.prevent_evi,
-                stand_has_evi=self.stand_has_evi(std),
+                stand_has_evi=std_has_evi,
             )
             if evi_moving_vpl in illegal_combos:
                 return False
@@ -247,7 +250,7 @@ class MarketStandClusterFinder:
                     branches
                 ),
                 prevent_evi=self.prevent_evi,
-                stand_has_required_branche=self.stand_has_required_branche(branches),
+                stand_has_required_branche=stand_required_br,
                 branches_match=merchant_branches[0] in branches,
             )
             if branches_moving_vpl in illegal_combos:
