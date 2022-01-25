@@ -67,29 +67,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
             clog.warning("--------------------------------------------")
             self.branches_df["maximumPlaatsen"] = 100
 
-        if len(self.branches_df) > 0:
-            df = self.branches_df.query("verplicht == True")
-            for index, row in df.iterrows():
-                br_id = row["brancheId"]
-                br = self.get_merchant_for_branche(br_id)
-                std = self.get_stand_for_branche(br_id)
-                try:
-                    maxi = int(row["maximumPlaatsen"])
-                except ValueError:
-                    clog.warning("--------------------------------------------")
-                    clog.warning(
-                        f"Field 'maximumPlaatsen' is Nan for branche id: {br_id}"
-                    )
-                    clog.warning("Assume default value '100'")
-                    clog.warning("--------------------------------------------")
-                    maxi = 100
-                self.branches_strategy[br_id] = {
-                    "max": int(maxi),
-                    "num_stands": len(std),
-                    "num_merchants": len(br),
-                    "will_fit": len(std) > len(br),
-                }
-
         # evi positions vs merchants rsvp
         evi_stands = self.get_evi_stands()
         evi_merchants = self.get_merchants_with_evi()
@@ -109,9 +86,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df = self.merchants_df.query(
             "(status == 'exp' | status == 'expf') | (( status == 'vpl' | status == 'tvpl') & will_move == 'no')"
         )
-        for index, row in df.iterrows():
+        for _, row in df.iterrows():
+            erk = row["erkenningsNummer"]
             try:
-                erk = row["erkenningsNummer"]
                 stands = row["plaatsen"]
                 expand = row["wants_expand"]
                 merchant_branches = row["voorkeur.branches"]
@@ -154,7 +131,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         # STEP 1:
         # first allocate the vpl's that can not move to avoid conflicts
         failed = {}
-        for index, row in df.iterrows():
+        for _, row in df.iterrows():
 
             erk = row["erkenningsNummer"]
             stands = row["plaatsen"]
@@ -210,7 +187,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
             fixed = []
             wanted = []
             merch_dict = {}
-            for index, row in df.iterrows():
+            for _, row in df.iterrows():
                 stands = row["plaatsen"]
                 fixed += stands
                 wanted += row["pref"]
@@ -237,7 +214,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
                 # first check if we have rejections
                 has_rejections = False
-                for index, row in df.iterrows():
+                for _, row in df.iterrows():
                     erk = row["erkenningsNummer"]
                     stands = row["plaatsen"]
                     pref = row["pref"]
@@ -255,7 +232,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                         has_rejections = True
                         break
 
-                for index, row in df.iterrows():
+                for _, row in df.iterrows():
                     erk = row["erkenningsNummer"]
                     stands = row["plaatsen"]
                     pref = row["pref"]
@@ -298,7 +275,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 # now allocate the vpl's that can move savely
                 # meaning that the wanted positions do not intefere with
                 # other fixed positions
-                for index, row in df.iterrows():
+                for _, row in df.iterrows():
 
                     erk = row["erkenningsNummer"]
                     stands = row["plaatsen"]

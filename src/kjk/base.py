@@ -263,6 +263,31 @@ class BaseAllocator:
         df = self.merchants_df.query("has_evi == 'yes'")
         return df["voorkeur.maximum"].sum() < len(self.get_evi_stands())
 
+    def market_has_unused_branche_space(self, branches):
+        for branche in branches:
+
+            def has_branch(x):
+                try:
+                    if branche in x:
+                        return True
+                except TypeError:
+                    # nobranches == nan in dataframe
+                    pass
+                return False
+
+            try:
+                has_branch = self.merchants_df["voorkeur.branches"].apply(has_branch)
+                demand_for_branche = self.merchants_df[has_branch][
+                    "voorkeur.maximum"
+                ].sum()
+                stands = self.get_stand_for_branche(branche)
+                stands_available_for_branche = len(stands)
+                if stands_available_for_branche <= demand_for_branche:
+                    return False
+            except KeyError:
+                return False
+        return True
+
     def get_debug_data(self):
         return self.allocations_per_phase
 
@@ -885,6 +910,7 @@ class BaseAllocator:
             mini = row["voorkeur.minimum"]
             evi = row["has_evi"] == "yes"
             pref = row["pref"]
+            expand = row["wants_expand"]
 
             stands_available = self.get_stand_for_branche(merchant_branches[0])
             try:
@@ -917,6 +943,14 @@ class BaseAllocator:
                     merchant_branche=merchant_branches,
                     evi_merchant=evi,
                     ignore_reserved=True,
+                )
+            if expand:
+                self._prepare_expansion(
+                    erk,
+                    stds,
+                    int(row["voorkeur.maximum"]),
+                    merchant_branches,
+                    evi,
                 )
             self._allocate_stands_to_merchant(stds, erk)
 

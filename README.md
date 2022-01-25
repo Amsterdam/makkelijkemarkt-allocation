@@ -90,4 +90,8 @@ Uitgebreide html report
     result:
     "Wrote HTML report to htmlcov/index.html"
 
+# generate diagram images
+
+    docker run -u $UID -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt-allocations/diagrams:/data minlag/mermaid-cli -i /data/overview.mmd -o /data/overview.png
+
 

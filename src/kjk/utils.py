@@ -1,5 +1,6 @@
 import redis
 import os
+from collections import namedtuple
 
 
 class BranchesScrutenizer:
@@ -139,61 +140,121 @@ class MarketStandClusterFinder:
                 return True
         return False
 
-    def option_is_valid_branche(
-        self, option, merchant_branche, evi_merchant, prevent_evi=False
-    ):
-        """
-        check if a merchant is trying to move to a branche incompatible stand
-        """
-        # once we have the data sorted out this block can be removed
-        # all merchants should have a branche
-        if merchant_branche is None or len(merchant_branche) == 0:
-            try:
-                for std in option:
-                    branches = self.branches_dict[std]
-                    if len(branches) > 0:
-                        return False
-            except KeyError:
-                pass
-            except TypeError:
-                pass
-            return True
+    def stand_has_evi(self, std):
+        try:
+            return "eigen-materieel" in self.evi_dict[std]
+        except TypeError:
+            return []
 
-        if len(merchant_branche) > 0:
-            is_required = self.branche_is_required(merchant_branche[0])
-            try:
-                valid = True
-                for std in option:
-                    branches = self.branches_dict[std]
-                    if is_required and len(branches) == 0:
-                        valid = False
-                        break
-                    if not is_required and len(branches) > 0:
-                        if (
-                            self.stand_has_required_branche(branches)
-                            and not evi_merchant
-                            and not self.market_info_delegate.market_has_unused_evi_space()
-                        ):
-                            valid = False
-                            break
-                    if len(branches) > 0 and is_required:
-                        if merchant_branche[0] not in branches:
-                            valid = False
-                            break
-                    if evi_merchant:
-                        if "eigen-materieel" not in self.evi_dict[std]:
-                            valid = False
-                            break
-                    else:
-                        if self.prevent_evi:
-                            if self.market_info_delegate.market_has_unused_evi_space():
-                                return True
-                            return "eigen-materieel" not in self.evi_dict[std]
-                return valid
-            except KeyError:
-                pass
-            except TypeError:
-                pass
+    def option_is_valid_branche(
+        self, option, merchant_branches, evi_merchant, prevent_evi=False
+    ):
+        AV = namedtuple(
+            "AllocationVars",
+            [
+                "merchant_has_required_branche",
+                "stand_has_branche",
+                "stand_has_required_branche",
+                "market_has_unused_evi_space",
+                "merchant_has_evi",
+                "branches_match",
+                "stand_has_evi",
+                "prevent_evi",
+                "market_has_unused_branche_space",
+            ],
+            defaults=(None,) * 9,
+        )
+
+        illegal_combos = [
+            AV(
+                merchant_has_required_branche=True,
+                branches_match=False,
+            ),
+            AV(
+                merchant_has_evi=True,
+                stand_has_evi=False,
+            ),
+            AV(
+                market_has_unused_evi_space=False,
+                merchant_has_evi=False,
+                stand_has_evi=True,
+                stand_has_branche=True,
+                stand_has_required_branche=True,
+                branches_match=False,
+            ),
+            AV(
+                market_has_unused_evi_space=False,
+                stand_has_branche=True,
+                stand_has_required_branche=True,
+                merchant_has_required_branche=False,
+                merchant_has_evi=False,
+            ),
+            AV(market_has_unused_evi_space=False, prevent_evi=True, stand_has_evi=True),
+            AV(
+                market_has_unused_branche_space=False,
+                prevent_evi=True,
+                stand_has_required_branche=True,
+                branches_match=False,
+            ),
+        ]
+
+        is_required = self.branche_is_required(merchant_branches[0])
+        for std in option:
+            branches = self.branches_dict[std]
+            evi_space = self.market_info_delegate.market_has_unused_evi_space()
+            stand_required_br = self.stand_has_required_branche(branches)
+            std_has_evi = self.stand_has_evi(std)
+
+            branch_vars = AV(
+                merchant_has_required_branche=is_required,
+                branches_match=merchant_branches[0] in branches,
+            )
+            if branch_vars in illegal_combos:
+                return False
+
+            evi_vars = AV(
+                merchant_has_evi=evi_merchant,
+                stand_has_evi=std_has_evi,
+            )
+            if evi_vars in illegal_combos:
+                return False
+
+            evi_space_vars = AV(
+                market_has_unused_evi_space=evi_space,
+                merchant_has_evi=evi_merchant,
+                stand_has_evi=std_has_evi,
+            )
+            if evi_space_vars in illegal_combos:
+                return False
+
+            evi_space_vars = AV(
+                market_has_unused_evi_space=evi_space,
+                stand_has_branche=len(branches) > 0,
+                stand_has_required_branche=stand_required_br,
+                merchant_has_required_branche=is_required,
+                merchant_has_evi=evi_merchant,
+            )
+            if evi_space_vars in illegal_combos:
+                return False
+
+            evi_moving_vpl = AV(
+                market_has_unused_evi_space=evi_space,
+                prevent_evi=self.prevent_evi,
+                stand_has_evi=std_has_evi,
+            )
+            if evi_moving_vpl in illegal_combos:
+                return False
+
+            branches_moving_vpl = AV(
+                market_has_unused_branche_space=self.market_info_delegate.market_has_unused_branche_space(
+                    branches
+                ),
+                prevent_evi=self.prevent_evi,
+                stand_has_required_branche=stand_required_br,
+                branches_match=merchant_branches[0] in branches,
+            )
+            if branches_moving_vpl in illegal_combos:
+                return False
         return True
 
     def option_is_available(self, option):
