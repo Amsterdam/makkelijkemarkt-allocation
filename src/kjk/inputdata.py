@@ -3,6 +3,9 @@ from kjk.base import BaseDataprovider
 
 
 class DataproviderGetterMixin:
+    def __init__(self, data):
+        self.data = data
+
     def get_obstacles(self):
         return self.data["obstakels"]
 
