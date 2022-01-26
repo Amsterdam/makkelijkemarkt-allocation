@@ -1,0 +1,23 @@
+graph TD                       
+    A(["FASE 13 Validatiefase"]) -->
+    A2(Valideer toewijzingen en afwijzingen) -->
+
+    C{Geen dubbele toewijzingen?}   
+    C --JA--> c1(["Rapporteren markten"])
+    C --correctie mogelijk--> c2(["Correctie indeling"]) --> A2 
+    C --NEE--> D
+      
+    D{EVI goed ingedeeld?}     
+    D --NEE--> d1(["Rapporteren markten"])
+    D --correctie mogelijk--> d2(["Correctie indeling"]) --> A2
+    D --JA--> E 
+
+    E{Branches staan goed?}     
+    E --NEE--> e1(["Rapporteren markten"])
+    E --correctie mogelijk--> e2(["Correctie indeling"]) --> A2
+    E --JA--> F
+
+    F{"Voorkeuren goed? (geen minimum overschreden)"}     
+    F --NEE--> f1(["Rapporteren markten"])
+    F --correctie mogelijk--> f2(["Correctie indeling"]) --> A2
+    F --JA--> Z(["Indeling klaar"])

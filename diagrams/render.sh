@@ -7,3 +7,10 @@ docker run -u 1000  -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt
 docker run -u 1000  -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt-allocations/diagrams:/data minlag/mermaid-cli -i /data/src/fase_5.mmd -o /data/img/fase_5.svg
 docker run -u 1000  -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt-allocations/diagrams:/data minlag/mermaid-cli -i /data/src/fase_6.mmd -o /data/img/fase_6.svg
 docker run -u 1000  -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt-allocations/diagrams:/data minlag/mermaid-cli -i /data/src/fase_7.mmd -o /data/img/fase_7.svg
+docker run -u 1000  -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt-allocations/diagrams:/data minlag/mermaid-cli -i /data/src/fase_8.mmd -o /data/img/fase_8.svg
+docker run -u 1000  -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt-allocations/diagrams:/data minlag/mermaid-cli -i /data/src/fase_9.mmd -o /data/img/fase_9.svg
+docker run -u 1000  -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt-allocations/diagrams:/data minlag/mermaid-cli -i /data/src/fase_10.mmd -o /data/img/fase_10.svg
+docker run -u 1000  -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt-allocations/diagrams:/data minlag/mermaid-cli -i /data/src/fase_11.mmd -o /data/img/fase_11.svg
+docker run -u 1000  -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt-allocations/diagrams:/data minlag/mermaid-cli -i /data/src/fase_12.mmd -o /data/img/fase_12.svg
+docker run -u 1000  -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt-allocations/diagrams:/data minlag/mermaid-cli -i /data/src/fase_13.mmd -o /data/img/fase_13.svg
+docker run -u 1000  -it -v /home/johan/Projects/amsterdam/origin/makkelijkemarkt-allocations/diagrams:/data minlag/mermaid-cli -i /data/src/fase_14.mmd -o /data/img/fase_14.svg
