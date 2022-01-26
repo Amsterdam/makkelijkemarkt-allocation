@@ -1,0 +1,11 @@
+graph TD
+    A(["FASE 8 uitbreidingsfase VPL (indien ruimte op de markt)"]) -->
+    E{Strategie?}              
+    E --"Strategie 1 (genoeg ruimte)"--> C
+    E --"Strategie 2 (beperkt ruimte)"--> E2(["Sla deze fase over.<br> Uitbreiden gebeurt in de generieke uitbreidingsfase."])
+    E --"Strategie 3 (te weinig ruimte)"--> E3(["Sla deze fase over.<br> Uitbreiden gebeurt in de generieke uitbreidingsfase."])
+    C(Selecteer de vpl ondernemers uit de uitbreidingsstack) -->
+    D[Haal de reeds toegewezen plaatsen op<br> voor deze vastplaatshouders] -->
+    F{Is er een plek die aansluit en<br> toegewezen kan worden?}
+    F --JA plek gevonden--> F1(["Toewijzing uitbreiding,<br> (zie diagram 'vinden uitbreiding')"])
+    F --NEE geen plek gevonden--> F2([Uitbreiden niet mogelijk])
