@@ -16,6 +16,30 @@ from kjk.test_utils import (
 # NOTE: There are no assertions, tests succeed if no exeptions are raised
 
 
+class DapperMovingVplBugTestCase_4(unittest.TestCase):
+    def setUp(self):
+        dp = FixtureDataprovider("../../bug_27-01-2022.json")
+        self.allocator = Allocator(dp)
+
+    def test_bug(self):
+        market_allocation = self.allocator.get_allocation()
+        # print_alloc(market_allocation)
+        # print(len(market_allocation["toewijzingen"]))
+        pprint(market_allocation["afwijzingen"])
+
+
+class DapperMovingVplBugTestCase_3(unittest.TestCase):
+    def setUp(self):
+        dp = FixtureDataprovider("../../bug_27-01-2022b.json")
+        self.allocator = Allocator(dp)
+
+    def test_bug(self):
+        market_allocation = self.allocator.get_allocation()
+        # print_alloc(market_allocation)
+        # print(len(market_allocation["toewijzingen"]))
+        pprint(market_allocation["afwijzingen"])
+
+
 class DapperMovingVplBugTestCase_2(unittest.TestCase):
     """Tuithof must be on 53 !"""
 
