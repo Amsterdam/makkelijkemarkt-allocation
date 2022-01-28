@@ -351,6 +351,35 @@ class BaseAllocator:
         )
         self.expanders_df = self.merchants_df.query("wants_expand == True").copy()
 
+    def create_reducers_set(self):
+        def wants_to_reduce(x):
+            if x["status"] in ("vpl", "tvpl", "exp", "expf"):
+                try:
+                    return int(x["voorkeur.maximum"]) < len(x["plaatsen"])
+                except KeyError:
+                    return False
+                except ValueError:
+                    return False
+            else:
+                return False
+
+        self.merchants_df["wants_reduce"] = self.merchants_df.apply(
+            wants_to_reduce, axis=1
+        )
+
+        def reduce_stands(x):
+            erk = ""
+            try:
+                if x["wants_reduce"]:
+                    erk = x["erkenningsNummer"]
+                    x["plaatsen"] = x["plaatsen"][: x["voorkeur.maximum"]]
+            except Exception:
+                clog.warning(f"Verminderen stand vpl {erk} mislukt!")
+                pass
+            return x
+
+        self.merchants_df = self.merchants_df.apply(reduce_stands, axis=1)
+
     def prepare_merchants(self):
         """prepare the merchants list for allocation"""
         self.df_for_attending_merchants()
@@ -364,6 +393,7 @@ class BaseAllocator:
         self.add_required_branche_for_merchant()
         self.add_evi_for_merchant()
         self.create_expanders_set()
+        self.create_reducers_set()
         self.merchants_df.set_index("erkenningsNummer", inplace=True)
         self.merchants_df["erkenningsNummer"] = self.merchants_df.index
         self.merchants_df["sollicitatieNummer"] = pd.to_numeric(

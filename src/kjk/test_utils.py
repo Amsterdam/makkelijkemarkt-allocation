@@ -5,6 +5,10 @@ class ErkenningsnummerNotFoudError(Exception):
     pass
 
 
+class SollicitatienummerNotFoudError(Exception):
+    pass
+
+
 def print_alloc(data):
     print("=" * 70)
     print("Allocation:")
@@ -23,6 +27,16 @@ def alloc_erk(erk, data):
             return toew
     raise ErkenningsnummerNotFoudError(
         f"Erkenningsnummer {erk} not found in allocations"
+    )
+
+
+def alloc_sollnr(sollnr, data):
+    """Get an allocation object by 'erkenningsNummer'"""
+    for toew in data["toewijzingen"]:
+        if sollnr == toew["ondernemer"]["sollicitatieNummer"]:
+            return toew
+    raise SollicitatienummerNotFoudError(
+        f"Sollicitatienummer {sollnr} not found in allocations"
     )
 
 

@@ -7,6 +7,7 @@ from kjk.test_utils import (
     print_alloc,
     stands_erk,
     alloc_erk,
+    alloc_sollnr,
     reject_erk,
     ErkenningsnummerNotFoudError,
 )
@@ -32,12 +33,19 @@ class DapperMovingVplBugTestCase_3(unittest.TestCase):
     def setUp(self):
         dp = FixtureDataprovider("../../bug_27-01-2022b.json")
         self.allocator = Allocator(dp)
+        self.market_allocation = self.allocator.get_allocation()
 
     def test_bug(self):
-        market_allocation = self.allocator.get_allocation()
         # print_alloc(market_allocation)
         # print(len(market_allocation["toewijzingen"]))
-        pprint(market_allocation["afwijzingen"])
+        # pprint(market_allocation["afwijzingen"])
+        pass
+
+    def test_reduction_number_of_stands_vpl(self):
+        tw = alloc_sollnr(63, self.market_allocation)
+        self.assertListEqual(tw["plaatsen"], ["75"])
+        tw = alloc_sollnr(278, self.market_allocation)
+        self.assertListEqual(tw["plaatsen"], ["120"])
 
 
 class DapperMovingVplBugTestCase_2(unittest.TestCase):
