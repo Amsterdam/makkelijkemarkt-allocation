@@ -6,6 +6,7 @@ from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
 from kjk.logging import clog, log
 from kjk.rejection_reasons import MARKET_FULL
+from pandas.core.computation.ops import UndefinedVariableError
 
 pd.options.mode.chained_assignment = "raise"
 
@@ -778,6 +779,19 @@ class BaseAllocator:
                 "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
             )
 
+    def _allocation_wanted(self, erk, stands_to_alloc):
+        try:
+            df = self.merchants_df.query(
+                "`voorkeur.anywhere` == False & status == 'soll'"
+            )
+            if erk not in df["erkenningsNummer"].to_list():
+                return True
+        except UndefinedVariableError:  # pandas error not all tests have 'anywhere'
+            return True
+        # if anywhere is off all stands should be in prefs
+        prefs = self.get_prefs_for_merchant(erk)
+        return all([std in prefs for std in stands_to_alloc])
+
     def _allocate_stands_to_merchant(self, stands_to_alloc, erk, dequeue_merchant=True):
         if len(stands_to_alloc) > 0:
             merchant_obj = self.merchant_object_by_id(erk)
@@ -799,7 +813,9 @@ class BaseAllocator:
 
             merchant_dequeue_error = False
             stand_dequeue_error = False
-            if allocation_allowed:
+            allocation_wanted = self._allocation_wanted(erk, stands_to_alloc)
+
+            if allocation_allowed and allocation_wanted:
                 # some times we need to know the phase in wich a merchant is allocated
                 # mostly for debugging but we may decide to report this to market-dep
                 if self.phase_id not in self.allocations_per_phase:
@@ -846,7 +862,8 @@ class BaseAllocator:
         for index, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
             pref = row["pref"]
-            mini = row["voorkeur.minimum"]
+            # mini = row["voorkeur.minimum"]
+            mini = 1
 
             if math.isnan(mini):
                 mini = 1
@@ -1004,7 +1021,7 @@ class BaseAllocator:
                 if assigned_stands is not None:
                     stands = self.cluster_finder.find_valid_expansion(
                         assigned_stands,
-                        total_size=int(maxi),
+                        total_size=len(assigned_stands) + 1,
                         merchant_branche=merchant_branches,
                         evi_merchant=evi,
                         ignore_check_available=assigned_stands,
