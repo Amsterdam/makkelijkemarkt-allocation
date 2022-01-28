@@ -14,7 +14,7 @@ from kjk.outputdata import ConvertToRejectionError
 
 # from kjk.utils import AllocationDebugger
 
-DEBUG = True
+DEBUG = False
 
 
 class Allocator(BaseAllocator, ValidatorMixin):
@@ -491,16 +491,31 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
-        # merhants who have 'anywhere' false
+        # merchants who have 'anywhere' false
         # and do not have a preferred stand
         rejected = self.correct_preferences()
         self.reclaimed_number_stands = 0
         for r in rejected:
             try:
-                num_freed = self.market_output.convert_to_rejection(r)
+                num_freed = len(self.market_output.convert_to_rejection(r))
             except ConvertToRejectionError:
                 num_freed = 0
             self.reclaimed_number_stands += num_freed
+
+        # merchants who have less stands than min required
+        rejected = self.correct_expansion()
+        for r in rejected:
+            try:
+                stands_to_reclaim = self.market_output.convert_to_rejection(r)
+            except ConvertToRejectionError:
+                stands_to_reclaim = []
+            for std in stands_to_reclaim:
+                df = self.back_up_stand_queue.query(f"plaatsId == '{std}'")
+                self.positions_df = pd.concat([self.positions_df, df])
+
+        # self.allocation_phase_11()
+        # print(self.merchants_df[["voorkeur.branches", "description", "pref", "voorkeur.anywhere", "voorkeur.minimum", "status"]])
+        # print(self.positions_df)
 
         self.validate_double_allocation()
         self.validate_evi_allocations()
@@ -524,20 +539,21 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
     def get_allocation(self):
 
-        self.allocation_phase_01()
-        self.allocation_phase_02()
-        self.allocation_phase_03()
-        self.allocation_phase_04()
-        self.allocation_phase_05()
-        self.allocation_phase_06()
-        self.allocation_phase_07()
-        self.allocation_phase_09()
-        self.allocation_phase_08()
-        self.allocation_phase_10()
-        self.allocation_phase_11()
-        self.allocation_phase_12()
-        self.allocation_phase_13()
-        self.allocation_phase_14()
+        if True:
+            self.allocation_phase_01()
+            self.allocation_phase_02()
+            self.allocation_phase_03()
+            self.allocation_phase_04()
+            self.allocation_phase_05()
+            self.allocation_phase_06()
+            self.allocation_phase_07()
+            self.allocation_phase_09()
+            self.allocation_phase_08()
+            self.allocation_phase_10()
+            self.allocation_phase_11()
+            self.allocation_phase_12()
+            self.allocation_phase_13()
+            self.allocation_phase_14()
 
         if DEBUG:
             json_file = self.market_output.to_json_file()

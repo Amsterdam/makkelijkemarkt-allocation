@@ -201,6 +201,7 @@ class BaseAllocator:
 
         self.prepare_merchants()
         self.prepare_stands()
+        self.back_up_stand_queue = self.positions_df.copy()
 
         # create a sparse datastructure for branche lookup per stand id
         plaats_ids = self.positions_df["plaatsId"].to_list()
@@ -859,11 +860,13 @@ class BaseAllocator:
             print(self.cluster_finder.stands_allocated)
 
         log.info("Ondernemers te alloceren in deze fase: {}".format(len(result_list)))
-        for index, row in result_list.iterrows():
+        for _, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
             pref = row["pref"]
-            # mini = row["voorkeur.minimum"]
-            mini = 1
+            if row["status"] == "tvplz":
+                mini = row["voorkeur.minimum"]
+            else:
+                mini = 1
 
             if math.isnan(mini):
                 mini = 1
@@ -1019,6 +1022,8 @@ class BaseAllocator:
                     erk
                 )
                 if assigned_stands is not None:
+                    if len(assigned_stands) >= maxi:
+                        continue
                     stands = self.cluster_finder.find_valid_expansion(
                         assigned_stands,
                         total_size=len(assigned_stands) + 1,

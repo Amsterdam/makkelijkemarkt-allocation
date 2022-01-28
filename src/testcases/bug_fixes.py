@@ -26,7 +26,7 @@ class DapperMovingVplBugTestCase_4(unittest.TestCase):
         market_allocation = self.allocator.get_allocation()
         # print_alloc(market_allocation)
         # print(len(market_allocation["toewijzingen"]))
-        pprint(market_allocation["afwijzingen"])
+        # pprint(market_allocation["afwijzingen"])
 
 
 class DapperMovingVplBugTestCase_3(unittest.TestCase):
@@ -38,7 +38,7 @@ class DapperMovingVplBugTestCase_3(unittest.TestCase):
     def test_bug(self):
         # print_alloc(market_allocation)
         # print(len(market_allocation["toewijzingen"]))
-        # pprint(market_allocation["afwijzingen"])
+        # pprint(self.market_allocation["afwijzingen"])
         pass
 
     def test_reduction_number_of_stands_vpl(self):

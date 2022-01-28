@@ -214,7 +214,7 @@ class TestEVI(unittest.TestCase):
             voorkeur={
                 "branches": ["mooie spullen"],
                 "maximum": 2,
-                "minimum": 2,
+                "minimum": 1,
                 "verkoopinrichting": ["eigen-materieel"],
                 "absentFrom": "",
                 "absentUntil": "",

@@ -44,7 +44,7 @@ class MarketArrangement:
             }
             self.rejection_list.append(rejection_obj)
             del self.allocation_dict[merchant_id]
-            return len(allocation_object["plaatsen"])
+            return allocation_object["plaatsen"]
         except Exception:
             raise ConvertToRejectionError("Could not convert allocation to rejection")
 

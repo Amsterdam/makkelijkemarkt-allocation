@@ -20,9 +20,14 @@ class ValidatorMixin:
         else:
             clog.error("Failed")
 
-    def validate_expansion(self):
-        log.info("-" * 60)
-        log.info("Valideren uitbreidingen kramen: ")
+    def correct_expansion(self):
+        return self.validate_expansion(verbose=False)
+
+    def validate_expansion(self, verbose=True):
+        merchants_to_be_rejected = []
+        if verbose:
+            log.info("-" * 60)
+            log.info("Valideren uitbreidingen kramen: ")
         tws = self.market_output.to_data()["toewijzingen"]
         status_ok = True
         errors = [
@@ -40,6 +45,7 @@ class ValidatorMixin:
             )
         ]
         for tw in tws:
+            len_fixed = 0
             try:
                 erk = tw["ondernemer"]["erkenningsNummer"]
                 status = tw["ondernemer"]["status"]
@@ -61,22 +67,26 @@ class ValidatorMixin:
                     )
                 if not _min:
                     _min = 1.0
-                if _min > _num:
+                # exp and expf can not have minimum
+                if _min > _num and status not in ("exp", "expf"):
                     status_ok = False
                     errors.append(
                         (erk, status, f"aantal kramen {_num} kleiner dan min {_min}")
                     )
+                    merchants_to_be_rejected.append(erk)
             except KeyError:
                 pass
-        if status_ok:
-            clog.info("-> OK")
-            if not clog.disabled:
-                print(tabulate(msgs, headers="firstrow"))
-        else:
-            clog.error("Failed: \n")
-            if not clog.disabled:
-                print(tabulate(errors, headers="firstrow"))
-            clog.info("")
+        if verbose:
+            if status_ok:
+                clog.info("-> OK")
+                if not clog.disabled:
+                    print(tabulate(msgs, headers="firstrow"))
+            else:
+                clog.error("Failed: \n")
+                if not clog.disabled:
+                    print(tabulate(errors, headers="firstrow"))
+                clog.info("")
+        return merchants_to_be_rejected
 
     def validate_branche_allocation(self):
         log.info("-" * 60)
