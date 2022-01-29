@@ -7,6 +7,7 @@ from kjk.base import STRATEGY_EXP_FULL
 from kjk.base import MarketStandDequeueError
 from kjk.base import MerchantDequeueError
 from kjk.rejection_reasons import VPL_POSITION_NOT_AVAILABLE
+from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
 from kjk.validation import ValidatorMixin
 from kjk.logging import clog, log
 from kjk.utils import TradePlacesSolver
@@ -506,16 +507,14 @@ class Allocator(BaseAllocator, ValidatorMixin):
         rejected = self.correct_expansion()
         for r in rejected:
             try:
-                stands_to_reclaim = self.market_output.convert_to_rejection(r)
+                stands_to_reclaim = self.market_output.convert_to_rejection(
+                    r, reason=MINIMUM_UNAVAILABLE
+                )
             except ConvertToRejectionError:
                 stands_to_reclaim = []
             for std in stands_to_reclaim:
                 df = self.back_up_stand_queue.query(f"plaatsId == '{std}'")
                 self.positions_df = pd.concat([self.positions_df, df])
-
-        # self.allocation_phase_11()
-        # print(self.merchants_df[["voorkeur.branches", "description", "pref", "voorkeur.anywhere", "voorkeur.minimum", "status"]])
-        # print(self.positions_df)
 
         self.validate_double_allocation()
         self.validate_evi_allocations()
@@ -539,21 +538,20 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
     def get_allocation(self):
 
-        if True:
-            self.allocation_phase_01()
-            self.allocation_phase_02()
-            self.allocation_phase_03()
-            self.allocation_phase_04()
-            self.allocation_phase_05()
-            self.allocation_phase_06()
-            self.allocation_phase_07()
-            self.allocation_phase_09()
-            self.allocation_phase_08()
-            self.allocation_phase_10()
-            self.allocation_phase_11()
-            self.allocation_phase_12()
-            self.allocation_phase_13()
-            self.allocation_phase_14()
+        self.allocation_phase_01()
+        self.allocation_phase_02()
+        self.allocation_phase_03()
+        self.allocation_phase_04()
+        self.allocation_phase_05()
+        self.allocation_phase_06()
+        self.allocation_phase_07()
+        self.allocation_phase_09()
+        self.allocation_phase_08()
+        self.allocation_phase_10()
+        self.allocation_phase_11()
+        self.allocation_phase_12()
+        self.allocation_phase_13()
+        self.allocation_phase_14()
 
         if DEBUG:
             json_file = self.market_output.to_json_file()

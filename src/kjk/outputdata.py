@@ -32,13 +32,13 @@ class MarketArrangement:
 
         self.assigned_stands = {}
 
-    def convert_to_rejection(self, merchant_id=None):
+    def convert_to_rejection(self, merchant_id=None, reason=PREF_NOT_AVAILABLE):
         try:
             allocation_object = self.allocation_dict[merchant_id]
             rejection_obj = {
                 "marktId": self.market_id,
                 "ondernemer": allocation_object["ondernemer"],
-                "reason": PREF_NOT_AVAILABLE,
+                "reason": reason,
                 "marktDate": self.market_date,
                 "erkenningsNummer": merchant_id,
             }

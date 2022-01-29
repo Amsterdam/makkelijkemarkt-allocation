@@ -31,7 +31,7 @@ def alloc_erk(erk, data):
 
 
 def alloc_sollnr(sollnr, data):
-    """Get an allocation object by 'erkenningsNummer'"""
+    """Get an allocation object by 'sollicitatieNummer'"""
     for toew in data["toewijzingen"]:
         if sollnr == toew["ondernemer"]["sollicitatieNummer"]:
             return toew
@@ -47,6 +47,16 @@ def stands_erk(erk, data):
             return toew["plaatsen"]
     raise ErkenningsnummerNotFoudError(
         f"Erkenningsnummer {erk} not found in allocations"
+    )
+
+
+def reject_sollnr(sollnr, data):
+    """Get a rejection object by 'sollicitatieNummer'"""
+    for afw in data["afwijzingen"]:
+        if sollnr == afw["ondernemer"]["sollicitatieNummer"]:
+            return afw
+    raise ErkenningsnummerNotFoudError(
+        f"Sollicitatienummer {sollnr} not found in rejections"
     )
 
 
