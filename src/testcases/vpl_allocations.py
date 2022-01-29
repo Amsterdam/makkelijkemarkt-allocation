@@ -101,7 +101,6 @@ class TestTVPallocation(unittest.TestCase):
         stands = allocs[0]["plaatsen"]
         self.assertListEqual(stands, ["1", "2"])
 
-    @unittest.skip("Navragen bij markt bureau, krimpen zonder voorkeuren?")
     def test_vpl_max_stands(self):
         """
         kan zijn aantal vaste plaatsen verkleinen door een maximum in te stellen
@@ -132,8 +131,8 @@ class TestTVPallocation(unittest.TestCase):
 
         self.dp.mock()
         allocator = Allocator(self.dp)
-        market_allocation = allocation = allocator.get_allocation()
-        twz = alloc_erk("1", market_allocation)
+        market_allocation = allocator.get_allocation()
+        twz = alloc_erk("4", market_allocation)
         num_stands = len(twz["plaatsen"])
         self.assertEqual(num_stands, 1)
 
@@ -158,9 +157,9 @@ class TestTVPallocation(unittest.TestCase):
         )
         self.dp.mock()
         allocator = Allocator(self.dp)
-        market_allocation = allocation = allocator.get_allocation()
+        market_allocation = allocator.get_allocation()
         self.assertTrue(len(market_allocation["afwijzingen"]) == 3)
-        self.assertEqual(reject_erk("2", market_allocation)["reason"]["code"], 4)
+        self.assertEqual(reject_erk("4", market_allocation)["reason"]["code"], 5)
 
     @unittest.skip(
         "Uitgezet, omdat nog niet besloten is hoe om te gaan met 'willekeurig indelen' voor VPL."

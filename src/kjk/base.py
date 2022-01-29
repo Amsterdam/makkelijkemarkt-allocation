@@ -6,6 +6,7 @@ from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
 from kjk.logging import clog, log
 from kjk.rejection_reasons import MARKET_FULL
+from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
 from pandas.core.computation.ops import UndefinedVariableError
 
 pd.options.mode.chained_assignment = "raise"
@@ -863,6 +864,10 @@ class BaseAllocator:
         for _, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
             pref = row["pref"]
+            minimal = row["voorkeur.minimum"]
+            expand = row["wants_expand"]
+            merchant_branches = row["voorkeur.branches"]
+            evi = row["has_evi"] == "yes"
             if row["status"] == "tvplz":
                 mini = row["voorkeur.minimum"]
             else:
@@ -870,6 +875,13 @@ class BaseAllocator:
 
             if math.isnan(mini):
                 mini = 1
+
+            minimal_possible = self.cluster_finder.find_valid_cluster_final_phase(
+                pref, int(minimal), preferred=False, anywhere=True
+            )
+            if len(minimal_possible) == 0:
+                self._reject_merchant(erk, MINIMUM_UNAVAILABLE)
+                continue
 
             stds = []
             if len(stds) == 0:
@@ -892,6 +904,14 @@ class BaseAllocator:
                 )
                 if len(stds_np) > 0:
                     stds = stds_np[0]
+            if expand:
+                self._prepare_expansion(
+                    erk,
+                    stds,
+                    int(row["voorkeur.maximum"]),
+                    merchant_branches,
+                    evi,
+                )
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_evi_for_query(self, query):
