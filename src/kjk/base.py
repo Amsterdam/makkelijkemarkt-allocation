@@ -6,6 +6,8 @@ from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
 from kjk.logging import clog, log
 from kjk.rejection_reasons import MARKET_FULL
+from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
+from pandas.core.computation.ops import UndefinedVariableError
 
 pd.options.mode.chained_assignment = "raise"
 
@@ -200,6 +202,7 @@ class BaseAllocator:
 
         self.prepare_merchants()
         self.prepare_stands()
+        self.back_up_stand_queue = self.positions_df.copy()
 
         # create a sparse datastructure for branche lookup per stand id
         plaats_ids = self.positions_df["plaatsId"].to_list()
@@ -351,6 +354,35 @@ class BaseAllocator:
         )
         self.expanders_df = self.merchants_df.query("wants_expand == True").copy()
 
+    def create_reducers_set(self):
+        def wants_to_reduce(x):
+            if x["status"] in ("vpl", "tvpl", "exp", "expf"):
+                try:
+                    return int(x["voorkeur.maximum"]) < len(x["plaatsen"])
+                except KeyError:
+                    return False
+                except ValueError:
+                    return False
+            else:
+                return False
+
+        self.merchants_df["wants_reduce"] = self.merchants_df.apply(
+            wants_to_reduce, axis=1
+        )
+
+        def reduce_stands(x):
+            erk = ""
+            try:
+                if x["wants_reduce"]:
+                    erk = x["erkenningsNummer"]
+                    x["plaatsen"] = x["plaatsen"][: x["voorkeur.maximum"]]
+            except Exception:
+                clog.warning(f"Verminderen stand vpl {erk} mislukt!")
+                pass
+            return x
+
+        self.merchants_df = self.merchants_df.apply(reduce_stands, axis=1)
+
     def prepare_merchants(self):
         """prepare the merchants list for allocation"""
         self.df_for_attending_merchants()
@@ -364,6 +396,7 @@ class BaseAllocator:
         self.add_required_branche_for_merchant()
         self.add_evi_for_merchant()
         self.create_expanders_set()
+        self.create_reducers_set()
         self.merchants_df.set_index("erkenningsNummer", inplace=True)
         self.merchants_df["erkenningsNummer"] = self.merchants_df.index
         self.merchants_df["sollicitatieNummer"] = pd.to_numeric(
@@ -748,6 +781,19 @@ class BaseAllocator:
                 "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
             )
 
+    def _allocation_wanted(self, erk, stands_to_alloc):
+        try:
+            df = self.merchants_df.query(
+                "`voorkeur.anywhere` == False & status == 'soll'"
+            )
+            if erk not in df["erkenningsNummer"].to_list():
+                return True
+        except UndefinedVariableError:  # pandas error not all tests have 'anywhere'
+            return True
+        # if anywhere is off all stands should be in prefs
+        prefs = self.get_prefs_for_merchant(erk)
+        return all([std in prefs for std in stands_to_alloc])
+
     def _allocate_stands_to_merchant(self, stands_to_alloc, erk, dequeue_merchant=True):
         if len(stands_to_alloc) > 0:
             merchant_obj = self.merchant_object_by_id(erk)
@@ -769,7 +815,9 @@ class BaseAllocator:
 
             merchant_dequeue_error = False
             stand_dequeue_error = False
-            if allocation_allowed:
+            allocation_wanted = self._allocation_wanted(erk, stands_to_alloc)
+
+            if allocation_allowed and allocation_wanted:
                 # some times we need to know the phase in wich a merchant is allocated
                 # mostly for debugging but we may decide to report this to market-dep
                 if self.phase_id not in self.allocations_per_phase:
@@ -813,13 +861,27 @@ class BaseAllocator:
             print(self.cluster_finder.stands_allocated)
 
         log.info("Ondernemers te alloceren in deze fase: {}".format(len(result_list)))
-        for index, row in result_list.iterrows():
+        for _, row in result_list.iterrows():
             erk = row["erkenningsNummer"]
             pref = row["pref"]
-            mini = row["voorkeur.minimum"]
+            minimal = row["voorkeur.minimum"]
+            expand = row["wants_expand"]
+            merchant_branches = row["voorkeur.branches"]
+            evi = row["has_evi"] == "yes"
+            if row["status"] == "tvplz":
+                mini = row["voorkeur.minimum"]
+            else:
+                mini = 1
 
             if math.isnan(mini):
                 mini = 1
+
+            minimal_possible = self.cluster_finder.find_valid_cluster_final_phase(
+                pref, int(minimal), preferred=False, anywhere=True
+            )
+            if len(minimal_possible) == 0:
+                self._reject_merchant(erk, MINIMUM_UNAVAILABLE)
+                continue
 
             stds = []
             if len(stds) == 0:
@@ -842,6 +904,14 @@ class BaseAllocator:
                 )
                 if len(stds_np) > 0:
                     stds = stds_np[0]
+            if expand:
+                self._prepare_expansion(
+                    erk,
+                    stds,
+                    int(row["voorkeur.maximum"]),
+                    merchant_branches,
+                    evi,
+                )
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_evi_for_query(self, query):
@@ -972,9 +1042,11 @@ class BaseAllocator:
                     erk
                 )
                 if assigned_stands is not None:
+                    if len(assigned_stands) >= maxi:
+                        continue
                     stands = self.cluster_finder.find_valid_expansion(
                         assigned_stands,
-                        total_size=int(maxi),
+                        total_size=len(assigned_stands) + 1,
                         merchant_branche=merchant_branches,
                         evi_merchant=evi,
                         ignore_check_available=assigned_stands,

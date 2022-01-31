@@ -636,10 +636,13 @@ class TestMinimizeRejections(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        erk = alloc_erk("3", allocation)
         num_rejects = len(allocation["afwijzingen"])
         self.assertEqual(num_rejects, 2)
-        self.assertListEqual(erk["plaatsen"], ["1", "2"])
+        erk = alloc_erk("3", allocation)
+        erk["plaatsen"].sort()
+        a = ["1", "2"]
+        a.sort()
+        self.assertListEqual(erk["plaatsen"], a)
 
     def test_rejection_for_branches(self):
         """

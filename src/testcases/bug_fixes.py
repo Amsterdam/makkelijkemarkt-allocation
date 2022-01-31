@@ -7,13 +7,60 @@ from kjk.test_utils import (
     print_alloc,
     stands_erk,
     alloc_erk,
+    alloc_sollnr,
     reject_erk,
+    reject_sollnr,
     ErkenningsnummerNotFoudError,
 )
 
 # These tests all expose data quality bugs
 # The bugs occurred while testing allocations on ACC data
 # NOTE: There are no assertions, tests succeed if no exeptions are raised
+
+
+class DapperBugTestCase_3(unittest.TestCase):
+    def setUp(self):
+        dp = FixtureDataprovider("../../bug_27-01-2022b.json")
+        self.allocator = Allocator(dp)
+        self.market_allocation = self.allocator.get_allocation()
+
+    def test_rejections(self):
+        num_rejects = len(self.market_allocation["afwijzingen"])
+        self.assertEqual(7, num_rejects)
+
+    def test_bug_1(self):
+        # soll 110 should get 46
+        tw = alloc_sollnr(110, self.market_allocation)
+        self.assertListEqual(tw["plaatsen"], ["46"])
+
+    def test_bug_2(self):
+        # soll 70 should get 44
+        tw = alloc_sollnr(70, self.market_allocation)
+        self.assertListEqual(tw["plaatsen"], ["44"])
+
+    def test_bug_3(self):
+        # soll 68 should get 97
+        tw = alloc_sollnr(68, self.market_allocation)
+        a = ["97", "95"]
+        a.sort()
+        tw["plaatsen"].sort()
+        self.assertListEqual(tw["plaatsen"], a)
+
+    def test_bug_4(self):
+        # soll 73 should get 122
+        # because vpl on 120 dropped this stand in prefs
+        tw = alloc_sollnr(73, self.market_allocation)
+        self.assertListEqual(tw["plaatsen"], ["122"])
+
+    def test_rejection_minimum(self):
+        afw = reject_sollnr(67, self.market_allocation)
+        self.assertEqual(afw["reason"]["code"], 3)
+
+    def test_reduction_number_of_stands_vpl(self):
+        tw = alloc_sollnr(63, self.market_allocation)
+        self.assertListEqual(tw["plaatsen"], ["75"])
+        tw = alloc_sollnr(278, self.market_allocation)
+        self.assertListEqual(tw["plaatsen"], ["120"])
 
 
 class DapperMovingVplBugTestCase_2(unittest.TestCase):

@@ -7,6 +7,7 @@ from kjk.base import STRATEGY_EXP_FULL
 from kjk.base import MarketStandDequeueError
 from kjk.base import MerchantDequeueError
 from kjk.rejection_reasons import VPL_POSITION_NOT_AVAILABLE
+from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
 from kjk.validation import ValidatorMixin
 from kjk.logging import clog, log
 from kjk.utils import TradePlacesSolver
@@ -491,16 +492,29 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
-        # merhants who have 'anywhere' false
+        # merchants who have 'anywhere' false
         # and do not have a preferred stand
         rejected = self.correct_preferences()
         self.reclaimed_number_stands = 0
         for r in rejected:
             try:
-                num_freed = self.market_output.convert_to_rejection(r)
+                num_freed = len(self.market_output.convert_to_rejection(r))
             except ConvertToRejectionError:
                 num_freed = 0
             self.reclaimed_number_stands += num_freed
+
+        # merchants who have less stands than min required
+        rejected = self.correct_expansion()
+        for r in rejected:
+            try:
+                stands_to_reclaim = self.market_output.convert_to_rejection(
+                    r, reason=MINIMUM_UNAVAILABLE
+                )
+            except ConvertToRejectionError:
+                stands_to_reclaim = []
+            for std in stands_to_reclaim:
+                df = self.back_up_stand_queue.query(f"plaatsId == '{std}'")
+                self.positions_df = pd.concat([self.positions_df, df])
 
         self.validate_double_allocation()
         self.validate_evi_allocations()
@@ -531,8 +545,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.allocation_phase_05()
         self.allocation_phase_06()
         self.allocation_phase_07()
-        self.allocation_phase_08()
         self.allocation_phase_09()
+        self.allocation_phase_08()
         self.allocation_phase_10()
         self.allocation_phase_11()
         self.allocation_phase_12()
