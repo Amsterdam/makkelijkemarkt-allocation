@@ -880,7 +880,10 @@ class BaseAllocator:
                 pref, int(minimal), preferred=False, anywhere=True
             )
             if len(minimal_possible) == 0:
-                self._reject_merchant(erk, MINIMUM_UNAVAILABLE)
+                # TODO: set the temp rejection reason somewhere
+                # do not reject yet, this merchant should be able to compete
+                # for reclaimed stands in a later phase
+                # self._reject_merchant(erk, MINIMUM_UNAVAILABLE)
                 continue
 
             stds = []
