@@ -1,15 +1,15 @@
 graph TD
-    A([Marktindeling])-->
+    A([Marktindeling])-->      
     fase_1[FASE 1<br>Marktanalyse] -->
-    fase_2[FASE 2<br>Indeling vasteplaatshouders] -->
+    fase_2["FASE 2<br>Indeling vasteplaatshouders <b>(vpl)</b>"] -->
+    fase_2b["FASE 2b<br>Indeling vasteplaatshouders <b>(tvpl)</b>"] -->
     fase_3[FASE 3<br>Indeling verplaatsende vasteplaatshouders]-->
     fase_4[FASE 4<br>Indeling verplichte branches sollicitanten<br> op de A-lijst] -->
     fase_5[FASE 5<br>Indeling EVI sollicitanten op de A-lijst] -->
     fase_6[FASE 6<br>Indeling verplichte branches sollicitanten<br> op de B-lijst] -->
     fase_7[FASE 7<br>Indeling EVI sollicitanten op de B-lijst] -->
-    has_space{Is er ruimte op de markt?}
-    has_space --YES--> fase_8[FASE 8<br>Uitbreidings fase voor vasteplaathouders] --> fase_9
-    has_space --NO--> fase_9[FASE 9<br>Overige sollicitanten op de A-lijst] --> 
+    fase_8[FASE 8<br>Overige sollicitanten op de A-lijst] -->
+    fase_9[FASE 9<br>Uitbreidings fase voor vasteplaathouders] --> 
     fase_10[FASE 10<br>Uitbreiding verplichte branches A-lijst] -->
     fase_10b[FASE 10-B<br>Uitbreiding verplichte branches B-lijst] -->
     fase_10c[FASE 10-C<br>Uitbreiding EVI ondernemers A-lijst] -->
@@ -17,9 +17,13 @@ graph TD
     fase_11[FASE 11<br>Overige sollicitanten op de B-lijst] -->
     fase_12[FASE 12<br>Uitbreiding overige sollicitanten A-lijst] -->
     fase_12b[FASE 12-B<br>Uitbreiding overige sollicitanten B-lijst] -->
+    expansion_done{Zijn er nog meer uitbreidingen mogelijk?}
+    expansion_done --YES--> plus_one
+    expansion_done --NO--> fase_13
     fase_13[FASE 13<br>Validatiefase] -->
     allocation_valid{Voldoet de indeling aan de regels/verordening?}
     allocation_valid --YES--> fase_14
-    allocation_valid --NO--> fase_1
+    allocation_valid --NO--> fase_4 
     fase_14[FASE 14<br>Afwijzingsfase niet ingedeelde ondernemers] -->
     x(Marktindeling opslaan in Kiesjekraam)
+    plus_one("<b>toegewezen kramen + 1</b>") --> fase_9
