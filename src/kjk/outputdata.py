@@ -42,7 +42,7 @@ class MarketArrangement:
                 "marktDate": self.market_date,
                 "erkenningsNummer": merchant_id,
             }
-            self.rejection_list.append(rejection_obj)
+            # self.rejection_list.append(rejection_obj)
             del self.allocation_dict[merchant_id]
             return allocation_object["plaatsen"]
         except Exception:

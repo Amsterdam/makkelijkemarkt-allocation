@@ -506,6 +506,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
             for std in stands_to_reclaim:
                 df = self.back_up_stand_queue.query(f"plaatsId == '{std}'")
                 self.positions_df = pd.concat([self.positions_df, df])
+            mdf = self.back_up_merchant_queue.query(f"erkenningsNummer == '{r}'")
+            self.merchants_df = pd.concat([self.merchants_df, mdf])
 
         # merchants who have less stands than min required
         rejected = self.correct_expansion()
@@ -521,6 +523,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
             for std in stands_to_reclaim:
                 df = self.back_up_stand_queue.query(f"plaatsId == '{std}'")
                 self.positions_df = pd.concat([self.positions_df, df])
+            mdf = self.back_up_merchant_queue.query(f"erkenningsNummer == '{r}'")
+            self.merchants_df = pd.concat([self.merchants_df, mdf])
 
         # fill in the reclaimed stands
         # all rules remain the same
