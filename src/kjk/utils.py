@@ -93,6 +93,9 @@ class MarketStandClusterFinder:
     def set_stands_allocated(self, allocated_stands):
         self.stands_allocated += allocated_stands
 
+    def set_stands_available(self, stands):
+        self.stands_allocated = list(set(self.stands_allocated) - set(stands))
+
     def set_stands_reserved(self, stands_to_reserve):
         self.stands_reserved_for_expansion += stands_to_reserve
 

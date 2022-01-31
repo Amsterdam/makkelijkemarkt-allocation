@@ -498,10 +498,14 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.reclaimed_number_stands = 0
         for r in rejected:
             try:
-                num_freed = len(self.market_output.convert_to_rejection(r))
+                stands_to_reclaim = self.market_output.convert_to_rejection(r)
             except ConvertToRejectionError:
-                num_freed = 0
-            self.reclaimed_number_stands += num_freed
+                stands_to_reclaim = []
+            self.reclaimed_number_stands += len(stands_to_reclaim)
+            self.cluster_finder.set_stands_available(stands_to_reclaim)
+            for std in stands_to_reclaim:
+                df = self.back_up_stand_queue.query(f"plaatsId == '{std}'")
+                self.positions_df = pd.concat([self.positions_df, df])
 
         # merchants who have less stands than min required
         rejected = self.correct_expansion()
@@ -512,9 +516,23 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 )
             except ConvertToRejectionError:
                 stands_to_reclaim = []
+            self.reclaimed_number_stands += len(stands_to_reclaim)
+            self.cluster_finder.set_stands_available(stands_to_reclaim)
             for std in stands_to_reclaim:
                 df = self.back_up_stand_queue.query(f"plaatsId == '{std}'")
                 self.positions_df = pd.concat([self.positions_df, df])
+
+        # fill in the reclaimed stands
+        # all rules remain the same
+        self.allocation_phase_04()
+        self.allocation_phase_05()
+        self.allocation_phase_06()
+        self.allocation_phase_07()
+        self.allocation_phase_09()
+        self.allocation_phase_08()
+        self.allocation_phase_10()
+        self.allocation_phase_11()
+        self.allocation_phase_12()
 
         self.validate_double_allocation()
         self.validate_evi_allocations()
