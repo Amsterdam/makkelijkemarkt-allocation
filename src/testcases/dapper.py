@@ -11,6 +11,10 @@ class DapperTestCase(unittest.TestCase):
         allocator = Allocator(dp)
         self.market_allocation = allocator.get_allocation()
 
+    def test_market_optimize(self):
+        num_afw = len(self.market_allocation["afwijzingen"])
+        self.assertEqual(num_afw, 3)
+
     def test_evi_alloc(self):
         res = alloc_erk("9012002010", self.market_allocation)
         for p in res["plaatsen"]:

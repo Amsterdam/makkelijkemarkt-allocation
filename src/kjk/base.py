@@ -203,6 +203,7 @@ class BaseAllocator:
         self.prepare_merchants()
         self.prepare_stands()
         self.back_up_stand_queue = self.positions_df.copy()
+        self.back_up_merchant_queue = self.merchants_df.copy()
 
         # create a sparse datastructure for branche lookup per stand id
         plaats_ids = self.positions_df["plaatsId"].to_list()
@@ -865,6 +866,7 @@ class BaseAllocator:
             erk = row["erkenningsNummer"]
             pref = row["pref"]
             minimal = row["voorkeur.minimum"]
+            maximal = row["voorkeur.maximum"]
             expand = row["wants_expand"]
             merchant_branches = row["voorkeur.branches"]
             evi = row["has_evi"] == "yes"
@@ -888,15 +890,45 @@ class BaseAllocator:
 
             stds = []
             if len(stds) == 0:
+                stds_np = self.cluster_finder.find_valid_cluster_final_phase(
+                    pref, size=int(maximal), preferred=False, anywhere=False
+                )
+                if len(stds_np) > 0:
+                    stds = stds_np[0]
+
+            if len(stds) == 0:
+                stds_np = self.cluster_finder.find_valid_cluster_final_phase(
+                    pref, size=int(minimal), preferred=False, anywhere=False
+                )
+                if len(stds_np) > 0:
+                    stds = stds_np[0]
+
+            if len(stds) == 0:
+                stds_np = self.cluster_finder.find_valid_cluster_final_phase(
+                    pref, size=int(maximal), preferred=False, anywhere=True
+                )
+                if len(stds_np) > 0:
+                    stds = stds_np[0]
+
+            if len(stds) == 0:
+                stds_np = self.cluster_finder.find_valid_cluster_final_phase(
+                    pref, size=int(minimal), preferred=False, anywhere=True
+                )
+                if len(stds_np) > 0:
+                    stds = stds_np[0]
+
+            if len(stds) == 0:
                 stds = self.cluster_finder.find_valid_cluster_final_phase(
                     pref, size=int(mini), preferred=True
                 )
+
             if len(stds) == 0:
                 stds_np = self.cluster_finder.find_valid_cluster_final_phase(
                     pref, size=int(mini), preferred=False, anywhere=True
                 )
                 if len(stds_np) > 0:
                     stds = stds_np[0]
+
             if len(stds) == 0:
                 stds_np = self.cluster_finder.find_valid_cluster_final_phase(
                     pref,
@@ -907,6 +939,7 @@ class BaseAllocator:
                 )
                 if len(stds_np) > 0:
                     stds = stds_np[0]
+
             if expand:
                 self._prepare_expansion(
                     erk,
@@ -915,6 +948,9 @@ class BaseAllocator:
                     merchant_branches,
                     evi,
                 )
+            if len(stds) > 1:
+                # TODO: find the sweetspot inside this cluster
+                stds = stds[:1]
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_evi_for_query(self, query):
