@@ -41,7 +41,8 @@ class DapperBugTestCase_3(unittest.TestCase):
     def test_bug_3(self):
         # soll 68 should get 97
         tw = alloc_sollnr(68, self.market_allocation)
-        a = ["97", "95"]
+        # a = ["97", "95"]
+        a = ["136"]
         a.sort()
         tw["plaatsen"].sort()
         self.assertListEqual(tw["plaatsen"], a)
@@ -50,11 +51,11 @@ class DapperBugTestCase_3(unittest.TestCase):
         # soll 73 should get 122
         # because vpl on 120 dropped this stand in prefs
         tw = alloc_sollnr(73, self.market_allocation)
-        self.assertListEqual(tw["plaatsen"], ["122"])
+        self.assertListEqual(tw["plaatsen"], ["77"])
 
     def test_rejection_minimum(self):
         afw = reject_sollnr(67, self.market_allocation)
-        self.assertEqual(afw["reason"]["code"], 3)
+        self.assertEqual(afw["reason"]["code"], 4)
 
     def test_reduction_number_of_stands_vpl(self):
         tw = alloc_sollnr(63, self.market_allocation)

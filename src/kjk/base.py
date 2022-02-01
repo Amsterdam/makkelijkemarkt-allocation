@@ -949,6 +949,7 @@ class BaseAllocator:
                     evi,
                 )
             if len(stds) > 1:
+                # TODO: find the sweetspot inside this cluster
                 stds = stds[:1]
             self._allocate_stands_to_merchant(stds, erk)
 

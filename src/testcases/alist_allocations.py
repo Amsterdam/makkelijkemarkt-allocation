@@ -103,12 +103,13 @@ class TestAlistAllocations(unittest.TestCase):
             erkenningsNummer="1",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="1",
+            sollicitatieNummer=2,
             description="Frank Zappa",
             voorkeur={
                 "branches": [],
                 "maximum": 2,
                 "minimum": 1,
+                "anywhere": True,
                 "verkoopinrichting": [],
                 "absentFrom": "",
                 "absentUntil": "",
@@ -119,11 +120,12 @@ class TestAlistAllocations(unittest.TestCase):
             erkenningsNummer="2",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="2",
+            sollicitatieNummer=3,
             description="C Beefheart",
             voorkeur={
                 "branches": [],
-                "maximum": 2,
+                "anywhere": True,
+                "maximum": 3,
                 "minimum": 1,
                 "verkoopinrichting": [],
                 "absentFrom": "",
@@ -131,10 +133,23 @@ class TestAlistAllocations(unittest.TestCase):
             },
         )
 
-        # dp.add_page([None, "1", "2", "3", "4", "5", None])
-        dp.add_page([None, "1", "2", "3", None])
+        dp.add_merchant(
+            erkenningsNummer="3",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer=10,
+            description="Ornette",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
 
-        dp.add_pref(erkenningsNummer="2", plaatsId="3", priority=1)
+        dp.add_page([None, "1", "2", "3", "4", "5", None])
 
         # stands
         dp.add_stand(
@@ -168,9 +183,14 @@ class TestAlistAllocations(unittest.TestCase):
             verkoopinrichting=[],
         )
 
+        dp.add_pref(erkenningsNummer="1", plaatsId="1", priority=1)
+        dp.add_pref(erkenningsNummer="2", plaatsId="5", priority=1)
+        dp.add_pref(erkenningsNummer="3", plaatsId="4", priority=1)
+
         # rsvp
         dp.add_rsvp(erkenningsNummer="1", attending=True)
         dp.add_rsvp(erkenningsNummer="2", attending=True)
+        dp.add_rsvp(erkenningsNummer="3", attending=True)
 
         dp.mock()
         allocator = Allocator(dp)
@@ -181,7 +201,7 @@ class TestAlistAllocations(unittest.TestCase):
         self.assertEqual(len(res_zappa["plaatsen"]), 2)
         self.assertEqual(len(res_beefheart["plaatsen"]), 1)
 
-        dp.set_alist({"erkenningsNummer": "2"})
+        dp.set_alist([{"erkenningsNummer": "2"}])
 
         # after the alist should be reversed
         dp.mock()

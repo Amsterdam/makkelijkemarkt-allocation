@@ -359,7 +359,11 @@ class TestTVPLZallocation(unittest.TestCase):
 
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        self.assertListEqual(alloc_erk("2", allocation)["plaatsen"], ["6", "7"])
+        a = ["6", "7"]
+        a.sort()
+        res = alloc_erk("2", allocation)["plaatsen"]
+        res.sort()
+        self.assertListEqual(res, a)
         self.assertEqual(
             alloc_erk("2", allocation)["ondernemer"]["description"], "C Beefheart"
         )
