@@ -528,21 +528,37 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         # fill in the reclaimed stands
         # all rules remain the same
-        self.allocation_phase_04()
-        self.allocation_phase_05()
-        self.allocation_phase_06()
-        self.allocation_phase_07()
-        self.allocation_phase_09()
-        self.allocation_phase_08()
-        self.allocation_phase_10()
-        self.allocation_phase_11()
-        self.allocation_phase_12()
+        # until we don't have changes
+        # in the number allocated stands
+        self.num_open = 999999
+        fill_iteration = 0
+        while not self.market_filled():
+            fill_iteration += 1
+            stands = len(self.positions_df)
+            clog.warning(
+                f"Bezig met vullen van de markt. open plaatsen {stands}. ITERATIE: {fill_iteration}"
+            )
+            self.allocation_phase_04()
+            self.allocation_phase_05()
+            self.allocation_phase_06()
+            self.allocation_phase_07()
+            self.allocation_phase_09()
+            self.allocation_phase_08()
+            self.allocation_phase_10()
+            self.allocation_phase_11()
+            self.allocation_phase_12()
 
         self.validate_double_allocation()
         self.validate_evi_allocations()
         self.validate_branche_allocation()
         self.validate_expansion()
         self.validate_preferences()
+
+    def market_filled(self):
+        if self.num_open == len(self.positions_df):
+            return True
+        self.num_open = len(self.positions_df)
+        return False
 
     def allocation_phase_14(self):
         self.set_allocation_phase("Phase 14")
