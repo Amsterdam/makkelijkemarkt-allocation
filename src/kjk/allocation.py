@@ -15,7 +15,7 @@ from kjk.outputdata import ConvertToRejectionError
 
 # from kjk.utils import AllocationDebugger
 
-DEBUG = False
+DEBUG = True
 
 
 class Allocator(BaseAllocator, ValidatorMixin):
@@ -259,7 +259,15 @@ class Allocator(BaseAllocator, ValidatorMixin):
                                 evi,
                             )
                         # unable to solve conflict stay on fixed positions
-                        self._allocate_stands_to_merchant(stands, erk)
+                        try:
+                            self._allocate_stands_to_merchant(stands, erk)
+                        except MarketStandDequeueError:
+                            try:
+                                self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
+                            except MerchantDequeueError:
+                                clog.error(
+                                    f"VPL plaatsen niet beschikbaar voor erkenningsNummer {erk}"
+                                )
                     else:
                         if expand:
                             self._prepare_expansion(

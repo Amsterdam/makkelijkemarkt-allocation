@@ -4,6 +4,7 @@ from datetime import date
 from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
+from kjk.utils import PreferredStandFinder
 from kjk.logging import clog, log
 from kjk.rejection_reasons import MARKET_FULL
 from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
@@ -643,25 +644,6 @@ class BaseAllocator:
         result_df = result_df["erkenningsNummer"]
         return result_df.to_list()
 
-    def get_expander_for_branche(self, branche, status=None):
-        """get all expander for a given branche for this market"""
-
-        def has_branch(x):
-            try:
-                if branche in x:
-                    return True
-            except TypeError:
-                # nobranches == nan in dataframe
-                pass
-            return False
-
-        has_branch = self.expanders_df["voorkeur.branches"].apply(has_branch)
-        result_df = self.expanders_df[has_branch][["erkenningsNummer", "status"]]
-        if status is not None:
-            result_df = result_df[result_df["status"] == status]
-        result_df = result_df["erkenningsNummer"]
-        return result_df.to_list()
-
     def get_baking_positions(self):
         """get all baking positions for this market"""
 
@@ -950,7 +932,8 @@ class BaseAllocator:
                 )
             if len(stds) > 1:
                 # TODO: find the sweetspot inside this cluster
-                stds = stds[:1]
+                psf = PreferredStandFinder(stds, pref)
+                stds = psf.produce()
             self._allocate_stands_to_merchant(stds, erk)
 
     def _allocate_evi_for_query(self, query):

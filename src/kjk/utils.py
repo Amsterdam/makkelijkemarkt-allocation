@@ -37,6 +37,34 @@ class BranchesScrutenizer:
         return allowed
 
 
+class PreferredStandFinder:
+    """
+    To reach an optimal filled market, and allow for maximal expansion:
+    1. First we try to find a stand cluster of max wanted stands.
+    2. Than we try min wanted stands.
+    3. After that we try to find one stand.
+    If we come up with a cluster of more than one stand for a 'soll' we can
+    not allocate all stands directly. This object get the best position within this
+    cluster.
+    """
+
+    def __init__(self, cluster, pref):
+        self.pref = pref
+        self.cluster = cluster
+
+    def produce(self):
+        try:
+            # try a preferred stand first
+            std = list(filter(lambda std: std in self.pref, self.cluster))
+            # no hit, return the first
+            if len(std) == 0:
+                std = self.cluster[:1]
+            return std
+        except Exception:
+            # just in case of failure
+            return self.cluster[:1]
+
+
 class MarketStandClusterFinder:
 
     """

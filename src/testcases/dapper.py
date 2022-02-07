@@ -13,7 +13,8 @@ class DapperTestCase(unittest.TestCase):
 
     def test_market_optimize(self):
         num_afw = len(self.market_allocation["afwijzingen"])
-        self.assertEqual(num_afw, 3)
+        print_alloc(self.market_allocation)
+        self.assertEqual(num_afw, 2)
 
     def test_evi_alloc(self):
         res = alloc_erk("9012002010", self.market_allocation)

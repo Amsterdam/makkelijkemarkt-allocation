@@ -14,6 +14,7 @@ from kjk.rejection_reasons import (
 from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
 from kjk.utils import AllocationDebugger
+from kjk.utils import PreferredStandFinder
 from kjk.test_utils import (
     print_alloc,
     stands_erk,
@@ -22,6 +23,29 @@ from kjk.test_utils import (
     ErkenningsnummerNotFoudError,
 )
 from kjk.utils import TradePlacesSolver
+
+
+class PreferredStandFinderTestCase(unittest.TestCase):
+    def test_no_pref(self):
+        pref = []
+        cluster = ["1", "2", "3"]
+        sut = PreferredStandFinder(cluster, pref)
+        stds = sut.produce()
+        self.assertListEqual(stds, ["1"])
+
+    def test_pref(self):
+        pref = ["2"]
+        cluster = ["1", "2", "3"]
+        sut = PreferredStandFinder(cluster, pref)
+        stds = sut.produce()
+        self.assertListEqual(stds, ["2"])
+
+    def test_pref_2(self):
+        pref = ["3", "5", "7", "2"]
+        cluster = ["1", "2", "3"]
+        sut = PreferredStandFinder(cluster, pref)
+        stds = sut.produce()
+        self.assertListEqual(stds, ["2", "3"])
 
 
 class AllocationDebuggerTestCase(unittest.TestCase):

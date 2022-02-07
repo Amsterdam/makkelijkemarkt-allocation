@@ -155,16 +155,52 @@ class TestExpansion(unittest.TestCase):
 
     def test_get_2_extra_if_space_sufficient(self):
         """
-        krijgt gelijk twee plaatsen als er genoeg ruimte op de markt is
+        krijgt twee plaatsen als er genoeg ruimte op de markt is
         """
         res = alloc_erk("1", self.market_allocation)["plaatsen"]
         self.assertTrue(len(res) == 4)
 
     @unittest.skip("TODO: wat doen we met anywhere")
-    def test_more_tand_two_stands_must_wait(self):
+    def test_more_than_two_stands_must_wait(self):
         """
         naar meer dan 2 plaatsen moet wachten op iedereen die 2 plaatsen wil
         """
+        # merchants
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.update_merchant(
+            erkenningsNummer="3",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer=1,
+            description="J Medeski",
+            voorkeur={
+                "branches": ["mooie spullen"],
+                "maximum": 3,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        print_alloc(allocation)
         self.assertTrue(False)
 
     def test_can_have_3_stands(self):
