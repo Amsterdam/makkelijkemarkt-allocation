@@ -222,6 +222,7 @@ class ValidatorMixin:
                 clog.info("-> OK")
             else:
                 clog.error("Failed: \n")
-                print(tabulate(errors, headers="firstrow"))
+                if not clog.disabled:
+                    print(tabulate(errors, headers="firstrow"))
                 clog.info("")
         return merchants_to_be_rejected

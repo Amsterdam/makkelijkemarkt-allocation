@@ -15,7 +15,7 @@ from kjk.outputdata import ConvertToRejectionError
 
 # from kjk.utils import AllocationDebugger
 
-DEBUG = True
+DEBUG = False
 
 
 class Allocator(BaseAllocator, ValidatorMixin):

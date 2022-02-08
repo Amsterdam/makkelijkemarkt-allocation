@@ -2,7 +2,7 @@ import unittest
 from pprint import pprint
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider, MockDataprovider
-from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc
+from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc, alloc_sollnr
 
 
 class TestExpansion(unittest.TestCase):
@@ -160,48 +160,138 @@ class TestExpansion(unittest.TestCase):
         res = alloc_erk("1", self.market_allocation)["plaatsen"]
         self.assertTrue(len(res) == 4)
 
-    @unittest.skip("TODO: wat doen we met anywhere")
     def test_more_than_two_stands_must_wait(self):
         """
         naar meer dan 2 plaatsen moet wachten op iedereen die 2 plaatsen wil
         """
+        dp = MockDataprovider("../fixtures/test_input.json")
+
         # merchants
-        self.dp.update_merchant(
-            erkenningsNummer="1",
+        dp.add_merchant(
+            erkenningsNummer="11",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="2",
-            description="Frank Zappa",
+            sollicitatieNummer=1,
+            description="Frank Zappata",
             voorkeur={
                 "branches": [],
-                "maximum": 2,
-                "minimum": 1,
+                "maximum": 3,
+                "minimum": 2,
                 "verkoopinrichting": [],
                 "absentFrom": "",
                 "absentUntil": "",
             },
         )
 
-        self.dp.update_merchant(
-            erkenningsNummer="3",
+        dp.add_merchant(
+            erkenningsNummer="22",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer=1,
-            description="J Medeski",
+            sollicitatieNummer=2,
+            description="C Beefheart",
             voorkeur={
-                "branches": ["mooie spullen"],
-                "maximum": 3,
-                "minimum": 1,
+                "branches": [],
+                "maximum": 2,
+                "minimum": 2,
                 "verkoopinrichting": [],
                 "absentFrom": "",
                 "absentUntil": "",
             },
         )
-        self.dp.mock()
-        allocator = Allocator(self.dp)
+
+        dp.add_merchant(
+            erkenningsNummer="33",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer=3,
+            description="J Medeski",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        # add pages
+        dp.add_page([None, "1", "2", "3", "4", "5", "6", None])
+
+        # prefs
+        dp.add_pref(erkenningsNummer="11", plaatsId="1", priority=1)
+        dp.add_pref(erkenningsNummer="22", plaatsId="3", priority=1)
+        dp.add_pref(erkenningsNummer="33", plaatsId="5", priority=1)
+
+        # stands
+        dp.add_stand(
+            plaatsId="1",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="3",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        dp.add_stand(
+            plaatsId="4",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        dp.add_stand(
+            plaatsId="5",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        dp.add_stand(
+            plaatsId="6",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+        dp.add_stand(
+            plaatsId="7",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+            inactive=False,
+        )
+
+        # rsvp
+        dp.add_rsvp(erkenningsNummer="11", attending=True)
+        dp.add_rsvp(erkenningsNummer="22", attending=True)
+        dp.add_rsvp(erkenningsNummer="33", attending=True)
+
+        self.dp = dp
+        dp.mock()
+        allocator = Allocator(dp)
         allocation = allocator.get_allocation()
-        print_alloc(allocation)
-        self.assertTrue(False)
+
+        # zapata has lowest soll nr
+        # wants 3 stands
+        # but everyone gets 2 stands
+        tw1 = alloc_sollnr(1, allocation)
+        tw2 = alloc_sollnr(2, allocation)
+        tw3 = alloc_sollnr(3, allocation)
+
+        self.assertEqual(len(tw1["plaatsen"]), 2)
+        self.assertEqual(len(tw2["plaatsen"]), 2)
+        self.assertEqual(len(tw3["plaatsen"]), 2)
 
     def test_can_have_3_stands(self):
         """

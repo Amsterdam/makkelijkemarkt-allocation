@@ -103,7 +103,7 @@ class TestAlistAllocations(unittest.TestCase):
             erkenningsNummer="1",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer=2,
+            sollicitatieNummer=1,
             description="Frank Zappa",
             voorkeur={
                 "branches": [],
@@ -120,12 +120,12 @@ class TestAlistAllocations(unittest.TestCase):
             erkenningsNummer="2",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer=3,
+            sollicitatieNummer=2,
             description="C Beefheart",
             voorkeur={
                 "branches": [],
                 "anywhere": True,
-                "maximum": 3,
+                "maximum": 2,
                 "minimum": 1,
                 "verkoopinrichting": [],
                 "absentFrom": "",
@@ -137,11 +137,11 @@ class TestAlistAllocations(unittest.TestCase):
             erkenningsNummer="3",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer=10,
+            sollicitatieNummer=3,
             description="Ornette",
             voorkeur={
                 "branches": [],
-                "maximum": 1,
+                "maximum": 2,
                 "minimum": 1,
                 "verkoopinrichting": [],
                 "absentFrom": "",
@@ -184,7 +184,7 @@ class TestAlistAllocations(unittest.TestCase):
         )
 
         dp.add_pref(erkenningsNummer="1", plaatsId="1", priority=1)
-        dp.add_pref(erkenningsNummer="2", plaatsId="5", priority=1)
+        dp.add_pref(erkenningsNummer="2", plaatsId="3", priority=1)
         dp.add_pref(erkenningsNummer="3", plaatsId="4", priority=1)
 
         # rsvp
@@ -204,6 +204,8 @@ class TestAlistAllocations(unittest.TestCase):
         dp.set_alist([{"erkenningsNummer": "2"}])
 
         # after the alist should be reversed
+        # zapp has lower sollnr
+        # but beefheart is now on A-list
         dp.mock()
         allocator = Allocator(dp)
         allocation = allocator.get_allocation()
