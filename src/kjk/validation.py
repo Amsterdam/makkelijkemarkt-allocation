@@ -212,7 +212,8 @@ class ValidatorMixin:
                     prefs = pref_dict[erk]
                     if p not in prefs and flex is False and status == "soll":
                         status_ok = False
-                        errors.append((erk, prefs, p, status, flex))
+                        _pref = (prefs[:8] + ["..."]) if len(prefs) > 8 else prefs
+                        errors.append((erk, _pref, p, status, flex))
                         merchants_to_be_rejected.append(erk)
                 except KeyError:
                     pass
