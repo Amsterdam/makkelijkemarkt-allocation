@@ -7,6 +7,7 @@ from kjk.utils import BranchesScrutenizer
 from kjk.utils import PreferredStandFinder
 from kjk.logging import clog, log
 from pandas.core.computation.ops import UndefinedVariableError
+from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
 
 pd.options.mode.chained_assignment = "raise"
 
@@ -865,10 +866,11 @@ class BaseAllocator:
                 pref, int(minimal), preferred=False, anywhere=True
             )
             if len(minimal_possible) == 0:
-                # TODO: set the temp rejection reason somewhere
                 # do not reject yet, this merchant should be able to compete
                 # for reclaimed stands in a later phase
-                # self._reject_merchant(erk, MINIMUM_UNAVAILABLE)
+                self.rejection_reasons.add_rejection_reason_for_merchant(
+                    erk, MINIMUM_UNAVAILABLE
+                )
                 continue
 
             stds = []
