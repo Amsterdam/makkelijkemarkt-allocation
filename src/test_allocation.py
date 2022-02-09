@@ -10,10 +10,13 @@ from kjk.rejection_reasons import (
     MARKET_FULL,
     BRANCHE_FULL,
     ADJACENT_UNAVAILABLE,
+    VPL_POSITION_NOT_AVAILABLE,
 )
 from kjk.utils import MarketStandClusterFinder
 from kjk.utils import BranchesScrutenizer
 from kjk.utils import AllocationDebugger
+from kjk.utils import PreferredStandFinder
+from kjk.utils import RejectionReasonManager
 from kjk.test_utils import (
     print_alloc,
     stands_erk,
@@ -22,6 +25,43 @@ from kjk.test_utils import (
     ErkenningsnummerNotFoudError,
 )
 from kjk.utils import TradePlacesSolver
+
+
+class RejectionManagerTestCase(unittest.TestCase):
+    def setUp(self):
+        self.sut = RejectionReasonManager()
+
+    def test_add_rejection(self):
+        self.sut.add_rejection_reason_for_merchant("1234", VPL_POSITION_NOT_AVAILABLE)
+        reason = self.sut.get_rejection_reason_for_merchant("1234")
+        self.assertEqual(reason["code"], 5)
+
+    def test_add_deafault_rejection(self):
+        reason = self.sut.get_rejection_reason_for_merchant("1234")
+        self.assertEqual(reason["code"], 4)
+
+
+class PreferredStandFinderTestCase(unittest.TestCase):
+    def test_no_pref(self):
+        pref = []
+        cluster = ["1", "2", "3"]
+        sut = PreferredStandFinder(cluster, pref)
+        stds = sut.produce()
+        self.assertListEqual(stds, ["1"])
+
+    def test_pref(self):
+        pref = ["2"]
+        cluster = ["1", "2", "3"]
+        sut = PreferredStandFinder(cluster, pref)
+        stds = sut.produce()
+        self.assertListEqual(stds, ["2"])
+
+    def test_pref_2(self):
+        pref = ["3", "5", "7", "2"]
+        cluster = ["1", "2", "3"]
+        sut = PreferredStandFinder(cluster, pref)
+        stds = sut.produce()
+        self.assertListEqual(stds, ["2", "3"])
 
 
 class AllocationDebuggerTestCase(unittest.TestCase):

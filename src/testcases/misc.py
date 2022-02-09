@@ -558,7 +558,7 @@ class TestMinimizeRejections(unittest.TestCase):
             erkenningsNummer="1",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="3",
+            sollicitatieNummer=1,
             description="Frank Zappa",
             voorkeur={
                 "branches": [],
@@ -573,7 +573,7 @@ class TestMinimizeRejections(unittest.TestCase):
             erkenningsNummer="2",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="2",
+            sollicitatieNummer=2,
             description="Ton Waits",
             voorkeur={
                 "branches": [],
@@ -588,7 +588,7 @@ class TestMinimizeRejections(unittest.TestCase):
             erkenningsNummer="3",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="1",
+            sollicitatieNummer=3,
             description="Frank London",
             voorkeur={
                 "branches": [],
@@ -604,8 +604,8 @@ class TestMinimizeRejections(unittest.TestCase):
         dp.add_rsvp(erkenningsNummer="2", attending=True)
         dp.add_rsvp(erkenningsNummer="3", attending=True)
 
-        # dp.add_pref(erkenningsNummer="1", plaatsId="3", priority=1)
-        # dp.add_pref(erkenningsNummer="1", plaatsId="4", priority=1)
+        dp.add_pref(erkenningsNummer="1", plaatsId="1", priority=1)
+        dp.add_pref(erkenningsNummer="2", plaatsId="3", priority=1)
         dp.add_page([None, "1", "2", "3", None])
 
         # stands
@@ -638,7 +638,7 @@ class TestMinimizeRejections(unittest.TestCase):
         allocation = allocator.get_allocation()
         num_rejects = len(allocation["afwijzingen"])
         self.assertEqual(num_rejects, 2)
-        erk = alloc_erk("3", allocation)
+        erk = alloc_erk("1", allocation)
         erk["plaatsen"].sort()
         a = ["1", "2"]
         a.sort()

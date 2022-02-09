@@ -54,6 +54,12 @@ class JobDispatcher:
     def process_job(self, job_id):
         print("processing .....")
         job_res = self.r.hget(self.jobs, job_id)
+
+        # store input in REDIS for 30 secs
+        # to grab the input for debugging
+        self.r.set(f"JOB_{job_id}", job_res)
+        self.r.expire(f"JOB_{job_id}", 10 * 60)
+
         job = json.loads(job_res)
         start = time.time()
         data = job["data"]
@@ -64,12 +70,6 @@ class JobDispatcher:
         dp = RedisDataprovider(job["data"])
         a = Allocator(dp)
         output = a.get_allocation()
-
-        # store input in REDIS for 30 secs
-        # to grab the input for debugging
-        job_data = json.dumps(data)
-        self.r.set(f"JOB_{job_id}", job_data)
-        self.r.expire(f"JOB_{job_id}", 30)
 
         # store results in REDIS for 10 min
         json_result = json.dumps(output)
