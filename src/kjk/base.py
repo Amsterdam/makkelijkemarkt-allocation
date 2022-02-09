@@ -2,12 +2,10 @@ import pandas as pd
 import math
 from datetime import date
 from kjk.outputdata import MarketArrangement
-from kjk.utils import MarketStandClusterFinder
+from kjk.utils import MarketStandClusterFinder, RejectionReasonManager
 from kjk.utils import BranchesScrutenizer
 from kjk.utils import PreferredStandFinder
 from kjk.logging import clog, log
-from kjk.rejection_reasons import MARKET_FULL
-from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
 from pandas.core.computation.ops import UndefinedVariableError
 
 pd.options.mode.chained_assignment = "raise"
@@ -139,6 +137,8 @@ class BaseAllocator:
         """Accept the dataprovider and populate the data model"""
         dp = data_provider
         dp.load_data()
+
+        self.rejection_reasons = RejectionReasonManager()
 
         # raw data
         self.market = dp.get_market()
@@ -753,7 +753,8 @@ class BaseAllocator:
         )
         for index, row in self.merchants_df.iterrows():
             erk = row["erkenningsNummer"]
-            self._reject_merchant(erk, MARKET_FULL)
+            reason = self.rejection_reasons.get_rejection_reason_for_merchant(erk)
+            self._reject_merchant(erk, reason)
 
     def _reject_merchant(self, erk, reason):
         self.market_output.add_rejection(erk, reason, self.merchant_object_by_id(erk))

@@ -8,6 +8,7 @@ from kjk.base import MarketStandDequeueError
 from kjk.base import MerchantDequeueError
 from kjk.rejection_reasons import VPL_POSITION_NOT_AVAILABLE
 from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
+from kjk.rejection_reasons import PREF_NOT_AVAILABLE
 from kjk.validation import ValidatorMixin
 from kjk.logging import clog, log
 from kjk.utils import TradePlacesSolver
@@ -507,6 +508,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         for r in rejected:
             try:
                 stands_to_reclaim = self.market_output.convert_to_rejection(r)
+                self.rejection_reasons.add_rejection_reason_for_merchant(
+                    r, PREF_NOT_AVAILABLE
+                )
             except ConvertToRejectionError:
                 stands_to_reclaim = []
             self.reclaimed_number_stands += len(stands_to_reclaim)
@@ -521,8 +525,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         rejected = self.correct_expansion()
         for r in rejected:
             try:
-                stands_to_reclaim = self.market_output.convert_to_rejection(
-                    r, reason=MINIMUM_UNAVAILABLE
+                stands_to_reclaim = self.market_output.convert_to_rejection(r)
+                self.rejection_reasons.add_rejection_reason_for_merchant(
+                    r, MINIMUM_UNAVAILABLE
                 )
             except ConvertToRejectionError:
                 stands_to_reclaim = []

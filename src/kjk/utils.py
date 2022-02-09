@@ -1,6 +1,7 @@
 import redis
 import os
 from collections import namedtuple
+from kjk.rejection_reasons import MARKET_FULL
 
 
 class BranchesScrutenizer:
@@ -35,6 +36,28 @@ class BranchesScrutenizer:
             except KeyError:
                 pass
         return allowed
+
+
+class RejectionReasonManager:
+    """
+    Merchants can be rejected for several reasons.
+    If a mechant is not allocation in an allocation-phase,
+    a reason will be set for the merchant id.
+    If the merchant is still not allocated in later phases, the reason will
+    be retreived in the rejection phase.
+    """
+
+    def __init__(self):
+        self.rejection_reason_dict = {}
+
+    def add_rejection_reason_for_merchant(self, erk, reason):
+        self.rejection_reason_dict[erk] = reason
+
+    def get_rejection_reason_for_merchant(self, erk):
+        try:
+            return self.rejection_reason_dict[erk]
+        except KeyError:
+            return MARKET_FULL
 
 
 class PreferredStandFinder:

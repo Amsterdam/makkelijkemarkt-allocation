@@ -1,5 +1,4 @@
 import json
-from kjk.rejection_reasons import PREF_NOT_AVAILABLE
 
 
 class StandsTypeError(Exception):
@@ -32,17 +31,9 @@ class MarketArrangement:
 
         self.assigned_stands = {}
 
-    def convert_to_rejection(self, merchant_id=None, reason=PREF_NOT_AVAILABLE):
+    def convert_to_rejection(self, merchant_id=None):
         try:
             allocation_object = self.allocation_dict[merchant_id]
-            rejection_obj = {
-                "marktId": self.market_id,
-                "ondernemer": allocation_object["ondernemer"],
-                "reason": reason,
-                "marktDate": self.market_date,
-                "erkenningsNummer": merchant_id,
-            }
-            # self.rejection_list.append(rejection_obj)
             del self.allocation_dict[merchant_id]
             return allocation_object["plaatsen"]
         except Exception:

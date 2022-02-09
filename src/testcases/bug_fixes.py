@@ -68,7 +68,7 @@ class DapperBugTestCase_3(unittest.TestCase):
 
     def test_rejection_minimum(self):
         afw = reject_sollnr(67, self.market_allocation)
-        self.assertEqual(afw["reason"]["code"], 4)
+        self.assertEqual(afw["reason"]["code"], 3)
 
     def test_reduction_number_of_stands_vpl(self):
         tw = alloc_sollnr(63, self.market_allocation)
