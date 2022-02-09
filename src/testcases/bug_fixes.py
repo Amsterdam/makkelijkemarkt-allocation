@@ -20,7 +20,7 @@ from kjk.test_utils import (
 
 class BugFixStand122TestCase(unittest.TestCase):
     def setUp(self):
-        dp = FixtureDataprovider("../../bug_06-02-2022.json")
+        dp = FixtureDataprovider("../fixtures/bug_06-02-2022.json")
         self.allocator = Allocator(dp)
         self.market_allocation = self.allocator.get_allocation()
 
@@ -33,7 +33,7 @@ class BugFixStand122TestCase(unittest.TestCase):
 
 class DapperBugTestCase_3(unittest.TestCase):
     def setUp(self):
-        dp = FixtureDataprovider("../../bug_27-01-2022b.json")
+        dp = FixtureDataprovider("../fixtures/bug_27-01-2022b.json")
         self.allocator = Allocator(dp)
         self.market_allocation = self.allocator.get_allocation()
 
