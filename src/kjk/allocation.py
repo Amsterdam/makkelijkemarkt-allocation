@@ -115,7 +115,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.set_allocation_phase("Phase 3")
         log.info("")
         clog.info("--- ALLOCATIE FASE 3 ---")
-        log.info("ondenemers (vpl) die WEL willen verplaatsen maar niet uitbreiden:")
+        log.info("ondenemers (vpl) die WEL willen verplaatsen.")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 

@@ -51,6 +51,7 @@ class MarketArrangement:
     def add_allocation(self, merchant_id=None, stand_ids=None, merchant_object=None):
         if type(stand_ids) is not list:
             raise StandsTypeError("market stands must be of type list")
+        stand_ids = stand_ids.copy()
         if merchant_id in self.allocation_dict:
             allocation_obj = self.allocation_dict[merchant_id]
             allocation_obj["plaatsen"] += stand_ids
