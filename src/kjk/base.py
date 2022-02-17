@@ -603,10 +603,13 @@ class BaseAllocator:
                     return False
             return True
 
-        df = self.merchants_df[["voorkeur.absentFrom", "voorkeur.absentUntil"]].apply(
-            check_absent, axis=1
-        )
-        self.merchants_df = self.merchants_df[df]
+        try:
+            df = self.merchants_df[
+                ["voorkeur.absentFrom", "voorkeur.absentUntil"]
+            ].apply(check_absent, axis=1)
+            self.merchants_df = self.merchants_df[df]
+        except KeyError:
+            clog.warning("No merchants records found for preriodic absence.")
 
     def get_vpl_for_position(self, position):
         """return a merchant number for a fixed position, reurn None is no merchant found"""
