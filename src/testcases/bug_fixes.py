@@ -24,6 +24,10 @@ class BugFixBadAbsenceDates(unittest.TestCase):
         self.allocator = Allocator(dp)
         self.market_allocation = self.allocator.get_allocation()
 
+    def test_bug(self):
+        num_afw = len(self.market_allocation["afwijzingen"])
+        self.assertEqual(num_afw, 0)
+
 
 class BugFixStand122TestCase(unittest.TestCase):
     def setUp(self):

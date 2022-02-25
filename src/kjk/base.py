@@ -594,14 +594,17 @@ class BaseAllocator:
         self.merchants_df = pd.concat([df_1, df_2])
 
         def check_absent(x):
-            if x["voorkeur.absentUntil"] != None and x["voorkeur.absentFrom"]:
-                from_str = x["voorkeur.absentFrom"]
-                from_date = date.fromisoformat(from_str)
-                until_str = x["voorkeur.absentUntil"]
-                until_date = date.fromisoformat(until_str)
-                if from_date <= self.market_date <= until_date:
-                    return False
-            return True
+            try:
+                if x["voorkeur.absentUntil"] != None and x["voorkeur.absentFrom"]:
+                    from_str = x["voorkeur.absentFrom"]
+                    from_date = date.fromisoformat(from_str)
+                    until_str = x["voorkeur.absentUntil"]
+                    until_date = date.fromisoformat(until_str)
+                    if from_date <= self.market_date <= until_date:
+                        return False
+                return True
+            except TypeError:
+                return True
 
         try:
             df = self.merchants_df[

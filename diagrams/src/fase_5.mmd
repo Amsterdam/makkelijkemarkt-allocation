@@ -1,0 +1,13 @@
+graph TD
+    A([FASE 4-a VPL + TVPL verplaatsing <b><i>BRANCHE</i></b>]) -->
+    B[Selecteer alle VPL en TVPL<br> die willen verplaatsen en deel ze<br> in op de voorkeursplaatsen indien beschikbaar] -->
+    C{"Verplaatsing toegestaan volgens? <b><br><br>BRANCHE<br>BAK<br>EVI</b>"}
+    C --YES--> D(["Deel in op voorkeursplaats(en), <br>verwijder de ondernemer uit de wachtrij en de kraam uit de beschikbare plaatsen"])
+    C --NO--> E(["Deel in op vasteplaats(en), <br>verwijder de ondernemer uit de wachtrij en de kraam uit de beschikbare plaatsen"])
+
+    A1([FASE 4-b VPL + TVPL verplaatsing <b><i>BAK</i></b>]) --> B
+    
+    A2([FASE 4-c VPL + TVPL verplaatsing <b><i>EVI</i></b>]) --> B
+    
+    A3([FASE 4-d VPL + TVPL verplaatsing <b><i>Overige</i></b>]) --> B
+

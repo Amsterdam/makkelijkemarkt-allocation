@@ -1,0 +1,15 @@
+graph TD
+    A([FASE 2 VPL]) -->
+	B{Selecteer de vasteplaatshouders<br> die niet willen verplaatsen<br> en deel ze in op de vaste plaatsen.}
+    B --plaats beschikbaar--> C([Verwijder ondernemer uit wachtlijst, Verwijder marktplaats uit beschikbare plaatsen])
+    B --plaats niet beschikbaar--> D([Vaste plaatsen dienen beschikbaar te zijn,<br> rapporteer fout aan marktbureau.])
+    
+    A2([FASE 3 TVPL]) -->
+	B2{Selecteer de tijdelijke vasteplaatshouders<br> die niet willen verplaatsen<br> en deel ze in op de vaste plaatsen.}
+    B2 --plaats beschikbaar--> C2([Verwijder ondernemer uit wachtlijst, Verwijder marktplaats uit beschikbare plaatsen])
+    B2 --plaats niet beschikbaar--> D2([Vaste plaatsen dienen beschikbaar te zijn,<br> rapporteer fout aan marktbureau.])
+    
+    A3([FASE 4 EXP, EXPF met plaatsen]) -->
+	B3{Selecteer de experimentele plaatshouders<br> die niet <b><i>mogen</i></b> verplaatsen<br> en deel ze in op de vaste plaatsen.}
+    B3 --plaats beschikbaar--> C3([Verwijder ondernemer uit wachtlijst, Verwijder marktplaats uit beschikbare plaatsen])
+    B3 --plaats niet beschikbaar--> D3([Vaste plaatsen dienen beschikbaar te zijn,<br> rapporteer fout aan marktbureau.])
