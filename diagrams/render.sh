@@ -3,14 +3,14 @@
 diagrams=( 
     overview 
     fase_1 
-    fase_2-3 
-    fase_4
-    fase_5-6-7-8
-    fase_9-10-11-12-13
-    fase_14-15-16-17
-    fase_18-19-20-21
-    fase_22
-    fase_23
+    fase_2-3-4 
+    fase_5
+    fase_6-7-8-9-10-11
+    fase_12-13-14-15-16
+    fase_17-18-19-20
+    fase_21-22-23-24
+    fase_25
+    fase_26
     vinden_kramen
     vinden_uitbreiding
 )
