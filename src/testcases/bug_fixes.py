@@ -18,6 +18,13 @@ from kjk.test_utils import (
 # NOTE: There are no assertions, tests succeed if no exeptions are raised
 
 
+class BugFixBadAbsenceDates(unittest.TestCase):
+    def setUp(self):
+        dp = FixtureDataprovider("../fixtures/bug_25-02-2022.json")
+        self.allocator = Allocator(dp)
+        self.market_allocation = self.allocator.get_allocation()
+
+
 class BugFixStand122TestCase(unittest.TestCase):
     def setUp(self):
         dp = FixtureDataprovider("../fixtures/bug_06-02-2022.json")
