@@ -4,17 +4,27 @@ graph TD
     A(["FASE 25 Validatiefase"]) -->
     A2(Valideer toewijzingen en afwijzingen) -->
 
-    C{Geen dubbele toewijzingen?}   
+    C{Geen dubbele toewijzingen?}
     C --JA--> rap
     C --correctie mogelijk--> cor
     C --NEE--> D
 
-    D{Branches staan goed? <b>BRANCHE</b>}     
+    D{Branches staan goed? <b>BRANCHE</b>}
     D --NEE--> rap
     D --correctie mogelijk--> cor
-    D --JA--> D1 
-      
-    D1{Bakkers staan goed? <b>BAK</b>}         
+    D --JA--> D1
+
+    D1{Bakkers staan goed? <b>BAK</b>}
     D1 --NEE--> rap
     D1 --correctie mogelijk--> cor
-    D1 --JA--> E 
+    D1 --JA--> E
+
+    E{EVI goed ingedeeld? <b>EVI</b>}
+    E --NEE--> rap
+    E --correctie mogelijk--> cor
+    E --JA--> F
+
+    F{"Voorkeuren goed? <br> (geen minimum overschreden)"}
+    F --NEE--> rap
+    F --correctie mogelijk--> cor
+    F --JA--> Z(["Indeling klaar"])
