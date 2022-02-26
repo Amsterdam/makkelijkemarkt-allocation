@@ -24328,7 +24328,7 @@
                 "verkoopinrichting": []
             },
             "sollicitatieNummer": 6231,
-            "status": "soll"
+            "status": "tvplz"
         },
         {
             "description": "Smeets",
@@ -24381,7 +24381,7 @@
                 "verkoopinrichting": []
             },
             "sollicitatieNummer": 6247,
-            "status": "vpl"
+            "status": "tvpl"
         },
         {
             "description": "van Arkel",
@@ -25591,7 +25591,7 @@
                 "marktDate": null,
                 "anywhere": true,
                 "minimum": 1,
-                "brancheId": "309-kleding-volwassenen-hoofddeksels",
+                "brancheId": "Worsten",
                 "parentBrancheId": null,
                 "inrichting": null,
                 "absentFrom": null,
@@ -25599,9 +25599,12 @@
                 "createdAt": "2021-10-27T17:35:16.770Z",
                 "updatedAt": "2021-10-27T17:37:45.149Z",
                 "branches": [
-                    "309-kleding-volwassenen-hoofddeksels"
+                    "Worsten",
+                    "bak"
                 ],
-                "verkoopinrichting": []
+                "verkoopinrichting": [
+                    "eigen-materieel"
+                ]
             },
             "sollicitatieNummer": 7616,
             "status": "soll"
@@ -27834,9 +27837,7 @@
         {
             "description": "van Eck",
             "erkenningsNummer": "7042018051",
-            "plaatsen": [
-                "238"
-            ],
+            "plaatsen": [],
             "voorkeur": {
                 "marktId": 16,
                 "erkenningsNummer": "7042018051",

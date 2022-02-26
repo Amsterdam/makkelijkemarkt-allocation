@@ -335,6 +335,30 @@ class BaseAllocator:
         except KeyError:
             raise MerchantNotFoundError(f"mechant not found: {merchant_id}")
 
+    def add_has_stands(self):
+        def has_stands(x):
+            try:
+                if len(x["plaatsen"]) > 0:
+                    return True
+                return False
+            except Exception:
+                clog.warning("No valid plaatsen field for merchant assume []")
+                return False
+
+        self.merchants_df["has_stands"] = self.merchants_df.apply(has_stands, axis=1)
+
+    def add_has_bak(self):
+        def has_bak(x):
+            try:
+                if "bak" in x["voorkeur.branches"]:
+                    return True
+                return False
+            except Exception:
+                clog.warning("No valid branches field for merchant assume []")
+                return False
+
+        self.merchants_df["has_bak"] = self.merchants_df.apply(has_bak, axis=1)
+
     def create_expanders_set(self):
         def wants_to_expand(x):
             if x["status"] in ("vpl", "tvpl", "exp", "expf"):
@@ -408,6 +432,8 @@ class BaseAllocator:
         self.merchants_df["voorkeur.minimum"] = self.merchants_df[
             "voorkeur.minimum"
         ].fillna(1.0)
+        self.add_has_stands()
+        self.add_has_bak()
 
     def prepare_stands(self):
         """prepare the stands list for allocation"""
@@ -453,8 +479,6 @@ class BaseAllocator:
         # assumption:
         # if more than one branche per stand always means bak?
         if len(b) >= 1:
-            if "bak" in b:
-                return "yes"
             result = self.branches_df[self.branches_df["brancheId"] == b[0]]
             if len(result) > 0 and result.iloc[0]["verplicht"] == True:
                 return "yes"
@@ -586,10 +610,10 @@ class BaseAllocator:
             is_attending_market
         )
         df_1 = self.merchants_df.query(
-            "attending != 'no' & (status == 'vpl' | status == 'tvlp')"
+            "attending != 'no' & (status == 'vpl' | status == 'tvpl')"
         )
         df_2 = self.merchants_df.query(
-            "attending == 'yes' & (status != 'vpl' & status != 'tvlp')"
+            "attending == 'yes' & (status != 'vpl' & status != 'tvpl')"
         )
         self.merchants_df = pd.concat([df_1, df_2])
 

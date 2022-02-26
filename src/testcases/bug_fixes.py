@@ -20,7 +20,8 @@ from kjk.test_utils import (
 
 class BugFixBadAbsenceDates(unittest.TestCase):
     def setUp(self):
-        dp = FixtureDataprovider("../fixtures/bug_25-02-2022.json")
+        # dp = FixtureDataprovider("../fixtures/bug_25-02-2022.json")
+        dp = FixtureDataprovider("../fixtures/assen_d.json")
         self.allocator = Allocator(dp)
         self.market_allocation = self.allocator.get_allocation()
 

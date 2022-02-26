@@ -31,6 +31,7 @@ class DapperTestCase2(unittest.TestCase):
 
     def test_market_optimize(self):
         num_afw = len(self.market_allocation["afwijzingen"])
+        # print_alloc(self.market_allocation)
         self.assertEqual(num_afw, 2)
 
     def test_6304_num_stands(self):
