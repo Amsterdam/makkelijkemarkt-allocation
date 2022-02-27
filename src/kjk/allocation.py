@@ -132,12 +132,14 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 expand = row["wants_expand"]
                 merchant_branches = row["voorkeur.branches"]
                 evi = row["has_evi"] == "yes"
+                bak = row["has_bak"]
                 if expand:
                     self._prepare_expansion(
                         erk,
                         stands,
                         int(row["voorkeur.maximum"]),
                         merchant_branches,
+                        bak,
                         evi,
                     )
                 self._allocate_stands_to_merchant(stands, erk)
@@ -176,6 +178,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
             stands = row["plaatsen"]
             pref = row["pref"]
             merchant_branches = row["voorkeur.branches"]
+            bak = row["has_bak"]
             evi = row["has_evi"] == "yes"
 
             # some merchants have their own fixed stands as pref
@@ -185,10 +188,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
             valid_pref_stands = self.cluster_finder.find_valid_cluster(
                 pref,
                 size=len(stands),
-                preferred=True,
                 merchant_branche=merchant_branches,
-                mode="any",
+                bak_merchant=bak,
                 evi_merchant=evi,
+                anywhere=False,
             )
             if len(valid_pref_stands) == 0 or ignore_pref:
                 failed[erk] = (stands, row)
@@ -200,7 +203,12 @@ class Allocator(BaseAllocator, ValidatorMixin):
             expand = row["wants_expand"]
             if expand:
                 self._prepare_expansion(
-                    erk, stands, int(row["voorkeur.maximum"]), merchant_branches, evi
+                    erk,
+                    stands,
+                    int(row["voorkeur.maximum"]),
+                    merchant_branches,
+                    bak,
+                    evi,
                 )
             try:
                 self._allocate_stands_to_merchant(stands_to_alloc, erk)
@@ -258,14 +266,15 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     stands = row["plaatsen"]
                     pref = row["pref"]
                     merchant_branches = row["voorkeur.branches"]
+                    bak = row["has_bak"]
                     evi = row["has_evi"] == "yes"
                     valid_pref_stands = self.cluster_finder.find_valid_cluster(
                         pref,
                         size=len(stands),
-                        preferred=True,
                         merchant_branche=merchant_branches,
-                        mode="all",
+                        bak_merchant=bak,
                         evi_merchant=evi,
+                        anywhere=False,
                     )
                     if len(valid_pref_stands) == 0:
                         has_rejections = True
@@ -276,14 +285,14 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     stands = row["plaatsen"]
                     pref = row["pref"]
                     merchant_branches = row["voorkeur.branches"]
+                    bak = row["has_bak"]
                     evi = row["has_evi"] == "yes"
                     expand = row["wants_expand"]
                     valid_pref_stands = self.cluster_finder.find_valid_cluster(
                         pref,
                         size=len(stands),
-                        preferred=True,
                         merchant_branche=merchant_branches,
-                        mode="all",
+                        bak_merchant=bak,
                         evi_merchant=evi,
                     )
 
@@ -294,6 +303,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                                 stands,
                                 int(row["voorkeur.maximum"]),
                                 merchant_branches,
+                                bak,
                                 evi,
                             )
                         # unable to solve conflict stay on fixed positions
@@ -313,6 +323,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                                 valid_pref_stands,
                                 int(row["voorkeur.maximum"]),
                                 merchant_branches,
+                                bak,
                                 evi,
                             )
                         # no conflicts savely switch positions
@@ -328,15 +339,16 @@ class Allocator(BaseAllocator, ValidatorMixin):
                     stands = row["plaatsen"]
                     pref = row["pref"]
                     merchant_branches = row["voorkeur.branches"]
+                    bak = row["has_bak"]
                     evi = row["has_evi"] == "yes"
 
                     valid_pref_stands = self.cluster_finder.find_valid_cluster(
                         pref,
                         size=len(stands),
-                        preferred=True,
                         merchant_branche=merchant_branches,
-                        mode="any",
+                        bak_merchant=bak,
                         evi_merchant=evi,
+                        anywhere=False,
                     )
                     fixed_set = set(fixed)
 
@@ -361,6 +373,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                                 stands_to_alloc,
                                 int(row["voorkeur.maximum"]),
                                 merchant_branches,
+                                bak,
                                 evi,
                             )
                         self._allocate_stands_to_merchant(stands_to_alloc, erk)
@@ -402,7 +415,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
-        self._allocate_solls_for_query("status == 'tvplz'")
+        self._allocate_solls_for_query("status == 'tvplz'", print_df=True)
 
     def phase_07(self):
         self.set_allocation_phase("Phase 7")
@@ -428,7 +441,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         self._allocate_solls_for_query(
             "status == 'soll' & alist == True & branche_required == 'yes'",
-            print_df=True,
+            print_df=False,
         )
 
     def phase_09(self):
@@ -441,7 +454,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         self._allocate_solls_for_query(
-            "status == 'soll' & alist == True & has_bak == True", print_df=True
+            "status == 'soll' & alist == True & has_bak == True", print_df=False
         )
 
     def phase_10(self):
@@ -453,8 +466,21 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
-        self._allocate_evi_for_query(
-            "status == 'soll' & alist == True & has_evi == 'yes'"
+        self._allocate_solls_for_query(
+            "status == 'soll' & alist == True & has_evi == 'yes'", print_df=False
+        )
+
+    def phase_11(self):
+        self.set_allocation_phase("Phase 11")
+        log.info("")
+        clog.info("--- ALLOCATIE FASE 11 ---")
+        log.info("Overige sollicitanten op de A-lijst")
+        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
+        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
+
+        self._allocate_solls_for_query(
+            "status == 'soll' & alist == True",
+            print_df=False,
         )
 
     def allocation_phase_05(self):
@@ -685,6 +711,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.phase_08()
         self.phase_09()
         self.phase_10()
+        self.phase_11()
         self.phase_26()
 
         if DEBUG:
