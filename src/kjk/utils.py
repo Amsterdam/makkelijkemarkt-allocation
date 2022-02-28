@@ -2,6 +2,7 @@ import redis
 import os
 from collections import namedtuple
 from kjk.rejection_reasons import MARKET_FULL
+from pprint import pprint
 
 
 class BranchesScrutenizer:
@@ -208,7 +209,13 @@ class MarketStandClusterFinder:
             return False
 
     def option_is_valid_branche(
-        self, option, merchant_branches, bak_merchant, evi_merchant, prevent_evi=False
+        self,
+        option,
+        merchant_branches,
+        bak_merchant,
+        evi_merchant,
+        prevent_evi=False,
+        erk=None,
     ):
         AV = namedtuple(
             "AllocationVars",
@@ -216,6 +223,7 @@ class MarketStandClusterFinder:
                 "merchant_has_required_branche",
                 "stand_has_branche",
                 "stand_has_required_branche",
+                "market_has_unused_bak_space",
                 "market_has_unused_evi_space",
                 "merchant_has_evi",
                 "merchant_has_bak",
@@ -225,7 +233,7 @@ class MarketStandClusterFinder:
                 "stand_has_bak",
                 "market_has_unused_branche_space",
             ],
-            defaults=(None,) * 11,
+            defaults=(None,) * 12,
         )
 
         illegal_combos = [
@@ -242,37 +250,38 @@ class MarketStandClusterFinder:
                 stand_has_evi=False,
             ),
             AV(
+                market_has_unused_branche_space=False,
+                branches_match=False,
+                stand_has_required_branche=True,
+            ),
+            AV(
+                market_has_unused_bak_space=False,
+                merchant_has_bak=False,
+                stand_has_bak=True,
+            ),
+            AV(
                 market_has_unused_evi_space=False,
                 merchant_has_evi=False,
                 stand_has_evi=True,
-                stand_has_branche=True,
-                stand_has_required_branche=True,
-                branches_match=False,
-            ),
-            AV(
-                market_has_unused_evi_space=False,
-                stand_has_branche=True,
-                stand_has_required_branche=True,
-                merchant_has_required_branche=False,
-                merchant_has_evi=False,
-            ),
-            AV(market_has_unused_evi_space=False, prevent_evi=True, stand_has_evi=True),
-            AV(
-                market_has_unused_branche_space=False,
-                prevent_evi=True,
-                stand_has_required_branche=True,
-                branches_match=False,
             ),
         ]
 
         is_required = self.branche_is_required(merchant_branches[0])
         for std in option:
             branches = self.branches_dict[std]
-            evi_space = self.market_info_delegate.market_has_unused_evi_space()
             stand_required_br = self.stand_has_required_branche(branches)
             std_has_evi = self.stand_has_evi(std)
             std_has_bak = self.stand_has_bak(std)
 
+            # print("- "*23)
+            # print("ERK: ", erk)
+            # print("stand nr: ", std)
+            # print("branches: ", branches)
+            # print("stand required branche: ", stand_required_br)
+            # print("stand evi: ", std_has_evi)
+            # print("stand bak: ", std_has_bak)
+
+            # branche
             branch_vars = AV(
                 merchant_has_required_branche=is_required,
                 branches_match=merchant_branches[0] in branches,
@@ -280,13 +289,7 @@ class MarketStandClusterFinder:
             if branch_vars in illegal_combos:
                 return False
 
-            evi_vars = AV(
-                merchant_has_evi=evi_merchant,
-                stand_has_evi=std_has_evi,
-            )
-            if evi_vars in illegal_combos:
-                return False
-
+            # bak
             bak_vars = AV(
                 merchant_has_bak=bak_merchant,
                 stand_has_bak=std_has_bak,
@@ -294,6 +297,16 @@ class MarketStandClusterFinder:
             if bak_vars in illegal_combos:
                 return False
 
+            # evi
+            evi_vars = AV(
+                merchant_has_evi=evi_merchant,
+                stand_has_evi=std_has_evi,
+            )
+            if evi_vars in illegal_combos:
+                return False
+
+            evi_space = self.market_info_delegate.market_has_unused_evi_space()
+
             evi_space_vars = AV(
                 market_has_unused_evi_space=evi_space,
                 merchant_has_evi=evi_merchant,
@@ -302,29 +315,19 @@ class MarketStandClusterFinder:
             if evi_space_vars in illegal_combos:
                 return False
 
-            evi_space_vars = AV(
-                market_has_unused_evi_space=evi_space,
-                stand_has_branche=len(branches) > 0,
-                stand_has_required_branche=stand_required_br,
-                merchant_has_required_branche=is_required,
-                merchant_has_evi=evi_merchant,
+            bak_space = self.market_info_delegate.market_has_unused_bak_space()
+            bak_space_vars = AV(
+                market_has_unused_bak_space=bak_space,
+                merchant_has_bak=bak_merchant,
+                stand_has_bak=std_has_bak,
             )
-            if evi_space_vars in illegal_combos:
-                return False
-
-            evi_moving_vpl = AV(
-                market_has_unused_evi_space=evi_space,
-                prevent_evi=self.prevent_evi,
-                stand_has_evi=std_has_evi,
-            )
-            if evi_moving_vpl in illegal_combos:
+            if bak_space_vars in illegal_combos:
                 return False
 
             branches_moving_vpl = AV(
                 market_has_unused_branche_space=self.market_info_delegate.market_has_unused_branche_space(
                     branches
                 ),
-                prevent_evi=self.prevent_evi,
                 stand_has_required_branche=stand_required_br,
                 branches_match=merchant_branches[0] in branches,
             )
@@ -396,44 +399,49 @@ class MarketStandClusterFinder:
         evi_merchant=False,
         bak_merchant=False,
         anywhere=True,
+        check_branche_bak_evi=True,
+        erk=None,
     ):
         """
         check all adjacent clusters of the requested size
         """
+        if len(prefs) > 0:
+            valid_options = []
+            for i, elem in enumerate(self.flattened_list):
+                # an option is valid if it is present in de prio list
+                option = self.flattened_list[i : i + size]
+                valid = any(elem in prefs for elem in option) and all(
+                    isinstance(x, str) for x in option
+                )
+                if valid:
+                    branche_valid_for_option = True
+                    if merchant_branche and check_branche_bak_evi:
+                        branche_valid_for_option = self.option_is_valid_branche(
+                            option,
+                            merchant_branche,
+                            bak_merchant,
+                            evi_merchant,
+                            erk=erk,
+                        )
+                    if branche_valid_for_option and self.option_is_available(option):
+                        valid_options.append(option)
+            best_option = self.filter_preferred(valid_options, prefs)
+            if len(best_option) > 0 or anywhere == False:
+                return best_option
+
         valid_options = []
-        for i, elem in enumerate(self.flattened_list):
-            # an option is valid if it is present in de prio list
+        for i, _ in enumerate(self.flattened_list):
             option = self.flattened_list[i : i + size]
-            valid = any(elem in prefs for elem in option) and all(
-                isinstance(x, str) for x in option
-            )
+            valid = all(isinstance(x, str) and x != "STW" for x in option)
             if valid:
                 branche_valid_for_option = True
                 if merchant_branche:
                     branche_valid_for_option = self.option_is_valid_branche(
-                        option, merchant_branche, bak_merchant, evi_merchant
+                        option, merchant_branche, bak_merchant, evi_merchant, erk=erk
                     )
                 if branche_valid_for_option and self.option_is_available(option):
-                    valid_options.append(option)
-        best_option = self.filter_preferred(valid_options, prefs)
-        if len(best_option) > 0 or anywhere == False:
-            return best_option
-        else:
-            valid_options = []
-            for i, elem in enumerate(self.flattened_list):
-                option = self.flattened_list[i : i + size]
-                valid = all(isinstance(x, str) and x != "STW" for x in option)
-                if valid:
-                    branche_valid_for_option = True
-                    if merchant_branche:
-                        branche_valid_for_option = self.option_is_valid_branche(
-                            option, merchant_branche, bak_merchant, evi_merchant
-                        )
-                    if branche_valid_for_option and self.option_is_available(option):
-                        valid_options.append(option)
-            if len(valid_options) > 1:
-                return valid_options[0]
-            return []
+                    return option
+        return []
 
 
 class AllocationDebugger:

@@ -125,7 +125,7 @@ class TestAlistAllocations(unittest.TestCase):
             voorkeur={
                 "branches": [],
                 "anywhere": True,
-                "maximum": 2,
+                "maximum": 3,
                 "minimum": 1,
                 "verkoopinrichting": [],
                 "absentFrom": "",
@@ -213,7 +213,7 @@ class TestAlistAllocations(unittest.TestCase):
         res_beefheart = alloc_erk("2", allocation)
 
         self.assertEqual(len(res_zappa["plaatsen"]), 1)
-        self.assertEqual(len(res_beefheart["plaatsen"]), 2)
+        self.assertEqual(len(res_beefheart["plaatsen"]), 3)
 
     def test_vpl_pref_to_soll_on_alist(self):
         """

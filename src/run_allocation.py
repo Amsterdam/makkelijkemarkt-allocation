@@ -4,6 +4,12 @@ from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider
 import time
 
+import cProfile, pstats, io
+from pstats import SortKey
+
+pr = cProfile.Profile()
+pr.enable()
+
 try:
     start = time.time()
     dp = FixtureDataprovider("../fixtures/dapp_20211030/a_input.json")
@@ -16,3 +22,10 @@ except Exception as e:
     print("-" * 60)
     traceback.print_exc(file=sys.stdout)
     print("-" * 60)
+
+pr.disable()
+s = io.StringIO()
+sortby = SortKey.CUMULATIVE
+ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+ps.print_stats()
+print(s.getvalue())
