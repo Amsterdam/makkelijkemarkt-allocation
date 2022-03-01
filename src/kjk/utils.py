@@ -96,8 +96,18 @@ class MarketStandClusterFinder:
     adjacent, in another market row or have an obstakel in between.
     """
 
-    def __init__(self, data, obstacles, branches_dict, evi_dict, bak_dict, branches):
+    def __init__(
+        self,
+        data,
+        obstacles,
+        branches_dict,
+        evi_dict,
+        bak_dict,
+        branches,
+        global_prefs=[],
+    ):
         self.prevent_evi = False
+        self.global_prefs = global_prefs
         self.branche_required_dict = {}
         for b in branches:
             try:
@@ -338,13 +348,23 @@ class MarketStandClusterFinder:
                 return False
         return True
 
-    def option_is_available(self, option):
+    def option_is_available(self, option, mode=None):
         if "STW" in option:
             return False
-        stands_not_available = (
-            self.stands_reserved_for_expansion + self.stands_allocated
-        )
-        # stands_not_available = self.stands_allocated
+        if mode == 1:
+            stands_not_available = (
+                self.global_prefs
+                + self.stands_reserved_for_expansion
+                + self.stands_allocated
+            )
+        elif mode == 2:
+            stands_not_available = (
+                self.stands_reserved_for_expansion + self.stands_allocated
+            )
+        elif mode == 3:
+            stands_not_available = self.global_prefs + self.stands_allocated
+        else:
+            stands_not_available = self.stands_allocated
         return not any(elem in option for elem in stands_not_available)
 
     def option_is_available_for_expansion(self, option):
@@ -418,7 +438,7 @@ class MarketStandClusterFinder:
                 )
                 if valid:
                     branche_valid_for_option = True
-                    option_is_available = self.option_is_available(option)
+                    option_is_available = self.option_is_available(option, mode=2)
                     if not option_is_available:
                         continue
                     if merchant_branche and check_branche_bak_evi:
