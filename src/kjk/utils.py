@@ -293,6 +293,8 @@ class MarketStandClusterFinder:
             # print("stand required branche: ", stand_required_br)
             # print("stand evi: ", std_has_evi)
             # print("stand bak: ", std_has_bak)
+            # print("merchant bak: ", bak_merchant)
+            # print("merchant evi: ", evi_merchant)
 
             # branche
             branch_vars = AV(
@@ -430,7 +432,7 @@ class MarketStandClusterFinder:
         """
         if len(prefs) > 0:
             valid_options = []
-            for i, elem in enumerate(self.flattened_list):
+            for i, _ in enumerate(self.flattened_list):
                 # an option is valid if it is present in de prio list
                 option = self.flattened_list[i : i + size]
                 valid = any(elem in prefs for elem in option) and all(
@@ -438,7 +440,7 @@ class MarketStandClusterFinder:
                 )
                 if valid:
                     branche_valid_for_option = True
-                    option_is_available = self.option_is_available(option, mode=2)
+                    option_is_available = self.option_is_available(option, mode=4)
                     if not option_is_available:
                         continue
                     if merchant_branche and check_branche_bak_evi:
@@ -455,13 +457,34 @@ class MarketStandClusterFinder:
             if len(best_option) > 0 or anywhere == False:
                 return best_option
 
-        valid_options = []
+        for mode in (1, 2, 3, 4):
+            option = self.find_valid_cluster_for_mode(
+                size,
+                merchant_branche=merchant_branche,
+                evi_merchant=evi_merchant,
+                bak_merchant=bak_merchant,
+                erk=erk,
+                mode=mode,
+            )
+            if option:
+                return option
+        return []
+
+    def find_valid_cluster_for_mode(
+        self,
+        size=2,
+        merchant_branche=None,
+        evi_merchant=False,
+        bak_merchant=False,
+        erk=None,
+        mode=1,
+    ):
         for i, _ in enumerate(self.flattened_list):
             option = self.flattened_list[i : i + size]
             valid = all(isinstance(x, str) and x != "STW" for x in option)
             if valid:
                 branche_valid_for_option = True
-                option_is_available = self.option_is_available(option)
+                option_is_available = self.option_is_available(option, mode=mode)
                 if not option_is_available:
                     continue
                 if merchant_branche:
@@ -470,7 +493,6 @@ class MarketStandClusterFinder:
                     )
                 if branche_valid_for_option and option_is_available:
                     return option
-        return []
 
 
 class AllocationDebugger:
