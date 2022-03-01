@@ -116,7 +116,7 @@ class TestMovingVPL(unittest.TestCase):
         allocation = allocator.get_allocation()
         erk = alloc_erk("1", allocation)
         erk_2 = alloc_erk("2", allocation)
-        self.assertListEqual(erk["plaatsen"], ["3", "4"])
+        self.assertListEqual(erk["plaatsen"], ["2", "3"])
         self.assertListEqual(erk_2["plaatsen"], ["1"])
 
     def test_can_switch_stands_2(self):
@@ -148,7 +148,7 @@ class TestMovingVPL(unittest.TestCase):
         erk = alloc_erk("1", allocation)
         erk_2 = alloc_erk("2", allocation)
         erk_3 = alloc_erk("3", allocation)
-        self.assertListEqual(erk["plaatsen"], ["3", "4"])
+        self.assertListEqual(erk["plaatsen"], ["2", "3"])
         self.assertListEqual(erk_2["plaatsen"], ["5"])
         self.assertListEqual(erk_3["plaatsen"], ["1"])
 

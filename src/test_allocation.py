@@ -273,6 +273,7 @@ class ClusterFinderTestCase(unittest.TestCase):
             dp.get_obstacles(),
             {"1": ["101-agf"]},
             {},
+            {},
             [],
         )
 
@@ -280,21 +281,16 @@ class ClusterFinderTestCase(unittest.TestCase):
         res = self.sut.find_valid_cluster(
             ["2", "4", "123", "22", "7", "9", "11"], size=3
         )
-        self.assertListEqual([], res)
-        res = self.sut.find_valid_cluster(
-            ["2", "4", "123", "22", "5", "7", "9", "11"], size=3
-        )
-        self.assertListEqual([["5", "7", "9"]], res)
+        self.assertListEqual(["119", "121", "123"], res)
+        res = self.sut.find_valid_cluster(["2", "4", "5", "7", "9", "11"], size=3)
+        self.assertListEqual(["5", "7", "9"], res)
         res = self.sut.find_valid_cluster(
             ["197", "153", "151", "157", "155", "199", "201", "200", "198"], size=2
         )
-        self.assertListEqual(
-            [["151", "153"], ["155", "157"], ["198", "200"], ["199", "201"]], res
-        )
+        self.assertListEqual(["195", "197"], res)
         res = self.sut.find_valid_cluster(
-            ["197", "153", "151", "157", "155", "199", "201", "200", "198"],
+            ["153", "151", "157", "155", "199", "201", "200", "198"],
             size=2,
-            preferred=True,
         )
         self.assertListEqual(["151", "153"], res)
 
@@ -321,9 +317,9 @@ class ClusterFinderTestCase(unittest.TestCase):
         self.assertTrue(res is None)
 
     def test_max_not_available(self):
-        res = self.sut.find_valid_cluster(["207 - 209"], size=2, preferred=True)
+        res = self.sut.find_valid_cluster(["229"], size=12)
         self.assertListEqual([], res)
-        res = self.sut.find_valid_cluster(["207 - 209"], size=1, preferred=True)
+        res = self.sut.find_valid_cluster(["207 - 209"], size=1)
         self.assertListEqual(["207 - 209"], res)
 
 

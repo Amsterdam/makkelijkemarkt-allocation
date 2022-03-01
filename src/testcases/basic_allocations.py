@@ -24,10 +24,10 @@ class TestBasicAllocation(unittest.TestCase):
             erkenningsNummer="1",
             plaatsen=["1", "2"],
             status="vpl",
-            sollicitatieNummer="2",
+            sollicitatieNummer=2,
             description="Frank Zappa",
             voorkeur={
-                "branches": ["101-afg"],
+                "branches": ["101-agf"],
                 "maximum": 2,
                 "minimum": 2,
                 "verkoopinrichting": [],
@@ -40,10 +40,10 @@ class TestBasicAllocation(unittest.TestCase):
             erkenningsNummer="2",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="2",
+            sollicitatieNummer=2,
             description="C Beefheart",
             voorkeur={
-                "branches": ["101-afg"],
+                "branches": ["101-agf"],
                 "maximum": 1,
                 "minimum": 1,
                 "verkoopinrichting": [],
@@ -56,7 +56,7 @@ class TestBasicAllocation(unittest.TestCase):
             erkenningsNummer="3",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="3",
+            sollicitatieNummer=3,
             description="J Medeski",
             voorkeur={
                 "branches": ["mooie spullen"],
@@ -140,7 +140,7 @@ class TestBasicAllocation(unittest.TestCase):
             },
         )
 
-        self.dp.add_page(["1", "2", "3", "4", "5", "6", "7", "8", "9"])
+        self.dp.add_page(["1", "2", "3", "4", "5", "9"])
         self.dp.add_rsvp(erkenningsNummer="4", attending=True)
         self.dp.add_stand(
             plaatsId="9",
@@ -192,7 +192,7 @@ class TestBasicAllocation(unittest.TestCase):
             erkenningsNummer="244",
             plaatsen=[],
             status="soll",
-            sollicitatieNummer="1",
+            sollicitatieNummer=1,
             description="K. Oopman",
             voorkeur={
                 "branches": ["vacuumslangen"],

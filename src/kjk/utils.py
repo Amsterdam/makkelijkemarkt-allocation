@@ -96,7 +96,7 @@ class MarketStandClusterFinder:
     adjacent, in another market row or have an obstakel in between.
     """
 
-    def __init__(self, data, obstacles, branches_dict, evi_dict, branches):
+    def __init__(self, data, obstacles, branches_dict, evi_dict, bak_dict, branches):
         self.prevent_evi = False
         self.branche_required_dict = {}
         for b in branches:
@@ -109,6 +109,7 @@ class MarketStandClusterFinder:
         self.stands_reserved_for_expansion = []
         self.branches_dict = branches_dict
         self.evi_dict = evi_dict
+        self.bak_dict = bak_dict
         self.obstacle_dict = self._process_obstacle_dict(obstacles)
         self.flattened_list = []
         self.stands_linked_list = {}
@@ -198,10 +199,22 @@ class MarketStandClusterFinder:
         try:
             return "eigen-materieel" in self.evi_dict[std]
         except TypeError:
-            return []
+            return False
+
+    def stand_has_bak(self, std):
+        try:
+            return "bak" in self.bak_dict[std]
+        except TypeError:
+            return False
 
     def option_is_valid_branche(
-        self, option, merchant_branches, evi_merchant, prevent_evi=False
+        self,
+        option,
+        merchant_branches,
+        bak_merchant,
+        evi_merchant,
+        prevent_evi=False,
+        erk=None,
     ):
         AV = namedtuple(
             "AllocationVars",
@@ -209,14 +222,17 @@ class MarketStandClusterFinder:
                 "merchant_has_required_branche",
                 "stand_has_branche",
                 "stand_has_required_branche",
+                "market_has_unused_bak_space",
                 "market_has_unused_evi_space",
                 "merchant_has_evi",
+                "merchant_has_bak",
                 "branches_match",
                 "stand_has_evi",
                 "prevent_evi",
+                "stand_has_bak",
                 "market_has_unused_branche_space",
             ],
-            defaults=(None,) * 9,
+            defaults=(None,) * 12,
         )
 
         illegal_combos = [
@@ -225,40 +241,50 @@ class MarketStandClusterFinder:
                 branches_match=False,
             ),
             AV(
+                merchant_has_bak=True,
+                stand_has_bak=False,
+            ),
+            AV(
                 merchant_has_evi=True,
                 stand_has_evi=False,
+            ),
+            AV(
+                market_has_unused_branche_space=False,
+                branches_match=False,
+                stand_has_required_branche=True,
+            ),
+            AV(
+                market_has_unused_bak_space=False,
+                merchant_has_bak=False,
+                stand_has_bak=True,
             ),
             AV(
                 market_has_unused_evi_space=False,
                 merchant_has_evi=False,
                 stand_has_evi=True,
-                stand_has_branche=True,
-                stand_has_required_branche=True,
-                branches_match=False,
-            ),
-            AV(
-                market_has_unused_evi_space=False,
-                stand_has_branche=True,
-                stand_has_required_branche=True,
-                merchant_has_required_branche=False,
-                merchant_has_evi=False,
-            ),
-            AV(market_has_unused_evi_space=False, prevent_evi=True, stand_has_evi=True),
-            AV(
-                market_has_unused_branche_space=False,
-                prevent_evi=True,
-                stand_has_required_branche=True,
-                branches_match=False,
             ),
         ]
 
         is_required = self.branche_is_required(merchant_branches[0])
         for std in option:
-            branches = self.branches_dict[std]
-            evi_space = self.market_info_delegate.market_has_unused_evi_space()
+            try:
+                branches = self.branches_dict[std]
+            except KeyError:
+                # stands input data is not always complete
+                branches = []
             stand_required_br = self.stand_has_required_branche(branches)
             std_has_evi = self.stand_has_evi(std)
+            std_has_bak = self.stand_has_bak(std)
 
+            # print("- "*23)
+            # print("ERK: ", erk)
+            # print("stand nr: ", std)
+            # print("branches: ", branches)
+            # print("stand required branche: ", stand_required_br)
+            # print("stand evi: ", std_has_evi)
+            # print("stand bak: ", std_has_bak)
+
+            # branche
             branch_vars = AV(
                 merchant_has_required_branche=is_required,
                 branches_match=merchant_branches[0] in branches,
@@ -266,6 +292,15 @@ class MarketStandClusterFinder:
             if branch_vars in illegal_combos:
                 return False
 
+            # bak
+            bak_vars = AV(
+                merchant_has_bak=bak_merchant,
+                stand_has_bak=std_has_bak,
+            )
+            if bak_vars in illegal_combos:
+                return False
+
+            # evi
             evi_vars = AV(
                 merchant_has_evi=evi_merchant,
                 stand_has_evi=std_has_evi,
@@ -273,6 +308,8 @@ class MarketStandClusterFinder:
             if evi_vars in illegal_combos:
                 return False
 
+            evi_space = self.market_info_delegate.market_has_unused_evi_space()
+
             evi_space_vars = AV(
                 market_has_unused_evi_space=evi_space,
                 merchant_has_evi=evi_merchant,
@@ -281,29 +318,19 @@ class MarketStandClusterFinder:
             if evi_space_vars in illegal_combos:
                 return False
 
-            evi_space_vars = AV(
-                market_has_unused_evi_space=evi_space,
-                stand_has_branche=len(branches) > 0,
-                stand_has_required_branche=stand_required_br,
-                merchant_has_required_branche=is_required,
-                merchant_has_evi=evi_merchant,
+            bak_space = self.market_info_delegate.market_has_unused_bak_space()
+            bak_space_vars = AV(
+                market_has_unused_bak_space=bak_space,
+                merchant_has_bak=bak_merchant,
+                stand_has_bak=std_has_bak,
             )
-            if evi_space_vars in illegal_combos:
-                return False
-
-            evi_moving_vpl = AV(
-                market_has_unused_evi_space=evi_space,
-                prevent_evi=self.prevent_evi,
-                stand_has_evi=std_has_evi,
-            )
-            if evi_moving_vpl in illegal_combos:
+            if bak_space_vars in illegal_combos:
                 return False
 
             branches_moving_vpl = AV(
                 market_has_unused_branche_space=self.market_info_delegate.market_has_unused_branche_space(
                     branches
                 ),
-                prevent_evi=self.prevent_evi,
                 stand_has_required_branche=stand_required_br,
                 branches_match=merchant_branches[0] in branches,
             )
@@ -333,6 +360,7 @@ class MarketStandClusterFinder:
         prefs=[],
         preferred=False,
         merchant_branche=None,
+        bak_merchant=False,
         evi_merchant=False,
         ignore_check_available=None,
     ):
@@ -353,7 +381,7 @@ class MarketStandClusterFinder:
                 branche_valid_for_option = True
                 if merchant_branche:
                     branche_valid_for_option = self.option_is_valid_branche(
-                        option, merchant_branche, evi_merchant
+                        option, merchant_branche, bak_merchant, evi_merchant
                     )
                 if ignore_check_available:
                     option = list(set(option) - set(ignore_check_available))
@@ -368,79 +396,61 @@ class MarketStandClusterFinder:
 
     def find_valid_cluster(
         self,
-        stand_list,
+        prefs,
         size=2,
-        preferred=False,
         merchant_branche=None,
-        mode="all",
         evi_merchant=False,
-        ignore_reserved=False,
+        bak_merchant=False,
+        anywhere=True,
+        check_branche_bak_evi=True,
+        erk=None,
     ):
         """
         check all adjacent clusters of the requested size
         """
-        valid_options = []
-        for i, elem in enumerate(self.flattened_list):
-            # an option is valid if it is present in de prio list
-            option = self.flattened_list[i : i + size]
-            if mode == "all":
-                valid = all(elem in stand_list for elem in option)
-            else:  # any
-                valid = any(elem in stand_list for elem in option) and all(
+        if len(prefs) > 0:
+            valid_options = []
+            for i, elem in enumerate(self.flattened_list):
+                # an option is valid if it is present in de prio list
+                option = self.flattened_list[i : i + size]
+                valid = any(elem in prefs for elem in option) and all(
                     isinstance(x, str) for x in option
                 )
+                if valid:
+                    branche_valid_for_option = True
+                    option_is_available = self.option_is_available(option)
+                    if not option_is_available:
+                        continue
+                    if merchant_branche and check_branche_bak_evi:
+                        branche_valid_for_option = self.option_is_valid_branche(
+                            option,
+                            merchant_branche,
+                            bak_merchant,
+                            evi_merchant,
+                            erk=erk,
+                        )
+                    if branche_valid_for_option and option_is_available:
+                        valid_options.append(option)
+            best_option = self.filter_preferred(valid_options, prefs)
+            if len(best_option) > 0 or anywhere == False:
+                return best_option
+
+        valid_options = []
+        for i, _ in enumerate(self.flattened_list):
+            option = self.flattened_list[i : i + size]
+            valid = all(isinstance(x, str) and x != "STW" for x in option)
             if valid:
                 branche_valid_for_option = True
+                option_is_available = self.option_is_available(option)
+                if not option_is_available:
+                    continue
                 if merchant_branche:
                     branche_valid_for_option = self.option_is_valid_branche(
-                        option, merchant_branche, evi_merchant
+                        option, merchant_branche, bak_merchant, evi_merchant, erk=erk
                     )
-                if ignore_reserved:
-                    if (
-                        branche_valid_for_option
-                        and self.option_is_available_for_expansion(option)
-                    ):
-                        valid_options.append(option)
-                else:
-                    if branche_valid_for_option and self.option_is_available(option):
-                        valid_options.append(option)
-        if preferred:
-            return self.filter_preferred(valid_options, stand_list)
-        else:
-            return valid_options
-
-    def find_valid_cluster_final_phase(
-        self,
-        stand_list,
-        size=2,
-        preferred=False,
-        merchant_branche=None,
-        anywhere=False,
-        ignore_reserved=False,
-    ):
-        """
-        check all adjacent clusters of the requested size
-        """
-        valid_options = []
-        for i, elem in enumerate(self.flattened_list):
-            # an option is valid if it is present in de prio list
-            option = self.flattened_list[i : i + size]
-            if anywhere:
-                valid = all(isinstance(x, str) for x in option)
-            else:
-                valid = any(elem in stand_list for elem in option) and all(
-                    isinstance(x, str) for x in option
-                )
-            if ignore_reserved:
-                if valid and self.option_is_available_for_expansion(option):
-                    valid_options.append(option)
-            else:
-                if valid and self.option_is_available(option):
-                    valid_options.append(option)
-        if preferred:
-            return self.filter_preferred(valid_options, stand_list)
-        else:
-            return valid_options
+                if branche_valid_for_option and option_is_available:
+                    return option
+        return []
 
 
 class AllocationDebugger:

@@ -369,7 +369,7 @@ class TestSollAllocation(unittest.TestCase):
             sollicitatieNummer="9",
             description="C Beefheart",
             voorkeur={
-                "branches": [],
+                "branches": ["autobanden"],
                 "maximum": 3,
                 "minimum": 2,
                 "verkoopinrichting": [],
@@ -406,6 +406,8 @@ class TestSollAllocation(unittest.TestCase):
         # rsvp
         dp.add_rsvp(erkenningsNummer="1", attending=True)
         dp.add_rsvp(erkenningsNummer="2", attending=True)
+
+        dp.set_alist([{"erkenningsNummer": "1"}])
 
         dp.mock()
         allocator = Allocator(dp)

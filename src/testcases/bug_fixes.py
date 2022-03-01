@@ -20,13 +20,13 @@ from kjk.test_utils import (
 
 class BugFixBadAbsenceDates(unittest.TestCase):
     def setUp(self):
-        dp = FixtureDataprovider("../fixtures/bug_25-02-2022.json")
+        dp = FixtureDataprovider("../fixtures/absent_field_bug.json")
         self.allocator = Allocator(dp)
         self.market_allocation = self.allocator.get_allocation()
 
     def test_bug(self):
         num_afw = len(self.market_allocation["afwijzingen"])
-        self.assertEqual(num_afw, 0)
+        self.assertEqual(num_afw, 1)
 
 
 class BugFixStand122TestCase(unittest.TestCase):
@@ -50,7 +50,7 @@ class DapperBugTestCase_3(unittest.TestCase):
 
     def test_rejections(self):
         num_rejects = len(self.market_allocation["afwijzingen"])
-        self.assertEqual(6, num_rejects)
+        self.assertEqual(7, num_rejects)
 
     def test_bug_1(self):
         # soll 110 should get 46
@@ -63,10 +63,9 @@ class DapperBugTestCase_3(unittest.TestCase):
         self.assertListEqual(tw["plaatsen"], ["44"])
 
     def test_bug_3(self):
-        # soll 68 should get 97
+        # soll 68 should get 16
         tw = alloc_sollnr(68, self.market_allocation)
-        # a = ["97", "95"]
-        a = ["136"]
+        a = ["16"]
         a.sort()
         tw["plaatsen"].sort()
         self.assertListEqual(tw["plaatsen"], a)

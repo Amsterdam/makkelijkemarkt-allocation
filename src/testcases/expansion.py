@@ -680,10 +680,3 @@ class TestExpansion(unittest.TestCase):
         a.sort()
         self.assertListEqual(twz["plaatsen"], a)
         self.assertEqual(twz["ondernemer"]["description"], "Dweezil Zappa")
-
-    @unittest.skip("Navragen markten wat is een cirkelvormige oppstelling?")
-    def test_expansion_circular_market(self):
-        """
-        kan dit in een cirkelvormige marktoptstelling
-        """
-        self.assertTrue(False)

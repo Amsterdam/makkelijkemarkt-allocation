@@ -161,15 +161,6 @@ class TestTVPallocation(unittest.TestCase):
         self.assertTrue(len(market_allocation["afwijzingen"]) == 3)
         self.assertEqual(reject_erk("4", market_allocation)["reason"]["code"], 5)
 
-    @unittest.skip(
-        "Uitgezet, omdat nog niet besloten is hoe om te gaan met 'willekeurig indelen' voor VPL."
-    )
-    def test_other_stands_if_not_available(self):
-        """
-        kan hetzelfde aantal willekeurige plaatsen krijgen als zijn eigen plaatsen niet beschikbaar zijn
-        """
-        self.assertTrue(False)
-
 
 class TestTVPLZallocation(unittest.TestCase):
     """
@@ -368,16 +359,95 @@ class TestTVPLZallocation(unittest.TestCase):
             alloc_erk("2", allocation)["ondernemer"]["description"], "C Beefheart"
         )
 
-    @unittest.skip("Navraag markten")
     def test_can_not_limit_stands(self):
         """
         mag zijn vaste aantal plaatsen niet verkleinen
         """
-        self.assertTrue(False)
+        self.dp.update_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="tvplz",
+            sollicitatieNummer="1",
+            description="C Beefheart",
+            voorkeur={
+                "branches": ["mooie spullen"],
+                "maximum": 1,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
 
-    @unittest.skip("Dit is de default, navraag markten")
+        self.dp.add_rsvp(erkenningsNummer="2", attending=True)
+
+        self.dp.add_page(["6", "7", "8"])
+        self.dp.add_stand(
+            plaatsId="6", branches=[], properties=[], verkoopinrichting=[]
+        )
+        self.dp.add_stand(
+            plaatsId="7", branches=[], properties=[], verkoopinrichting=[]
+        )
+        self.dp.add_stand(
+            plaatsId="8", branches=[], properties=[], verkoopinrichting=[]
+        )
+
+        self.dp.mock()
+
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        # should get 2 spots, while max is set to 1
+        a = ["6", "7"]
+        a.sort()
+        res = alloc_erk("2", allocation)["plaatsen"]
+        res.sort()
+        self.assertListEqual(res, a)
+        self.assertEqual(
+            alloc_erk("2", allocation)["ondernemer"]["description"], "C Beefheart"
+        )
+
     def test_can_expand_stands(self):
         """
         mag zijn vaste aantal plaatsen uitbreiden indien mogelijk
         """
-        self.assertTrue(False)
+        self.dp.update_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="tvplz",
+            sollicitatieNummer="1",
+            description="C Beefheart",
+            voorkeur={
+                "branches": ["mooie spullen"],
+                "maximum": 3,
+                "minimum": 2,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.add_rsvp(erkenningsNummer="2", attending=True)
+
+        self.dp.add_page(["6", "7", "8"])
+        self.dp.add_stand(
+            plaatsId="6", branches=[], properties=[], verkoopinrichting=[]
+        )
+        self.dp.add_stand(
+            plaatsId="7", branches=[], properties=[], verkoopinrichting=[]
+        )
+        self.dp.add_stand(
+            plaatsId="8", branches=[], properties=[], verkoopinrichting=[]
+        )
+
+        self.dp.mock()
+
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+        a = ["6", "7", "8"]
+        a.sort()
+        res = alloc_erk("2", allocation)["plaatsen"]
+        res.sort()
+        self.assertListEqual(res, a)
+        self.assertEqual(
+            alloc_erk("2", allocation)["ondernemer"]["description"], "C Beefheart"
+        )
