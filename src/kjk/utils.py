@@ -415,6 +415,9 @@ class MarketStandClusterFinder:
                 )
                 if valid:
                     branche_valid_for_option = True
+                    option_is_available = self.option_is_available(option)
+                    if not option_is_available:
+                        continue
                     if merchant_branche and check_branche_bak_evi:
                         branche_valid_for_option = self.option_is_valid_branche(
                             option,
@@ -423,7 +426,7 @@ class MarketStandClusterFinder:
                             evi_merchant,
                             erk=erk,
                         )
-                    if branche_valid_for_option and self.option_is_available(option):
+                    if branche_valid_for_option and option_is_available:
                         valid_options.append(option)
             best_option = self.filter_preferred(valid_options, prefs)
             if len(best_option) > 0 or anywhere == False:
@@ -435,11 +438,14 @@ class MarketStandClusterFinder:
             valid = all(isinstance(x, str) and x != "STW" for x in option)
             if valid:
                 branche_valid_for_option = True
+                option_is_available = self.option_is_available(option)
+                if not option_is_available:
+                    continue
                 if merchant_branche:
                     branche_valid_for_option = self.option_is_valid_branche(
                         option, merchant_branche, bak_merchant, evi_merchant, erk=erk
                     )
-                if branche_valid_for_option and self.option_is_available(option):
+                if branche_valid_for_option and option_is_available:
                     return option
         return []
 
