@@ -207,6 +207,12 @@ class BaseAllocator:
             subset="erkenningsNummer", keep="first", inplace=True
         )
 
+        # pref stand ids of all merchants
+        self.global_prefs = []
+
+        # create a dataframe with merchants attending the market
+        # and create a positions dataframe
+        # these dataframes will be used in the allocation
         self.prepare_merchants()
         self.prepare_stands()
         self.back_up_stand_queue = self.positions_df.copy()
@@ -227,9 +233,6 @@ class BaseAllocator:
         baks = self.positions_df["branches"].to_list()
         stand_bak_dict = dict(zip(plaats_ids, baks))
 
-        # create a dataframe with merchants attending the market
-        # and create a positions dataframe
-        # these dataframes will be used in the allocation
         self.cluster_finder = MarketStandClusterFinder(
             dp.get_market_blocks(),
             dp.get_obstacles(),
@@ -237,6 +240,7 @@ class BaseAllocator:
             stand_evi_dict,
             stand_bak_dict,
             self.branches,
+            global_prefs=self.global_prefs,
         )
 
         self.cluster_finder.set_market_info_delegate(self)
@@ -593,11 +597,14 @@ class BaseAllocator:
 
         def prefs(x):
             try:
-                return self.get_prefs_for_merchant(x)
+                merchant_prefs = self.get_prefs_for_merchant(x)
+                self.global_prefs += merchant_prefs
+                return merchant_prefs
             except KeyError:
                 return []
 
         self.merchants_df["pref"] = self.merchants_df["erkenningsNummer"].apply(prefs)
+        self.global_prefs = list(set(self.global_prefs))
 
         def will_move(x):
             try:

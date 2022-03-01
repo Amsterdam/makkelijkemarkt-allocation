@@ -490,12 +490,94 @@ class TestSollAllocation(unittest.TestCase):
         allocation = allocator.get_allocation()
         self.assertListEqual(alloc_erk("1", allocation)["plaatsen"], ["1"])
 
-    @unittest.skip("todo: take another look at anywhere flag")
     def test_will_not_go_to_pref_of_others(self):
         """
         komt liefst niet op de voorkeursplek van een ander als zij flexibel ingedeeld willen worden
         """
-        self.assertTrue(False)
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer=44,
+            description="Frank Zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "anywhere": False,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer=9,
+            description="C Beefheart",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "anywhere": True,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_page(["1", "2", "3"])
+
+        # stands
+        dp.add_stand(
+            plaatsId="1",
+            branches=[],
+            properties=["boom"],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=[],
+            properties=["boom"],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="3",
+            branches=[],
+            properties=["boom"],
+            verkoopinrichting=[],
+        )
+
+        # branches
+        dp.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
+
+        # rsvp
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+        dp.add_rsvp(erkenningsNummer="2", attending=True)
+
+        # prefs soll wants stand 1
+        dp.add_pref(erkenningsNummer="1", plaatsId="1", priority=1)
+
+        dp.mock()
+        allocator = Allocator(dp)
+        allocation = allocator.get_allocation()
+        # normally Beefheart would get number 1
+        # zappa gets number 1 because pref and Beefheart does not care
+        self.assertListEqual(alloc_erk("1", allocation)["plaatsen"], ["1"])
+
+        # add competing pref
+        dp.add_pref(erkenningsNummer="2", plaatsId="1", priority=1)
+
+        dp.mock()
+        allocator = Allocator(dp)
+        allocation = allocator.get_allocation()
+        # now beefheart gets one he has also pref and better rating (lower sollicitatieNummer)
+        self.assertListEqual(alloc_erk("2", allocation)["plaatsen"], ["1"])
 
     def test_can_choose_to_only_want_prefs(self):
         """
