@@ -4,7 +4,10 @@ from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider
 import time
 
-import cProfile, pstats, io
+# profiling stuff
+import cProfile
+import pstats
+import io
 from pstats import SortKey
 
 pr = cProfile.Profile()

@@ -95,6 +95,7 @@ class TestEVI(unittest.TestCase):
                 "branches": ["404-parfum"],
                 "maximum": 2,
                 "minimum": 2,
+                "anywhere": True,
                 "verkoopinrichting": ["eigen-materieel"],
                 "absentFrom": "",
                 "absentUntil": "",
@@ -168,7 +169,8 @@ class TestEVI(unittest.TestCase):
         self.market_allocation = allocator.get_allocation()
         # 101, 103 are evi stands. Zappa prefs are 2, 3 (assign evi anyway)
         erk = alloc_erk("1", self.market_allocation)
-        self.assertListEqual(erk["plaatsen"], ["101", "103"])
+        a = [a in erk["plaatsen"] for a in ["101", "103"]]
+        self.assertTrue(a)
 
     def test_most_suitable_stand(self):
         """
@@ -367,6 +369,7 @@ class TestEVI(unittest.TestCase):
                 "branches": ["404-parfum"],
                 "maximum": 1,
                 "minimum": 1,
+                "anywhere": True,
                 "verkoopinrichting": [],
                 "absentFrom": "",
                 "absentUntil": "",

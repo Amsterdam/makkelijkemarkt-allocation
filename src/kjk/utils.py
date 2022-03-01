@@ -2,7 +2,6 @@ import redis
 import os
 from collections import namedtuple
 from kjk.rejection_reasons import MARKET_FULL
-from pprint import pprint
 
 
 class BranchesScrutenizer:
@@ -268,7 +267,11 @@ class MarketStandClusterFinder:
 
         is_required = self.branche_is_required(merchant_branches[0])
         for std in option:
-            branches = self.branches_dict[std]
+            try:
+                branches = self.branches_dict[std]
+            except KeyError:
+                # stands input data is not always complete
+                branches = []
             stand_required_br = self.stand_has_required_branche(branches)
             std_has_evi = self.stand_has_evi(std)
             std_has_bak = self.stand_has_bak(std)

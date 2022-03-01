@@ -140,7 +140,7 @@ class TestBasicAllocation(unittest.TestCase):
             },
         )
 
-        self.dp.add_page(["1", "2", "3", "4", "5", "6", "7", "8", "9"])
+        self.dp.add_page(["1", "2", "3", "4", "5", "9"])
         self.dp.add_rsvp(erkenningsNummer="4", attending=True)
         self.dp.add_stand(
             plaatsId="9",

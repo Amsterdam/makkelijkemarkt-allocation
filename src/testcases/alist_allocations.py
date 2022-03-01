@@ -65,12 +65,69 @@ class TestAlistAllocations(unittest.TestCase):
 
         self.dp = dp
 
-    @unittest.skip("Navragen markten, dit hebben we anders besproken")
     def test_assign_pref_to_blist_evi_and_baking(self):
         """
         krijgt voorrang over EVI- en verplichte branche sollicitanten op de B-lijst
         """
-        self.assertTrue(False)
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        # merchants
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="Frank Zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": ["eigen-materieel"],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="C Beefheart",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_page([None, "1", None])
+
+        # stands
+        dp.add_stand(
+            plaatsId="1",
+            branches=[],
+            properties=[],
+            verkoopinrichting=["eigen-materieel"],
+        )
+
+        # branches
+        dp.add_branche(brancheId="101-agf", verplicht=True, maximumPlaatsen=12)
+
+        # rsvp
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+        dp.add_rsvp(erkenningsNummer="2", attending=True)
+
+        dp.set_alist([{"erkenningsNummer": "2"}])
+
+        dp.mock()
+        allocator = Allocator(dp)
+        allocation = allocator.get_allocation()
+        erk = alloc_erk("2", allocation)
+        self.assertListEqual(erk["plaatsen"], ["1"])
 
     def test_assign_pref_to_blist(self):
         """

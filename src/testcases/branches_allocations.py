@@ -24,6 +24,7 @@ class TestRequiredBranches(unittest.TestCase):
                 "branches": ["101-cosmic-utensils"],
                 "maximum": 1,
                 "minimum": 1,
+                "anywhere": True,
                 "verkoopinrichting": [],
                 "absentFrom": "",
                 "absentUntil": "",

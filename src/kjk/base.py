@@ -1,5 +1,4 @@
 import pandas as pd
-import math
 from datetime import date
 from kjk.outputdata import MarketArrangement
 from kjk.utils import MarketStandClusterFinder, RejectionReasonManager
@@ -920,14 +919,6 @@ class BaseAllocator:
             except KeyError:
                 anywhere = False
 
-            if row["status"] == "tvplz":
-                mini = row["voorkeur.minimum"]
-            else:
-                mini = 1
-
-            if math.isnan(mini):
-                mini = 1
-
             minimal_possible = self.cluster_finder.find_valid_cluster(
                 pref,
                 int(minimal),
@@ -944,6 +935,13 @@ class BaseAllocator:
                 self.rejection_reasons.add_rejection_reason_for_merchant(
                     erk, MINIMUM_UNAVAILABLE
                 )
+                continue
+            elif row["status"] == "tvplz":
+                # this is the exception for tvplz merchants
+                # they do not have stands but have the right to
+                # a minimal number of stands, so if possible allocate right
+                # now.
+                self._allocate_stands_to_merchant(minimal_possible, erk)
                 continue
 
             stds = []
