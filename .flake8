@@ -2,4 +2,4 @@
 ignore = E226,E302,E41,E712,E711,E203,W503
 max-line-length = 160
 exclude = src/testcases/*, tests.py, test_allocation.py
-max-complexity = 10
+max-complexity = 15
