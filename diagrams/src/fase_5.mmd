@@ -1,7 +1,7 @@
 graph TD
     A([FASE 5-a VPL + TVPL verplaatsing <b><i>BRANCHE</i></b>]) -->
     B[Selecteer alle VPL en TVPL<br> die willen verplaatsen en deel ze<br> in op de voorkeursplaatsen indien beschikbaar] -->
-    C{"Verplaatsing toegestaan volgens? <b><br><br>BRANCHE<br>BAK<br>EVI</b>"}
+    C{"Verplaatsing toegestaan volgens? <b><br><br>BRANCHE<br>BAK<br>EVI</b>"} --> NOTE
     C --YES--> D(["Deel in op voorkeursplaats(en), <br>verwijder de ondernemer uit de wachtrij en de kraam uit de beschikbare plaatsen"])
     C --NO--> E(["Deel in op vasteplaats(en), <br>verwijder de ondernemer uit de wachtrij en de kraam uit de beschikbare plaatsen"])
 
@@ -10,4 +10,40 @@ graph TD
     A2([FASE 5-c VPL + TVPL verplaatsing <b><i>EVI</i></b>]) --> B
     
     A3([FASE 5-d VPL + TVPL verplaatsing <b><i>Overige</i></b>]) --> B
+
+
+    NOTE["
+    <b>Toelichting</b>:<br> 
+        <b>1.</b> Plaats heeft verplichte branche,<br>
+        - Branche ondernemer komt niet overeen<br>
+        - Er is geen ongebruikte branche ruimte op de markt<br>
+        -> verplaatsing <b>NIET</b> toegestaan. <br><br>
+
+        <b>2.</b> Plaats heeft BAK,<br>
+        - Ondernemer bakt niet<br>
+        - Er is geen ongebruikte BAK ruimte op de markt<br>
+        -> verplaatsing <b>NIET</b> toegestaan. <br><br>
+
+        <b>3.</b> Plaats heeft EVI,<br>
+        - Ondernemer heeft geen EVI<br>
+        - Er is geen ongebruikte EVI ruimte op de markt<br>
+        -> verplaatsing <b>NIET</b> toegestaan. <br><br>
+
+        <b>4.</b> Plaats heeft geen branche,<br>
+        - Ondernemer heeft verplichte branche<br>
+        -> verplaatsing <b>NIET</b> toegestaan. <br><br>
+
+        <b>5.</b> Plaats heeft geen EVI,<br>
+        - Ondernemer heeft EVI<br>
+        -> verplaatsing <b>NIET</b> toegestaan. <br><br>
+
+        <b>6.</b> Plaats heeft geen BAK,<br>
+        - Ondernemer heeft BAK<br>
+        -> verplaatsing <b>NIET</b> toegestaan. <br><br>
+
+    In overige situaties is verplaatsing toegestaan<br> indien de plaats beschikbaar is.
+
+    "]
+
+
 
