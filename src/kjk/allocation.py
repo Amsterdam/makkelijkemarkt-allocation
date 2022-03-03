@@ -554,14 +554,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df = self.expanders_df.query(f"status == 'soll' & {list_mode}")
         self._expand_for_merchants(df)
 
-    def allocation_phase_13(self):
-        self.set_allocation_phase("Phase 13")
-        log.info("")
-        clog.info("--- ALLOCATIE FASE  13 ---")
-        log.info("Markt allocatie ingedeeld, nu de validatie.")
-        log.info("nog open plaatsen: {}".format(len(self.positions_df)))
-        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
-
     def phase_25(self):
         # merchants who have 'anywhere' false
         # and do not have a preferred stand
