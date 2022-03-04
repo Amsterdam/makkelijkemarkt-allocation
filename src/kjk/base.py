@@ -847,15 +847,21 @@ class BaseAllocator:
             # in KjK, see exception handling
             allocation_allowed = True  # unless the scrutenizer tells otherwise
             branches = []
+            m_id = self.market_id
+            m_date = self.market_date
             try:
                 branches = merchant_obj["voorkeur"]["branches"]
                 allocation_allowed = self.branches_scrutenizer.allocation_allowed(
                     branches
                 )
             except KeyError:
-                clog.warning(f"ondernemer {erk} heeft geen branche in zijn voorkeur.")
+                clog.error(
+                    f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
+                )
             except IndexError:
-                clog.warning(f"ondernemer {erk} heeft geen branche in zijn voorkeur.")
+                clog.error(
+                    f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
+                )
 
             merchant_dequeue_error = False
             stand_dequeue_error = False

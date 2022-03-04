@@ -8,6 +8,7 @@ from random import randint
 from kjk.allocation import Allocator
 from kjk.inputdata import RedisDataprovider
 from kjk.logging import clog
+from kjk.mail import KjKEmailclient
 
 SAVE_JOB_DATA = True
 
@@ -80,6 +81,13 @@ class JobDispatcher:
         log_result = json.dumps(clog.get_logs())
         self.r.set(f"LOGS_{job_id}", log_result)
         self.r.expire(f"LOGS_{job_id}", 10 * 60)
+
+        email_client = KjKEmailclient()
+        email_text = ""
+        for log_line in clog.get_logs():
+            if log_line["level"] in ("ERROR"):
+                email_text += log_line["message"] + "\n"
+        email_client.send_mail(email_text)
 
         clog.purge()
         stop = time.time()
