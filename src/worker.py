@@ -12,6 +12,9 @@ from kjk.mail import KjKEmailclient
 
 SAVE_JOB_DATA = True
 
+ALLOCATION_MODE_CONCEPT = "concept"
+ALLOCATION_MODE_SCHEDULED = "scheduled"
+
 
 class JobDispatcher:
     """
@@ -64,6 +67,7 @@ class JobDispatcher:
         job = json.loads(job_res)
         start = time.time()
         data = job["data"]
+        allocation_mode = data["mode"]
         if SAVE_JOB_DATA:
             f = open("job.json", "w")
             json.dump(data, f, indent=4)
@@ -82,12 +86,14 @@ class JobDispatcher:
         self.r.set(f"LOGS_{job_id}", log_result)
         self.r.expire(f"LOGS_{job_id}", 10 * 60)
 
-        email_client = KjKEmailclient()
-        email_text = ""
-        for log_line in clog.get_logs():
-            if log_line["level"] in ("ERROR"):
-                email_text += log_line["message"] + "\n"
-        email_client.send_mail(email_text)
+        if allocation_mode != ALLOCATION_MODE_CONCEPT:
+            print("Sending status email to marktbureau.")
+            email_client = KjKEmailclient()
+            email_text = ""
+            for log_line in clog.get_logs():
+                if log_line["level"] in ("ERROR"):
+                    email_text += log_line["message"] + "\n"
+            email_client.send_mail(email_text)
 
         clog.purge()
         stop = time.time()
