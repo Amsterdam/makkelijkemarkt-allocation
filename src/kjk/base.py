@@ -7,6 +7,7 @@ from kjk.utils import PreferredStandFinder
 from kjk.logging import clog, log
 from pandas.core.computation.ops import UndefinedVariableError
 from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
+from kjk.rejection_reasons import VPL_POSITION_NOT_AVAILABLE
 
 pd.options.mode.chained_assignment = "raise"
 
@@ -897,12 +898,6 @@ class BaseAllocator:
                 self.cluster_finder.set_stands_allocated(stands_to_alloc)
                 self.market_output.add_allocation(erk, stands_to_alloc, merchant_obj)
 
-    def vpl_movers_remaining(self):
-        df = self.merchants_df.query(
-            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
-        ).copy()
-        return len(df) > 0
-
     def _allocate_solls_for_query(
         self, query, print_df=False, check_branche_bak_evi=True
     ):
@@ -1017,4 +1012,34 @@ class BaseAllocator:
                 if len(stands) > 0:
                     self._allocate_stands_to_merchant(
                         stands[0], erk, dequeue_merchant=False
+                    )
+
+    def _allocate_vpl_for_query(self, query):
+        df = self.merchants_df.query(query)
+        if df is None:
+            return
+        for _, row in df.iterrows():
+            erk = row["erkenningsNummer"]
+            try:
+                stands = row["plaatsen"]
+                expand = row["wants_expand"]
+                merchant_branches = row["voorkeur.branches"]
+                evi = row["has_evi"] == "yes"
+                bak = row["has_bak"]
+                if expand:
+                    self._prepare_expansion(
+                        erk,
+                        stands,
+                        int(row["voorkeur.maximum"]),
+                        merchant_branches,
+                        bak,
+                        evi,
+                    )
+                self._allocate_stands_to_merchant(stands, erk)
+            except MarketStandDequeueError:
+                try:
+                    self._reject_merchant(erk, VPL_POSITION_NOT_AVAILABLE)
+                except MerchantDequeueError:
+                    clog.error(
+                        f"VPL plaatsen niet beschikbaar voor erkenningsNummer {erk}"
                     )
