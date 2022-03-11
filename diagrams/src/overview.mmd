@@ -10,26 +10,36 @@ graph TD
     fase_5[FASE 8<br>Indeling <b><i>BRANCHE</i></b> sollicitanten<br> op de A-lijst] -->
     fase_6[FASE 9<br>Indeling <b><i>BAK</i></b> sollicitanten op de A-lijst] -->
     fase_7[FASE 10<br>Indeling <b><i>EVI</i></b> sollicitanten op de A-lijst] -->
-    fase_8[FASE 11<br><b><i>Overige</i></b> sollicitanten op de A-lijst] -->
-    fase_9[FASE 12<br>Uitbreidings fase voor vasteplaathouders] --> 
-    fase_10[FASE 13<br>Uitbreiding <b><i>BRANCHE</i></b> sollicitanten A-lijst] -->
-    fase_11[FASE 14<br>Uitbreiding <b><i>BAK</i></b> sollicitanten A-lijst] -->
-    fase_12[FASE 15<br>Uitbreiding <b><i>EVI</i></b> sollicitanten A-lijst] -->
-    fase_13[FASE 16<br>Uitbreiding <b><i>overige</i></b> sollicitanten A-lijst] -->
+    fase_9[FASE 11<br>Uitbreidings fase voor vasteplaathouders] --> 
+    fase_10[FASE 12<br>Uitbreiding <b><i>BRANCHE</i></b> sollicitanten A-lijst] -->
+    fase_11[FASE 13<br>Uitbreiding <b><i>BAK</i></b> sollicitanten A-lijst] -->
+    fase_12[FASE 14<br>Uitbreiding <b><i>EVI</i></b> sollicitanten A-lijst] -->
+
     expansion_done{Zijn er nog meer uitbreidingen mogelijk?}
     expansion_done --YES--> plus_one
     expansion_done --NO--> fase_4b  
-    fase_4b[FASE 17<br>Indeling <b><i>BRANCHE</i></b> sollicitanten<br> op de B-lijst] -->
-    fase_5b[FASE 18<br>Indeling <b><i>BAK</i></b> sollicitanten op de B-lijst] -->
-    fase_6b[FASE 19<br>Indeling <b><i>EVI</i></b> sollicitanten op de B-lijst] -->
-    fase_8b[FASE 20<br><b><i>Overige</i></b> sollicitanten op de B-lijst] -->
-    fase_10b[FASE 21<br>Uitbreiding <b><i>BRANCHE</i></b> sollicitanten B-lijst] -->
-    fase_12b[FASE 22<br>Uitbreiding <b><i>BAK</i></b> sollicitanten B-lijst] -->
-    fase_13b[FASE 23<br>Uitbreiding <b><i>EVI</i></b> sollicitanten B-lijst] -->
-    fase_14b[FASE 24<br>Uitbreiding <b><i>overige</i></b> sollicitanten B-lijst] -->
+    fase_4b[FASE 15<br>Indeling <b><i>BRANCHE</i></b> sollicitanten<br> op de B-lijst] -->
+    fase_5b[FASE 16<br>Indeling <b><i>BAK</i></b> sollicitanten op de B-lijst] -->
+    fase_6b[FASE 17<br>Indeling <b><i>EVI</i></b> sollicitanten op de B-lijst] -->
+
+    fase_10b[FASE 18<br>Uitbreiding <b><i>BRANCHE</i></b> sollicitanten B-lijst] -->
+    fase_12b[FASE 19<br>Uitbreiding <b><i>BAK</i></b> sollicitanten B-lijst] -->
+    fase_13b[FASE 20<br>Uitbreiding <b><i>EVI</i></b> sollicitanten B-lijst] -->
+
     expansion_done2{Zijn er nog meer uitbreidingen mogelijk?}
     expansion_done2 --YES--> plus_oneb
-    expansion_done2 --NO--> fase_valid
+    expansion_done2 --NO--> fase_8
+    fase_8[FASE 21<br><b><i>Overige</i></b> sollicitanten op de A-lijst] -->
+    fase_13[FASE 22<br>Uitbreiding <b><i>overige</i></b> sollicitanten A-lijst] -->
+    expansion_done3{Zijn er nog meer uitbreidingen mogelijk?}
+    expansion_done3 --YES--> plus_onec
+    expansion_done3 --NO--> fase_8b
+    fase_8b[FASE 23<br><b><i>Overige</i></b> sollicitanten op de B-lijst] -->
+    fase_14b[FASE 24<br>Uitbreiding <b><i>overige</i></b> sollicitanten B-lijst] -->
+    expansion_done4{Zijn er nog meer uitbreidingen mogelijk?}
+    expansion_done4 --YES--> plus_oned
+    expansion_done4 --NO--> fase_valid
+
     fase_valid[FASE 25<br>Validatiefase <br>Controle <b><i>BRANCHE, BAK, EVI</i></b>] -->
     allocation_valid{Voldoet de indeling aan de regels/verordening?}
     allocation_valid --YES--> fase_16
@@ -38,3 +48,5 @@ graph TD
     x(Marktindeling opslaan in Kiesjekraam)
     plus_one("<b>toegewezen kramen + 1</b>") --> fase_9
     plus_oneb("<b>toegewezen kramen + 1</b>") --> fase_10b
+    plus_onec("<b>toegewezen kramen + 1</b>") --> fase_13
+    plus_oned("<b>toegewezen kramen + 1</b>") --> fase_14b
