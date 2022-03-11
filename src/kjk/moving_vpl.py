@@ -33,11 +33,13 @@ class MovingVPLSolver:
         df = df.copy()
         return len(df) > 0
 
-    def execute(self):
+    def execute(self, print_df=False):
 
         df = self.allocator.merchants_df.query(self.query)
         if df is None:
             return
+        if print_df:
+            print(df)
         df = df.copy()
         df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
 

@@ -1014,10 +1014,12 @@ class BaseAllocator:
                         stands[0], erk, dequeue_merchant=False
                     )
 
-    def _allocate_vpl_for_query(self, query):
+    def _allocate_vpl_for_query(self, query, print_df=False):
         df = self.merchants_df.query(query)
         if df is None:
             return
+        if print_df:
+            print(df)
         for _, row in df.iterrows():
             erk = row["erkenningsNummer"]
             try:

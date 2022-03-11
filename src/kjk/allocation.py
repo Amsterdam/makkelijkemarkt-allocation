@@ -104,7 +104,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         self._allocate_vpl_for_query(
-            "(status == 'exp' | status == 'expf') & has_stands == True"
+            "(status == 'exp' | status == 'expf') & has_stands == True", print_df=False
         )
 
     def phase_05(self):
