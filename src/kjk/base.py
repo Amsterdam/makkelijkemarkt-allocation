@@ -8,6 +8,7 @@ from kjk.logging import clog, log
 from pandas.core.computation.ops import UndefinedVariableError
 from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
 from kjk.rejection_reasons import VPL_POSITION_NOT_AVAILABLE
+from kjk.rejection_reasons import PREF_NOT_AVAILABLE
 
 pd.options.mode.chained_assignment = "raise"
 
@@ -901,7 +902,10 @@ class BaseAllocator:
     def _allocate_solls_for_query(
         self, query, print_df=False, check_branche_bak_evi=True
     ):
-        result_list = self.merchants_df.query(query)
+        if query == "all":
+            result_list = self.merchants_df.copy()
+        else:
+            result_list = self.merchants_df.query(query)
 
         if print_df:
             print(result_list)
@@ -940,9 +944,14 @@ class BaseAllocator:
             if len(minimal_possible) == 0:
                 # do not reject yet, this merchant should be able to compete
                 # for reclaimed stands in a later phase
-                self.rejection_reasons.add_rejection_reason_for_merchant(
-                    erk, MINIMUM_UNAVAILABLE
-                )
+                if not anywhere and len(pref) > 0:
+                    self.rejection_reasons.add_rejection_reason_for_merchant(
+                        erk, PREF_NOT_AVAILABLE
+                    )
+                else:
+                    self.rejection_reasons.add_rejection_reason_for_merchant(
+                        erk, MINIMUM_UNAVAILABLE
+                    )
                 continue
             elif row["status"] == "tvplz":
                 # this is the exception for tvplz merchants
@@ -979,7 +988,7 @@ class BaseAllocator:
                     bak,
                     evi,
                 )
-            if len(stds) > 1:
+            if len(stds) > 1 and query != "all":
                 # TODO: find the sweetspot inside this cluster
                 psf = PreferredStandFinder(stds, pref)
                 stds = psf.produce()

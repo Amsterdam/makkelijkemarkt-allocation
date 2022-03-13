@@ -222,23 +222,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
             mdf = self.back_up_merchant_queue.query(f"erkenningsNummer == '{r}'")
             self.merchants_df = pd.concat([self.merchants_df, mdf])
 
-        # fill in the reclaimed stands
-        # all rules remain the same
-        # until we don't have changes
-        # in the number allocated stands
-        # self.num_open = 999999
-        # fill_iteration = 0
-        # while not self.expansion_finished():
-        #    fill_iteration += 1
-        #    stands = len(self.positions_df)
-        #    clog.warning(
-        #        f"Bezig met vullen van de markt. open plaatsen {stands}. ITERATIE: {fill_iteration}"
-        #    )
-        #    self.phase_12()
-        #    self.phase_13()
-        #    self.phase_14()
-        #    self.phase_15()
-        #    self.phase_16()
+        # fill the reclaimed stands, sort by soll_nr first
+        self.merchants_df.sort_values(
+            by=["sollicitatieNummer"], inplace=True, ascending=True
+        )
+        self._allocate_solls_for_query("all")
 
         self.validate_double_allocation()
         self.validate_evi_allocations()

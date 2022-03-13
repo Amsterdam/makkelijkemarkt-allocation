@@ -26,7 +26,7 @@ class BugFixBadAbsenceDates(unittest.TestCase):
 
     def test_bug(self):
         num_afw = len(self.market_allocation["afwijzingen"])
-        self.assertEqual(num_afw, 1)
+        self.assertEqual(num_afw, 0)
 
 
 class BugFixStand122TestCase(unittest.TestCase):
@@ -50,7 +50,7 @@ class DapperBugTestCase_3(unittest.TestCase):
 
     def test_rejections(self):
         num_rejects = len(self.market_allocation["afwijzingen"])
-        self.assertEqual(7, num_rejects)
+        self.assertEqual(6, num_rejects)
 
     def test_bug_1(self):
         # soll 110 should get 46

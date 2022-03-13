@@ -78,11 +78,11 @@ class PreferredStandFinder:
     def produce(self):
         try:
             # try a preferred stand first
-            std = list(filter(lambda std: std in self.pref, self.cluster))
+            for std in self.cluster:
+                if std in self.pref:
+                    return [std]
             # no hit, return the first
-            if len(std) == 0:
-                std = self.cluster[:1]
-            return std
+            return self.cluster[:1]
         except Exception:
             # just in case of failure
             return self.cluster[:1]
