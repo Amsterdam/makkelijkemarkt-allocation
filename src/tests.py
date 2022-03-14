@@ -12,6 +12,7 @@ from testcases.soll import *
 from testcases.expansion import *
 from testcases.misc import *
 from testcases.dapper import *
+from testcases.avoid_pref_by_sollnr import *
 
 from testcases.bug_fixes import *
 

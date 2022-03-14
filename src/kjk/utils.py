@@ -465,7 +465,6 @@ class MarketStandClusterFinder:
 
         for mode in (
             self.MODE_AVOID_PREFS_AND_EXPANSION,
-            self.MODE_AVOID_EXPANSION,
             self.MODE_AVOID_PREFS,
             self.MODE_AVOID_NONE,
         ):
@@ -490,6 +489,7 @@ class MarketStandClusterFinder:
         erk=None,
         mode=1,
     ):
+        valid_options = []
         for i, _ in enumerate(self.flattened_list):
             option = self.flattened_list[i : i + size]
             valid = all(isinstance(x, str) and x != "STW" for x in option)
@@ -503,7 +503,13 @@ class MarketStandClusterFinder:
                         option, merchant_branche, bak_merchant, evi_merchant, erk=erk
                     )
                 if branche_valid_for_option and option_is_available:
-                    return option
+                    if mode != self.MODE_AVOID_NONE:
+                        return option
+                    else:
+                        valid_options.append(option)
+        best_option = self.filter_preferred(valid_options, self.weighted_prefs)
+        if len(best_option) > 0:
+            return best_option
 
 
 class AllocationDebugger:
