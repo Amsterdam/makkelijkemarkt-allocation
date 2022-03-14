@@ -96,6 +96,11 @@ class MarketStandClusterFinder:
     adjacent, in another market row or have an obstakel in between.
     """
 
+    MODE_AVOID_PREFS_AND_EXPANSION = 1
+    MODE_AVOID_EXPANSION = 2
+    MODE_AVOID_PREFS = 3
+    MODE_AVOIS_NONE = 4
+
     def __init__(
         self,
         data,
@@ -352,17 +357,17 @@ class MarketStandClusterFinder:
     def option_is_available(self, option, mode=None):
         if "STW" in option:
             return False
-        if mode == 1:
+        if mode == self.MODE_AVOID_PREFS_AND_EXPANSION:
             stands_not_available = (
                 self.global_prefs
                 + self.stands_reserved_for_expansion
                 + self.stands_allocated
             )
-        elif mode == 2:
+        elif mode == self.MODE_AVOID_EXPANSION:
             stands_not_available = (
                 self.stands_reserved_for_expansion + self.stands_allocated
             )
-        elif mode == 3:
+        elif mode == self.MODE_AVOID_PREFS:
             stands_not_available = self.global_prefs + self.stands_allocated
         else:
             stands_not_available = self.stands_allocated
@@ -456,7 +461,12 @@ class MarketStandClusterFinder:
             if len(best_option) > 0 or anywhere == False:
                 return best_option
 
-        for mode in (1, 2, 3, 4):
+        for mode in (
+            self.MODE_AVOID_PREFS_AND_EXPANSION,
+            self.MODE_AVOID_EXPANSION,
+            self.MODE_AVOID_PREFS,
+            self.MODE_AVOIS_NONE,
+        ):
             option = self.find_valid_cluster_for_mode(
                 size,
                 merchant_branche=merchant_branche,
