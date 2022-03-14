@@ -115,7 +115,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         )
 
     def tvplz(self):
+        self.cluster_finder.set_check_branche_bak_evi(True)
         self._allocate_solls_for_query("status == 'tvplz'", print_df=False)
+        self.cluster_finder.set_check_branche_bak_evi(False)
 
     def exp_no_stands(self):
         self._allocate_solls_for_query(
@@ -146,12 +148,14 @@ class Allocator(BaseAllocator, ValidatorMixin):
         )
 
     def expand_vpl(self):
+        self.cluster_finder.set_check_branche_bak_evi(True)
         if self.expanders_df is None:
             return
         df = self.expanders_df.query(
             "status == 'vpl' | status == 'tvpl' | status == 'tvplz'"
         )
         self._expand_for_merchants(df)
+        self.cluster_finder.set_check_branche_bak_evi(False)
 
     def expand_branche_soll(self, list_mode=MODE_ALIST):
         if self.expanders_df is None:

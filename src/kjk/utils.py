@@ -78,8 +78,8 @@ class PreferredStandFinder:
     def produce(self):
         try:
             # try a preferred stand first
-            for std in self.cluster:
-                if std in self.pref:
+            for std in self.pref:
+                if std in self.cluster:
                     return [std]
             # no hit, return the first
             return self.cluster[:1]
@@ -106,7 +106,7 @@ class MarketStandClusterFinder:
         branches,
         global_prefs=[],
     ):
-        self.prevent_evi = False
+        self.should_check_branche_bak_evi_space = False
         self.global_prefs = global_prefs
         self.branche_required_dict = {}
         for b in branches:
@@ -149,8 +149,8 @@ class MarketStandClusterFinder:
     def set_market_info_delegate(self, delegate):
         self.market_info_delegate = delegate
 
-    def set_prevent_evi(self, prevent_evi):
-        self.prevent_evi = prevent_evi
+    def set_check_branche_bak_evi(self, should_check=False):
+        self.should_check_branche_bak_evi_space = should_check
 
     def set_stands_allocated(self, allocated_stands):
         self.stands_allocated += allocated_stands
@@ -223,7 +223,6 @@ class MarketStandClusterFinder:
         merchant_branches,
         bak_merchant,
         evi_merchant,
-        prevent_evi=False,
         erk=None,
     ):
         AV = namedtuple(
@@ -238,11 +237,10 @@ class MarketStandClusterFinder:
                 "merchant_has_bak",
                 "branches_match",
                 "stand_has_evi",
-                "prevent_evi",
                 "stand_has_bak",
                 "market_has_unused_branche_space",
             ],
-            defaults=(None,) * 12,
+            defaults=(None,) * 11,
         )
 
         illegal_combos = [
@@ -320,34 +318,35 @@ class MarketStandClusterFinder:
             if evi_vars in illegal_combos:
                 return False
 
-            evi_space = self.market_info_delegate.market_has_unused_evi_space()
+            if self.should_check_branche_bak_evi_space:
+                evi_space = self.market_info_delegate.market_has_unused_evi_space()
 
-            evi_space_vars = AV(
-                market_has_unused_evi_space=evi_space,
-                merchant_has_evi=evi_merchant,
-                stand_has_evi=std_has_evi,
-            )
-            if evi_space_vars in illegal_combos:
-                return False
+                evi_space_vars = AV(
+                    market_has_unused_evi_space=evi_space,
+                    merchant_has_evi=evi_merchant,
+                    stand_has_evi=std_has_evi,
+                )
+                if evi_space_vars in illegal_combos:
+                    return False
 
-            bak_space = self.market_info_delegate.market_has_unused_bak_space()
-            bak_space_vars = AV(
-                market_has_unused_bak_space=bak_space,
-                merchant_has_bak=bak_merchant,
-                stand_has_bak=std_has_bak,
-            )
-            if bak_space_vars in illegal_combos:
-                return False
+                bak_space = self.market_info_delegate.market_has_unused_bak_space()
+                bak_space_vars = AV(
+                    market_has_unused_bak_space=bak_space,
+                    merchant_has_bak=bak_merchant,
+                    stand_has_bak=std_has_bak,
+                )
+                if bak_space_vars in illegal_combos:
+                    return False
 
-            branches_moving_vpl = AV(
-                market_has_unused_branche_space=self.market_info_delegate.market_has_unused_branche_space(
-                    branches
-                ),
-                stand_has_required_branche=stand_required_br,
-                branches_match=merchant_branches[0] in branches,
-            )
-            if branches_moving_vpl in illegal_combos:
-                return False
+                branches_moving_vpl = AV(
+                    market_has_unused_branche_space=self.market_info_delegate.market_has_unused_branche_space(
+                        branches
+                    ),
+                    stand_has_required_branche=stand_required_br,
+                    branches_match=merchant_branches[0] in branches,
+                )
+                if branches_moving_vpl in illegal_combos:
+                    return False
         return True
 
     def option_is_available(self, option, mode=None):

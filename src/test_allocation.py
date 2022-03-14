@@ -61,7 +61,7 @@ class PreferredStandFinderTestCase(unittest.TestCase):
         cluster = ["1", "2", "3"]
         sut = PreferredStandFinder(cluster, pref)
         stds = sut.produce()
-        self.assertListEqual(stds, ["2"])
+        self.assertListEqual(stds, ["3"])
 
 
 class AllocationDebuggerTestCase(unittest.TestCase):

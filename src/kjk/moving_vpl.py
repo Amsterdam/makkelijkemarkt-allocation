@@ -34,6 +34,7 @@ class MovingVPLSolver:
         return len(df) > 0
 
     def execute(self, print_df=False):
+        self.allocator.cluster_finder.set_check_branche_bak_evi(True)
 
         df = self.allocator.merchants_df.query(self.query)
         if df is None:
@@ -270,3 +271,4 @@ class MovingVPLSolver:
                         )
 
             self.fixed_set = fixed
+        self.allocator.cluster_finder.set_check_branche_bak_evi(False)
