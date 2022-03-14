@@ -99,7 +99,7 @@ class MarketStandClusterFinder:
     MODE_AVOID_PREFS_AND_EXPANSION = 1
     MODE_AVOID_EXPANSION = 2
     MODE_AVOID_PREFS = 3
-    MODE_AVOIS_NONE = 4
+    MODE_AVOID_NONE = 4
 
     def __init__(
         self,
@@ -109,10 +109,10 @@ class MarketStandClusterFinder:
         evi_dict,
         bak_dict,
         branches,
-        global_prefs=[],
+        weighted_prefs=[],
     ):
         self.should_check_branche_bak_evi_space = False
-        self.global_prefs = global_prefs
+        self.weighted_prefs = weighted_prefs
         self.branche_required_dict = {}
         for b in branches:
             try:
@@ -359,7 +359,7 @@ class MarketStandClusterFinder:
             return False
         if mode == self.MODE_AVOID_PREFS_AND_EXPANSION:
             stands_not_available = (
-                self.global_prefs
+                self.weighted_prefs
                 + self.stands_reserved_for_expansion
                 + self.stands_allocated
             )
@@ -368,7 +368,7 @@ class MarketStandClusterFinder:
                 self.stands_reserved_for_expansion + self.stands_allocated
             )
         elif mode == self.MODE_AVOID_PREFS:
-            stands_not_available = self.global_prefs + self.stands_allocated
+            stands_not_available = self.weighted_prefs + self.stands_allocated
         else:
             stands_not_available = self.stands_allocated
         return not any(elem in option for elem in stands_not_available)
@@ -444,7 +444,9 @@ class MarketStandClusterFinder:
                 )
                 if valid:
                     branche_valid_for_option = True
-                    option_is_available = self.option_is_available(option, mode=4)
+                    option_is_available = self.option_is_available(
+                        option, mode=self.MODE_AVOID_NONE
+                    )
                     if not option_is_available:
                         continue
                     if merchant_branche and check_branche_bak_evi:
@@ -465,7 +467,7 @@ class MarketStandClusterFinder:
             self.MODE_AVOID_PREFS_AND_EXPANSION,
             self.MODE_AVOID_EXPANSION,
             self.MODE_AVOID_PREFS,
-            self.MODE_AVOIS_NONE,
+            self.MODE_AVOID_NONE,
         ):
             option = self.find_valid_cluster_for_mode(
                 size,

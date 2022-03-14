@@ -209,8 +209,8 @@ class BaseAllocator:
             subset="erkenningsNummer", keep="first", inplace=True
         )
 
-        # pref stand ids of all merchants
-        self.global_prefs = []
+        # prefs of all soll-merchants sorted by soll_nr and priority
+        self.soll_nr_weighted_prefs = []
 
         # create a dataframe with merchants attending the market
         # and create a positions dataframe
@@ -235,6 +235,9 @@ class BaseAllocator:
         baks = self.positions_df["branches"].to_list()
         stand_bak_dict = dict(zip(plaats_ids, baks))
 
+        # created soll_nr weighted prefs
+        self.create_sollnr_weighted_prefs()
+
         self.cluster_finder = MarketStandClusterFinder(
             dp.get_market_blocks(),
             dp.get_obstacles(),
@@ -242,7 +245,7 @@ class BaseAllocator:
             stand_evi_dict,
             stand_bak_dict,
             self.branches,
-            global_prefs=self.global_prefs,
+            weighted_prefs=self.soll_nr_weighted_prefs,
         )
 
         self.cluster_finder.set_market_info_delegate(self)
@@ -594,19 +597,44 @@ class BaseAllocator:
         hasevi = self.merchants_df["voorkeur.verkoopinrichting"].apply(has_evi)
         self.merchants_df["has_evi"] = hasevi
 
+    def create_sollnr_weighted_prefs(self):
+        """
+        Create a list of stand numbers sorted on pref-prio and soll nr.
+        So that the stand with the lowest prio of the merchant with the highest
+        soll nr will be given away first (first elem in the list). The stand with the highest prio of the merchant with the
+        lowest soll nr will be given away last. (last elem in the list)
+        """
+        p = {}
+
+        def weighted_prefs(merch):
+            soll_nr = merch["sollicitatieNummer"]
+            pref = merch["pref"]
+            erk = merch["erkenningsNummer"]
+            if len(pref) > 0:
+                p[soll_nr] = self.get_prefs_for_merchant(erk)
+
+        self.merchants_df[["erkenningsNummer", "sollicitatieNummer", "pref"]].apply(
+            weighted_prefs, axis=1
+        )
+        _prefs = []
+        for m in sorted(p.items()):
+            for std in m[1]:
+                if std not in _prefs:
+                    _prefs.append(std)
+        _prefs.reverse()
+        self.soll_nr_weighted_prefs = _prefs
+
     def add_prefs_for_merchant(self):
         """add position preferences to the merchant dataframe"""
 
         def prefs(x):
             try:
                 merchant_prefs = self.get_prefs_for_merchant(x)
-                self.global_prefs += merchant_prefs
                 return merchant_prefs
             except KeyError:
                 return []
 
         self.merchants_df["pref"] = self.merchants_df["erkenningsNummer"].apply(prefs)
-        self.global_prefs = list(set(self.global_prefs))
 
         def will_move(x):
             try:
