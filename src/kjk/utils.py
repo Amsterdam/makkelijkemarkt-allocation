@@ -389,6 +389,7 @@ class MarketStandClusterFinder:
         bak_merchant=False,
         evi_merchant=False,
         ignore_check_available=None,
+        erk=None,
     ):
         """
         check all adjacent clusters of the requested size,
@@ -407,7 +408,7 @@ class MarketStandClusterFinder:
                 branche_valid_for_option = True
                 if merchant_branche:
                     branche_valid_for_option = self.option_is_valid_branche(
-                        option, merchant_branche, bak_merchant, evi_merchant
+                        option, merchant_branche, bak_merchant, evi_merchant, erk=erk
                     )
                 if ignore_check_available:
                     option = list(set(option) - set(ignore_check_available))
