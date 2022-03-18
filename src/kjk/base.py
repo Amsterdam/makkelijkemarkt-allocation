@@ -312,10 +312,10 @@ class BaseAllocator:
                 return False
 
             try:
-                has_branch = self.merchants_df["voorkeur.branches"].apply(has_branch)
-                demand_for_branche = self.merchants_df[has_branch][
-                    "voorkeur.maximum"
-                ].sum()
+                if len(self.merchants_df) < 1:
+                    return True
+                has_br = self.merchants_df["voorkeur.branches"].apply(has_branch)
+                demand_for_branche = self.merchants_df[has_br]["voorkeur.maximum"].sum()
                 stands = self.get_stand_for_branche(branche)
                 stands_available_for_branche = len(stands)
                 if stands_available_for_branche <= demand_for_branche:
@@ -1027,6 +1027,7 @@ class BaseAllocator:
             erk = row["erkenningsNummer"]
             stands = row["plaatsen"]
             merchant_branches = row["voorkeur.branches"]
+            bak = row["has_bak"]
             evi = row["has_evi"] == "yes"
             maxi = row["voorkeur.maximum"]
             status = row["status"]
@@ -1043,8 +1044,10 @@ class BaseAllocator:
                     assigned_stands,
                     total_size=len(assigned_stands) + 1,
                     merchant_branche=merchant_branches,
+                    bak_merchant=bak,
                     evi_merchant=evi,
                     ignore_check_available=assigned_stands,
+                    erk=erk,
                 )
                 if len(stands) > 0:
                     self._allocate_stands_to_merchant(
