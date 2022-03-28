@@ -262,29 +262,9 @@ class BaseAllocator:
 
         # export xls for debugging
         if XLS_EXPORT:
-
             # save to text for manual debugging
             self.merchants_df.to_markdown("../../merchants.md")
-
-            cols = [
-                "description",
-                "plaatsen",
-                "sollicitatieNummer",
-                "status",
-                "voorkeur.maximum",
-                "voorkeur.minimum",
-                "voorkeur.anywhere",
-                "voorkeur.brancheId",
-                "voorkeur.inrichting",
-                "attending",
-                "pref",
-                "will_move",
-                "alist",
-                "has_evi",
-                "wants_expand",
-                "branche_required",
-            ]
-            self.merchants_df[cols].to_excel("../../ondernemers.xls")
+            self.merchants_df.to_excel("../../ondernemers.xls")
             self.positions_df.to_excel("../../kramen.xls")
             self.branches_df.to_excel("../../branches.xls")
 
@@ -879,19 +859,21 @@ class BaseAllocator:
             branches = []
             m_id = self.market_id
             m_date = self.market_date
-            try:
-                branches = merchant_obj["voorkeur"]["branches"]
-                allocation_allowed = self.branches_scrutenizer.allocation_allowed(
-                    branches
-                )
-            except KeyError:
-                clog.error(
-                    f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
-                )
-            except IndexError:
-                clog.error(
-                    f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
-                )
+            # vpl always gets the stand, even if max branche is exeeded
+            if "vpl" not in merchant_obj["status"]:
+                try:
+                    branches = merchant_obj["voorkeur"]["branches"]
+                    allocation_allowed = self.branches_scrutenizer.allocation_allowed(
+                        branches
+                    )
+                except KeyError:
+                    clog.error(
+                        f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
+                    )
+                except IndexError:
+                    clog.error(
+                        f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
+                    )
 
             merchant_dequeue_error = False
             stand_dequeue_error = False
