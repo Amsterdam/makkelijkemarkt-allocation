@@ -859,7 +859,7 @@ class BaseAllocator:
             branches = []
             m_id = self.market_id
             m_date = self.market_date
-            # vpl always gets the stand, even if max bracnhe is exeeded
+            # vpl always gets the stand, even if max branche is exeeded
             if "vpl" not in merchant_obj["status"]:
                 try:
                     branches = merchant_obj["voorkeur"]["branches"]
