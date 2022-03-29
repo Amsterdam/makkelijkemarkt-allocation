@@ -848,6 +848,12 @@ class BaseAllocator:
         prefs = self.get_prefs_for_merchant(erk)
         return all([std in prefs for std in stands_to_alloc])
 
+    def _allocation_allowed(self, merchant_obj, branches):
+        # vpl always gets the stand, even if max branche is exeeded
+        if "vpl" in merchant_obj["status"]:
+            return True
+        return self.branches_scrutenizer.allocation_allowed(branches)
+
     def _allocate_stands_to_merchant(self, stands_to_alloc, erk, dequeue_merchant=True):
         if len(stands_to_alloc) > 0:
             merchant_obj = self.merchant_object_by_id(erk)
@@ -859,25 +865,21 @@ class BaseAllocator:
             branches = []
             m_id = self.market_id
             m_date = self.market_date
-            # vpl always gets the stand, even if max branche is exeeded
-            if "vpl" not in merchant_obj["status"]:
-                try:
-                    branches = merchant_obj["voorkeur"]["branches"]
-                    allocation_allowed = self.branches_scrutenizer.allocation_allowed(
-                        branches
-                    )
-                except KeyError:
-                    clog.error(
-                        f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
-                    )
-                except IndexError:
-                    clog.error(
-                        f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
-                    )
 
             merchant_dequeue_error = False
             stand_dequeue_error = False
             allocation_wanted = self._allocation_wanted(erk, stands_to_alloc)
+            try:
+                branches = merchant_obj["voorkeur"]["branches"]
+            except KeyError:
+                clog.error(
+                    f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
+                )
+            except IndexError:
+                clog.error(
+                    f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
+                )
+            allocation_allowed = self._allocation_allowed(merchant_obj, branches)
 
             if allocation_allowed and allocation_wanted:
                 # some times we need to know the phase in wich a merchant is allocated
@@ -905,7 +907,7 @@ class BaseAllocator:
                         "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
                     )
 
-                self.branches_scrutenizer.add_allocation(branches)
+                self.branches_scrutenizer.add_allocation(branches, stands_to_alloc)
                 self.cluster_finder.set_stands_allocated(stands_to_alloc)
                 self.market_output.add_allocation(erk, stands_to_alloc, merchant_obj)
 

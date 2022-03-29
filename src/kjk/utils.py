@@ -20,10 +20,10 @@ class BranchesScrutenizer:
             except KeyError:
                 pass  # no max for branche
 
-    def add_allocation(self, branches):
+    def add_allocation(self, branches, stands_to_alloc):
         for branche in branches:
             try:
-                self.counter_dict[branche] += 1
+                self.counter_dict[branche] += len(stands_to_alloc)
             except KeyError:
                 pass  # no max for branche
 
