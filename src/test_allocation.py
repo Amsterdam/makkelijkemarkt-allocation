@@ -172,25 +172,25 @@ class BrancheScrutenizerTestCase(unittest.TestCase):
         self.sut = BranchesScrutenizer(dp.get_branches())
 
     def test_max_branches(self):
-        self.sut.add_allocation(["101-agf"])
+        self.sut.add_allocation(["101-agf"], [1])
         allowed = self.sut.allocation_allowed(["101-agf"])
         self.assertTrue(allowed)
 
-        self.sut.add_allocation(["104-hummus-kruiden-olijven"])
-        self.sut.add_allocation(["104-hummus-kruiden-olijven"])
+        self.sut.add_allocation(["104-hummus-kruiden-olijven"], [1])
+        self.sut.add_allocation(["104-hummus-kruiden-olijven"], [1])
 
         allowed = self.sut.allocation_allowed(["104-hummus-kruiden-olijven"])
         self.assertFalse(allowed)
 
     def test_max_bak(self):
         for alloc in range(35):
-            self.sut.add_allocation(["404-broodje-bapao", "bak"])
+            self.sut.add_allocation(["404-broodje-bapao", "bak"], [1])
 
         allowed = self.sut.allocation_allowed(["404-broodje-bapao", "bak"])
         self.assertTrue(allowed)
 
         for alloc in range(2):
-            self.sut.add_allocation(["404-broodje-knakworst", "bak"])
+            self.sut.add_allocation(["404-broodje-knakworst", "bak"], [1])
 
         allowed = self.sut.allocation_allowed(["404-broodje-knakworst", "bak"])
         self.assertFalse(allowed)
