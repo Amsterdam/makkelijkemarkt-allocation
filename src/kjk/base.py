@@ -372,7 +372,7 @@ class BaseAllocator:
 
     def create_expanders_set(self):
         def wants_to_expand(x):
-            if x["status"] in ("vpl", "tvpl", "exp", "expf"):
+            if x["status"] in ("vpl", "tvpl", "exp", "expf", "eb"):
                 try:
                     return int(x["voorkeur.maximum"]) > len(x["plaatsen"])
                 except KeyError:
@@ -394,7 +394,7 @@ class BaseAllocator:
 
     def create_reducers_set(self):
         def wants_to_reduce(x):
-            if x["status"] in ("vpl", "tvpl", "exp", "expf"):
+            if x["status"] in ("vpl", "tvpl", "exp", "expf", "eb"):
                 try:
                     return int(x["voorkeur.maximum"]) < len(x["plaatsen"])
                 except KeyError:

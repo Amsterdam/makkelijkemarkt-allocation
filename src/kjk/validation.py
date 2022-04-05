@@ -52,7 +52,7 @@ class ValidatorMixin:
                 _max = tw["ondernemer"]["voorkeur"]["maximum"]
                 _min = tw["ondernemer"]["voorkeur"]["minimum"]
                 _num = len(tw["plaatsen"])
-                if status in ("vpl", "tvpl", "exp", "expf"):
+                if status in ("vpl", "tvpl", "exp", "expf", "eb"):
                     len_fixed = len(tw["ondernemer"]["plaatsen"])
                 if status == "soll":
                     len_fixed = 1
@@ -68,7 +68,7 @@ class ValidatorMixin:
                 if not _min:
                     _min = 1.0
                 # exp and expf can not have minimum
-                if _min > _num and status not in ("exp", "expf"):
+                if _min > _num and status not in ("exp", "expf", "eb"):
                     status_ok = False
                     errors.append(
                         (erk, status, f"aantal kramen {_num} kleiner dan min {_min}")
@@ -152,6 +152,7 @@ class ValidatorMixin:
                     "vpl",
                     "vplz",
                     "exp",
+                    "eb",
                 ):
                     for pl in tw["plaatsen"]:
                         if pl not in self.evi_ids:
