@@ -88,6 +88,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self._allocate_vpl_for_query(
             "(status == 'exp' | status == 'expf') & has_stands == True", print_df=False
         )
+        self._allocate_vpl_for_query(
+            "(status == 'eb') & has_stands == True", print_df=False
+        )
 
     def vpl_moving(self):
         self.set_allocation_phase("Phase 5")
@@ -281,7 +284,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self._phase_msg(3, "ondenemers (tvpl) die niet willen verplaatsen:")
         self.tvpl_not_moving()
 
-        self._phase_msg(4, "ondenemers (exp and expf) die niet mogen verplaatsen:")
+        self._phase_msg(4, "ondenemers (exp, expf and eb) die niet mogen verplaatsen:")
         self.exp_not_moving()
 
         self._phase_msg(5, "ondenemers (vpl) die WEL willen verplaatsen.")
