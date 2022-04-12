@@ -44,17 +44,16 @@
         {
             "plaatsId": "2",
             "branches": [
-                "bak",
                 "201-broodjes-belegd"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "4",
             "branches": [
-                "bak",
                 "201-broodjes-belegd"
             ],
             "verkoopinrichting": [
@@ -62,12 +61,12 @@
             ],
             "properties": [
                 "boom"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "7",
             "branches": [
-                "bak",
                 "103-brood-banket"
             ],
             "verkoopinrichting": [
@@ -75,7 +74,8 @@
             ],
             "properties": [
                 "boom"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "8",
@@ -86,12 +86,12 @@
         {
             "plaatsId": "9",
             "branches": [
-                "bak",
                 "103-brood-banket"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "10"
@@ -249,12 +249,12 @@
         {
             "plaatsId": "53",
             "branches": [
-                "bak",
                 "205-loempias"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "54",
@@ -376,12 +376,12 @@
         {
             "plaatsId": "85",
             "branches": [
-                "bak",
                 "207-grill-frituur"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "86"
@@ -389,12 +389,12 @@
         {
             "plaatsId": "87",
             "branches": [
-                "bak",
                 "207-grill-frituur"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "88"
@@ -558,17 +558,16 @@
         {
             "plaatsId": "130",
             "branches": [
-                "bak",
                 "105-noten-zuidvruchten"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "132",
             "branches": [
-                "bak",
                 "105-noten-zuidvruchten"
             ],
             "verkoopinrichting": [
@@ -576,7 +575,8 @@
             ],
             "properties": [
                 "boom"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "133",
@@ -686,7 +686,6 @@
         {
             "plaatsId": "158",
             "branches": [
-                "bak",
                 "207-grill-frituur"
             ],
             "verkoopinrichting": [
@@ -694,7 +693,8 @@
             ],
             "properties": [
                 "electra"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "159",
@@ -738,9 +738,9 @@
         {
             "plaatsId": "171",
             "branches": [
-                "bak",
                 "108-vleeswaren"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "178"
@@ -754,12 +754,12 @@
         {
             "plaatsId": "182",
             "branches": [
-                "bak",
                 "107-vis-nat"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "183",
@@ -773,12 +773,12 @@
         {
             "plaatsId": "184",
             "branches": [
-                "bak",
                 "107-vis-nat"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "185",
@@ -789,32 +789,32 @@
         {
             "plaatsId": "186",
             "branches": [
-                "bak",
                 "107-vis-nat"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "188",
             "branches": [
-                "bak",
                 "107-vis-nat"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "189",
             "branches": [
-                "bak",
                 "110-poelier"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "190"
@@ -822,12 +822,12 @@
         {
             "plaatsId": "191",
             "branches": [
-                "bak",
                 "110-poelier"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "192",
@@ -838,7 +838,6 @@
         {
             "plaatsId": "193",
             "branches": [
-                "bak",
                 "110-poelier"
             ],
             "verkoopinrichting": [
@@ -846,7 +845,8 @@
             ],
             "properties": [
                 "electra"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "194"
@@ -968,22 +968,22 @@
         {
             "plaatsId": "219",
             "branches": [
-                "bak",
                 "103-brood-banket"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "221",
             "branches": [
-                "bak",
                 "103-brood-banket"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "222",
@@ -1051,9 +1051,9 @@
         {
             "plaatsId": "237",
             "branches": [
-                "bak",
                 "108-vleeswaren"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "238"
@@ -12315,12 +12315,12 @@
                 "createdAt": "2020-11-17T07:50:24.545Z",
                 "updatedAt": "2020-11-17T07:50:24.545Z",
                 "branches": [
-                    "209-vis-gebakken",
-                    "bak"
+                    "209-vis-gebakken"
                 ],
                 "verkoopinrichting": [
                     "eigen-materieel"
-                ]
+                ],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 31,
             "status": "soll"
@@ -13186,12 +13186,12 @@
                 "createdAt": "2020-11-17T07:53:46.772Z",
                 "updatedAt": "2020-11-17T07:53:46.772Z",
                 "branches": [
-                    "103-brood-banket",
-                    "bak"
+                    "103-brood-banket"
                 ],
                 "verkoopinrichting": [
                     "eigen-materieel"
-                ]
+                ],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 78,
             "status": "soll"
@@ -14079,12 +14079,12 @@
                 "createdAt": "2020-11-17T07:57:56.364Z",
                 "updatedAt": "2020-11-17T07:57:56.364Z",
                 "branches": [
-                    "107-vis-nat",
-                    "bak"
+                    "107-vis-nat"
                 ],
                 "verkoopinrichting": [
                     "eigen-materieel"
-                ]
+                ],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 127,
             "status": "vpl"
@@ -14213,10 +14213,10 @@
                 "createdAt": "2020-11-17T07:24:04.859Z",
                 "updatedAt": "2020-11-17T08:09:30.768Z",
                 "branches": [
-                    "201-broodjes-belegd",
-                    "bak"
+                    "201-broodjes-belegd"
                 ],
-                "verkoopinrichting": []
+                "verkoopinrichting": [],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 133,
             "status": "vpl"
@@ -14657,12 +14657,12 @@
                 "createdAt": "2020-11-17T08:01:47.742Z",
                 "updatedAt": "2020-11-17T08:01:47.742Z",
                 "branches": [
-                    "110-poelier",
-                    "bak"
+                    "110-poelier"
                 ],
                 "verkoopinrichting": [
                     "eigen-materieel"
-                ]
+                ],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 159,
             "status": "vpl"
@@ -16104,12 +16104,12 @@
                 "createdAt": "2020-11-17T07:55:05.529Z",
                 "updatedAt": "2020-11-17T07:55:05.529Z",
                 "branches": [
-                    "206-oudhollands-gebak",
-                    "bak"
+                    "206-oudhollands-gebak"
                 ],
                 "verkoopinrichting": [
                     "eigen-materieel"
-                ]
+                ],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 250,
             "status": "soll"
@@ -16137,12 +16137,12 @@
                 "createdAt": "2020-11-17T07:41:16.954Z",
                 "updatedAt": "2020-11-17T07:55:56.246Z",
                 "branches": [
-                    "105-noten-zuidvruchten",
-                    "bak"
+                    "105-noten-zuidvruchten"
                 ],
                 "verkoopinrichting": [
                     "eigen-materieel"
-                ]
+                ],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 251,
             "status": "vpl"
@@ -16553,10 +16553,10 @@
                 "createdAt": "2020-11-16T08:22:22.418Z",
                 "updatedAt": "2020-11-16T08:22:54.817Z",
                 "branches": [
-                    "211-delicatessen-hapjes",
-                    "bak"
+                    "211-delicatessen-hapjes"
                 ],
-                "verkoopinrichting": []
+                "verkoopinrichting": [],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 273,
             "status": "soll"
@@ -16680,12 +16680,12 @@
                 "createdAt": "2020-11-07T19:59:45.012Z",
                 "updatedAt": "2020-11-08T19:06:07.906Z",
                 "branches": [
-                    "205-loempias",
-                    "bak"
+                    "205-loempias"
                 ],
                 "verkoopinrichting": [
                     "eigen-materieel"
-                ]
+                ],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 279,
             "status": "soll"
@@ -17053,10 +17053,10 @@
                 "createdAt": "2020-11-17T07:59:25.621Z",
                 "updatedAt": "2020-11-17T07:59:25.621Z",
                 "branches": [
-                    "108-vleeswaren",
-                    "bak"
+                    "108-vleeswaren"
                 ],
-                "verkoopinrichting": []
+                "verkoopinrichting": [],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 301,
             "status": "soll"
@@ -17308,10 +17308,10 @@
                 "createdAt": "2020-11-17T08:03:45.566Z",
                 "updatedAt": "2020-11-17T08:03:45.566Z",
                 "branches": [
-                    "103-brood-banket",
-                    "bak"
+                    "103-brood-banket"
                 ],
-                "verkoopinrichting": []
+                "verkoopinrichting": [],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 320,
             "status": "vpl"
@@ -18039,12 +18039,12 @@
                 "createdAt": "2020-11-17T07:36:09.812Z",
                 "updatedAt": "2020-11-17T07:50:49.355Z",
                 "branches": [
-                    "207-grill-frituur",
-                    "bak"
+                    "207-grill-frituur"
                 ],
                 "verkoopinrichting": [
                     "eigen-materieel"
-                ]
+                ],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 370,
             "status": "vpl"
@@ -18560,12 +18560,12 @@
                 "createdAt": "2020-11-17T07:48:33.134Z",
                 "updatedAt": "2020-11-17T07:48:33.134Z",
                 "branches": [
-                    "207-grill-frituur",
-                    "bak"
+                    "207-grill-frituur"
                 ],
                 "verkoopinrichting": [
                     "eigen-materieel"
-                ]
+                ],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 413,
             "status": "vpl"
@@ -18744,12 +18744,12 @@
                 "createdAt": "2020-11-17T08:13:48.613Z",
                 "updatedAt": "2020-11-17T08:13:48.613Z",
                 "branches": [
-                    "110-poelier",
-                    "bak"
+                    "110-poelier"
                 ],
                 "verkoopinrichting": [
                     "eigen-materieel"
-                ]
+                ],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 425,
             "status": "soll"

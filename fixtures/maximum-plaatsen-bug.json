@@ -43,13 +43,12 @@
     "marktplaatsen": [
         {
             "plaatsId": "1",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "2",
@@ -73,15 +72,14 @@
         },
         {
             "plaatsId": "5",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
             "properties": [
                 "boom"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "6",
@@ -93,25 +91,23 @@
         },
         {
             "plaatsId": "7",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "8",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
             "properties": [
                 "boom"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "9",
@@ -141,15 +137,14 @@
         },
         {
             "plaatsId": "13",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
             "properties": [
                 "boom"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "14",
@@ -235,60 +230,55 @@
         },
         {
             "plaatsId": "26",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "27",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "28",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
             "properties": [
                 "boom"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "29",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
             "properties": [
                 "water"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "30",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
             "properties": [
                 "electra",
                 "boom"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "31",
@@ -307,13 +297,12 @@
         },
         {
             "plaatsId": "33",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "34",
@@ -383,13 +372,12 @@
         },
         {
             "plaatsId": "44",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "45",
@@ -2080,10 +2068,10 @@
                 "createdAt": "2021-10-07T11:23:43.302Z",
                 "updatedAt": "2021-10-07T11:30:53.757Z",
                 "branches": [
-                    "102-bio-health-fairtrade",
-                    "bak"
+                    "102-bio-health-fairtrade"
                 ],
-                "verkoopinrichting": []
+                "verkoopinrichting": [],
+                "bakType": "bak"
             },
             "sollicitatieNummer": 1733,
             "status": "soll"
