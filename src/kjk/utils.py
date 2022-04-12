@@ -110,6 +110,7 @@ class MarketStandClusterFinder:
         bak_dict,
         branches,
         weighted_prefs=[],
+        blocked_stands=[],
     ):
         self.should_check_branche_bak_evi_space = False
         self.weighted_prefs = weighted_prefs
@@ -133,7 +134,10 @@ class MarketStandClusterFinder:
                 pl = gr["plaatsList"]
                 self.flattened_list.append(None)
                 for i, stand_nr in enumerate(pl):
-                    self.flattened_list.append(stand_nr)
+                    if stand_nr in blocked_stands:
+                        self.flattened_list.append(["blocked"])
+                    else:
+                        self.flattened_list.append(stand_nr)
                     try:
                         obs = self.obstacle_dict[str(stand_nr)]
                         self.flattened_list.append(obs)

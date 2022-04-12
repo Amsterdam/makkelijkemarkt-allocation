@@ -160,6 +160,8 @@ class BaseAllocator:
         self.market_blocks = dp.get_market_blocks()
         self.obstacles = dp.get_obstacles()
 
+        self.blocked_stands = self.market["kiesJeKraamGeblokkeerdePlaatsen"].split(",")
+
         # do some bookkeeping
         self.allocations_per_phase = {}
         self.phase_id = "Phase 1"
@@ -246,6 +248,7 @@ class BaseAllocator:
             stand_bak_dict,
             self.branches,
             weighted_prefs=self.soll_nr_weighted_prefs,
+            blocked_stands=self.blocked_stands,
         )
 
         self.cluster_finder.set_market_info_delegate(self)
