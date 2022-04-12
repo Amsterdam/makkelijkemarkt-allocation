@@ -160,7 +160,11 @@ class BaseAllocator:
         self.market_blocks = dp.get_market_blocks()
         self.obstacles = dp.get_obstacles()
 
-        self.blocked_stands = self.market["kiesJeKraamGeblokkeerdePlaatsen"].split(",")
+        self.blocked_stands = []
+        if self.market["kiesJeKraamGeblokkeerdePlaatsen"] is not None:
+            self.blocked_stands = self.market["kiesJeKraamGeblokkeerdePlaatsen"].split(
+                ","
+            )
 
         # do some bookkeeping
         self.allocations_per_phase = {}
