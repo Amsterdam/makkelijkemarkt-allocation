@@ -1,5 +1,4 @@
 import os
-from pprint import pprint
 import json
 
 
@@ -9,8 +8,8 @@ class BakBranchesMigration:
     FIXTURE_DIR = "../fixtures"
 
     def __init__(self):
-        l = os.listdir(self.FIXTURE_DIR)
-        for fix in l:
+        dirlist = os.listdir(self.FIXTURE_DIR)
+        for fix in dirlist:
             fixture_file = os.path.join(self.FIXTURE_DIR, fix)
             if fixture_file.endswith(".json") and fix not in self.INGNORE_LIST:
                 print("proccessing ", fixture_file)
