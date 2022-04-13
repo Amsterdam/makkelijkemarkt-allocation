@@ -222,7 +222,7 @@ class MarketStandClusterFinder:
 
     def stand_has_bak(self, std):
         try:
-            return "bak" in self.bak_dict[std]
+            return "bak" == self.bak_dict[std]
         except TypeError:
             return False
 

@@ -238,7 +238,10 @@ class BaseAllocator:
 
         # create a sparse datastructure for bak lookup per stand id
         plaats_ids = self.positions_df["plaatsId"].to_list()
-        baks = self.positions_df["branches"].to_list()
+        try:
+            baks = self.positions_df["bakType"].to_list()
+        except KeyError:
+            baks = [None] * len(plaats_ids)
         stand_bak_dict = dict(zip(plaats_ids, baks))
 
         # created soll_nr weighted prefs
@@ -368,7 +371,7 @@ class BaseAllocator:
     def add_has_bak(self):
         def has_bak(x):
             try:
-                if "bak" in x["voorkeur.branches"]:
+                if x["voorkeur.bakType"] == "bak":
                     return True
                 return False
             except Exception:
@@ -725,25 +728,16 @@ class BaseAllocator:
         """get all baking positions for this market"""
 
         def has_bak(x):
-            if "bak" in x:
+            if "bak" == x:
                 return True
             return False
 
-        has_bak_df = self.positions_df["branches"].apply(has_bak)
-        result_df = self.positions_df[has_bak_df]["plaatsId"]
-        return result_df.to_list()
-
-    def get_baking_positions_df(self):
-        """get all baking positions for this market"""
-
-        def has_bak(x):
-            if "bak" in x:
-                return True
-            return False
-
-        has_bak_df = self.positions_df["branches"].apply(has_bak)
-        result_df = self.positions_df[has_bak_df]
-        return result_df
+        try:
+            has_bak_df = self.positions_df["bakType"].apply(has_bak)
+            result_df = self.positions_df[has_bak_df]["plaatsId"]
+            return result_df.to_list()
+        except KeyError:
+            return []
 
     def get_rsvp_for_merchant(self, merchant_number):
         """boolean, Is this mechant attending this market?"""
