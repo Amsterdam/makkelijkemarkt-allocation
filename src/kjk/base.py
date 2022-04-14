@@ -323,7 +323,9 @@ class BaseAllocator:
     def set_expansion_mode(self, mode):
         self.expansion_mode = mode
 
-    def _prepare_expansion(self, erk, stands, size, merchant_branches, bak, evi):
+    def _prepare_expansion(
+        self, erk, stands, size, merchant_branches, bak, evi, bak_type
+    ):
         if len(stands) == 0:
             return
         expansion_candidates = self.cluster_finder.find_valid_expansion(
@@ -333,6 +335,7 @@ class BaseAllocator:
             bak_merchant=bak,
             evi_merchant=evi,
             ignore_check_available=stands,
+            bak_type=bak_type,
         )
         for exp in expansion_candidates:
             self.cluster_finder.set_stands_reserved(exp)
@@ -922,9 +925,9 @@ class BaseAllocator:
                         "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
                     )
 
-                # max 'bak' is spicified in the branches section
-                # so append bak to the allocated branches
-                if bakType is not None:
+                # max 'bak' is specified in the branches section
+                # so append bak (or bak-licht) to the allocated branches
+                if bakType is not None and bakType != "geen":
                     branches.append(bakType)
 
                 self.branches_scrutenizer.add_allocation(branches, stands_to_alloc)
@@ -1022,6 +1025,7 @@ class BaseAllocator:
                     merchant_branches,
                     bak,
                     evi,
+                    bak_type,
                 )
             if len(stds) > 1 and query != "all":
                 # TODO: find the sweetspot inside this cluster
@@ -1077,6 +1081,7 @@ class BaseAllocator:
                 merchant_branches = row["voorkeur.branches"]
                 evi = row["has_evi"] == "yes"
                 bak = row["has_bak"]
+                bak_type = row["bak_type"]
                 if expand:
                     self._prepare_expansion(
                         erk,
@@ -1085,6 +1090,7 @@ class BaseAllocator:
                         merchant_branches,
                         bak,
                         evi,
+                        bak_type,
                     )
                 self._allocate_stands_to_merchant(stands, erk)
             except MarketStandDequeueError:
