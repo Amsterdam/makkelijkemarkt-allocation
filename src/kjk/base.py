@@ -368,6 +368,15 @@ class BaseAllocator:
 
         self.merchants_df["has_stands"] = self.merchants_df.apply(has_stands, axis=1)
 
+    def add_bak_type(self):
+        def bak_type(x):
+            try:
+                return x["voorkeur.bakType"]
+            except Exception:
+                return "geen"
+
+        self.merchants_df["bak_type"] = self.merchants_df.apply(bak_type, axis=1)
+
     def add_has_bak(self):
         def has_bak(x):
             try:
@@ -445,6 +454,7 @@ class BaseAllocator:
         self.add_evi_for_merchant()
         self.add_has_stands()
         self.add_has_bak()
+        self.add_bak_type()
         self.create_expanders_set()
         self.create_reducers_set()
         self.merchants_df.set_index("erkenningsNummer", inplace=True)
@@ -931,7 +941,7 @@ class BaseAllocator:
 
         if print_df:
             print(result_list)
-            print(self.cluster_finder.stands_allocated)
+            # print(self.cluster_finder.stands_allocated)
 
         if result_list is None:
             return
@@ -948,6 +958,7 @@ class BaseAllocator:
             merchant_branches = row["voorkeur.branches"]
             evi = row["has_evi"] == "yes"
             bak = row["has_bak"]
+            bak_type = row["bak_type"]
             try:
                 anywhere = row["voorkeur.anywhere"]
             except KeyError:
@@ -962,6 +973,7 @@ class BaseAllocator:
                 anywhere=anywhere,
                 check_branche_bak_evi=check_branche_bak_evi,
                 erk=erk,
+                bak_type=bak_type,
             )
             if len(minimal_possible) == 0:
                 # do not reject yet, this merchant should be able to compete
@@ -995,6 +1007,7 @@ class BaseAllocator:
                     anywhere=anywhere,
                     check_branche_bak_evi=check_branche_bak_evi,
                     erk=erk,
+                    bak_type=bak_type,
                 )
 
             # 2. then try to find cluster for the minimum wanted number of stands
@@ -1025,6 +1038,7 @@ class BaseAllocator:
             evi = row["has_evi"] == "yes"
             maxi = row["voorkeur.maximum"]
             status = row["status"]
+            bak_type = row["bak_type"]
 
             # exp, expf can not expand
             if status in ("exp", "expf"):
@@ -1042,6 +1056,7 @@ class BaseAllocator:
                     evi_merchant=evi,
                     ignore_check_available=assigned_stands,
                     erk=erk,
+                    bak_type=bak_type,
                 )
                 if len(stands) > 0:
                     self._allocate_stands_to_merchant(
