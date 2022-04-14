@@ -198,6 +198,7 @@ class TestBasicAllocation(unittest.TestCase):
                 "branches": ["vacuumslangen"],
                 "maximum": 1,
                 "minimum": 1,
+                "bakType": "geen",
                 "verkoopinrichting": [],
                 "absentFrom": "",
                 "absentUntil": "",
@@ -208,7 +209,7 @@ class TestBasicAllocation(unittest.TestCase):
         self.dp.add_rsvp(erkenningsNummer="244", attending=True)
         self.dp.add_stand(
             plaatsId="7",
-            branches=["bak"],
+            bakType="bak",
             properties=[],
             verkoopinrichting=[],
             inactive=False,
@@ -249,7 +250,7 @@ class TestBasicAllocation(unittest.TestCase):
         self.dp.add_rsvp(erkenningsNummer="244", attending=True)
         self.dp.add_stand(
             plaatsId="7",
-            branches=["bak"],
+            bakType="bak",
             properties=[],
             verkoopinrichting=["eigen-materieel"],
             inactive=False,
@@ -310,14 +311,14 @@ class TestBasicAllocation(unittest.TestCase):
         self.dp.add_rsvp(erkenningsNummer="23", attending=True)
         self.dp.add_stand(
             plaatsId="3",
-            branches=["bak"],
+            bakType="bak",
             properties=[],
             verkoopinrichting=["eigen-materieel"],
             inactive=False,
         )
         self.dp.add_stand(
             plaatsId="4",
-            branches=["bak"],
+            bakType="bak",
             properties=[],
             verkoopinrichting=["eigen-materieel"],
             inactive=False,

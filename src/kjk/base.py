@@ -871,6 +871,10 @@ class BaseAllocator:
             stand_dequeue_error = False
             allocation_wanted = self._allocation_wanted(erk, stands_to_alloc)
             try:
+                bakType = merchant_obj["voorkeur"]["bakType"]
+            except KeyError:
+                bakType = None
+            try:
                 branches = merchant_obj["voorkeur"]["branches"]
             except KeyError:
                 clog.error(
@@ -907,6 +911,11 @@ class BaseAllocator:
                     raise MerchantDequeueError(
                         "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
                     )
+
+                # max 'bak' is spicified in the branches section
+                # so append bak to the allocated branches
+                if bakType is not None:
+                    branches.append(bakType)
 
                 self.branches_scrutenizer.add_allocation(branches, stands_to_alloc)
                 self.cluster_finder.set_stands_allocated(stands_to_alloc)
