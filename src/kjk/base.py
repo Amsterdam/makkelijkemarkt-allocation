@@ -6,7 +6,7 @@ from kjk.utils import BranchesScrutenizer
 from kjk.utils import PreferredStandFinder
 from kjk.logging import clog, log
 from pandas.core.computation.ops import UndefinedVariableError
-from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
+from kjk.rejection_reasons import BRANCHE_FULL, MINIMUM_UNAVAILABLE
 from kjk.rejection_reasons import VPL_POSITION_NOT_AVAILABLE
 from kjk.rejection_reasons import PREF_NOT_AVAILABLE
 
@@ -897,7 +897,14 @@ class BaseAllocator:
                 clog.error(
                     f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
                 )
-            allocation_allowed = self._allocation_allowed(merchant_obj, branches)
+
+            allocation_allowed = self._allocation_allowed(
+                merchant_obj, branches + [bakType]
+            )
+            if not allocation_allowed:
+                self.rejection_reasons.add_rejection_reason_for_merchant(
+                    erk, BRANCHE_FULL
+                )
 
             if allocation_allowed and allocation_wanted:
                 # some times we need to know the phase in wich a merchant is allocated
@@ -928,6 +935,7 @@ class BaseAllocator:
                 # max 'bak' is specified in the branches section
                 # so append bak (or bak-licht) to the allocated branches
                 if bakType is not None and bakType != "geen":
+                    branches = branches.copy()
                     branches.append(bakType)
 
                 self.branches_scrutenizer.add_allocation(branches, stands_to_alloc)
