@@ -860,6 +860,8 @@ class BaseAllocator:
             return True
         # if anywhere is off all stands should be in prefs
         prefs = self.get_prefs_for_merchant(erk)
+        if len(prefs) == 0:
+            return True
         return all([std in prefs for std in stands_to_alloc])
 
     def _allocation_allowed(self, merchant_obj, branches):
