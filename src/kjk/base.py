@@ -279,17 +279,33 @@ class BaseAllocator:
             self.branches_df.to_excel("../../branches.xls")
 
     def set_mode_blist(self):
+        """set mode to blist, this is used in query format strings"""
         self.list_mode = MODE_BLIST
 
     def market_has_unused_bak_space(self):
+        """
+        Check if the market has unused bak space.
+        This will allow non bak vpl merchants that want to move
+        to get a bak stand.
+        """
         df = self.merchants_df.query("has_bak == True")
         return df["voorkeur.maximum"].sum() < self.num_bak_stands
 
     def market_has_unused_evi_space(self):
+        """
+        Check if the market has unused evi space.
+        This will allow non evi vpl merchants that want to move
+        to get an evi stand.
+        """
         df = self.merchants_df.query("has_evi == 'yes'")
         return df["voorkeur.maximum"].sum() < self.num_evi_stands
 
     def market_has_unused_branche_space(self, branches):
+        """
+        Check if the market has unused branche space.
+        This will allow non branche vpl merchants that want to move
+        to get a branched stand.
+        """
         for branche in branches:
 
             def has_branch(x):
@@ -315,17 +331,29 @@ class BaseAllocator:
         return True
 
     def get_debug_data(self):
+        """helper to track in which phase a merchant is allocated"""
         return self.allocations_per_phase
 
     def set_allocation_phase(self, phase_id):
+        """set current allocation phase, used in logging"""
         self.phase_id = phase_id
 
     def set_expansion_mode(self, mode):
+        """
+        set expansion mode:
+        'EXPANSION_MODE_GREEDY' will allocate minimum stands in first pass
+        (not market-regulation compatible)
+        """
         self.expansion_mode = mode
 
     def _prepare_expansion(
         self, erk, stands, size, merchant_branches, bak, evi, bak_type
     ):
+        """
+        If a merchant wants to expand, the stands can not be assigned right away.
+        We 'reserve' the stands suited for expansion by trying to avoid them later in
+        allocation process. This increases the changes for expansion.
+        """
         if len(stands) == 0:
             return
         expansion_candidates = self.cluster_finder.find_valid_expansion(
@@ -348,18 +376,23 @@ class BaseAllocator:
             )
 
     def create_merchant_dict(self):
+        """create a sparse datastructure for merchant lookup, by 'erkenningsnummer'"""
         d = {}
         for m in self.merchants:
             d[m["erkenningsNummer"]] = m
         return d
 
     def merchant_object_by_id(self, merchant_id):
+        """merchant lookup"""
         try:
             return self.merchants_dict[merchant_id]
         except KeyError:
             raise MerchantNotFoundError(f"mechant not found: {merchant_id}")
 
     def add_has_stands(self):
+        """add has_stands boolean to the merchant dataframe,
+        exp merchants may or may not have stands"""
+
         def has_stands(x):
             try:
                 if len(x["plaatsen"]) > 0:
@@ -372,6 +405,9 @@ class BaseAllocator:
         self.merchants_df["has_stands"] = self.merchants_df.apply(has_stands, axis=1)
 
     def add_bak_type(self):
+        """add bak_type to the merchant dataframe
+        make sure there is a value so we don't have data quality issues later on."""
+
         def bak_type(x):
             try:
                 return x["voorkeur.bakType"]
