@@ -137,6 +137,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self._allocate_solls_for_query(
             f"status == 'soll' & {list_mode} & has_bak == True", print_df=False
         )
+        self._allocate_solls_for_query(
+            f"status == 'soll' & {list_mode} & bak_type == 'bak-licht'", print_df=False
+        )
 
     def evi_soll(self, list_mode=MODE_ALIST):
         self._allocate_solls_for_query(
@@ -173,6 +176,10 @@ class Allocator(BaseAllocator, ValidatorMixin):
             return
         df = self.expanders_df.query(
             f"status == 'soll' & has_bak == True & {list_mode}"
+        )
+        self._expand_for_merchants(df)
+        df = self.expanders_df.query(
+            f"status == 'soll' & bak_type == 'bak-licht' & {list_mode}"
         )
         self._expand_for_merchants(df)
 

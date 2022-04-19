@@ -6,7 +6,7 @@ from kjk.utils import BranchesScrutenizer
 from kjk.utils import PreferredStandFinder
 from kjk.logging import clog, log
 from pandas.core.computation.ops import UndefinedVariableError
-from kjk.rejection_reasons import MINIMUM_UNAVAILABLE
+from kjk.rejection_reasons import BRANCHE_FULL, MINIMUM_UNAVAILABLE
 from kjk.rejection_reasons import VPL_POSITION_NOT_AVAILABLE
 from kjk.rejection_reasons import PREF_NOT_AVAILABLE
 
@@ -160,6 +160,12 @@ class BaseAllocator:
         self.market_blocks = dp.get_market_blocks()
         self.obstacles = dp.get_obstacles()
 
+        self.blocked_stands = []
+        if self.market["kiesJeKraamGeblokkeerdePlaatsen"] is not None:
+            self.blocked_stands = self.market["kiesJeKraamGeblokkeerdePlaatsen"].split(
+                ","
+            )
+
         # do some bookkeeping
         self.allocations_per_phase = {}
         self.phase_id = "Phase 1"
@@ -232,7 +238,10 @@ class BaseAllocator:
 
         # create a sparse datastructure for bak lookup per stand id
         plaats_ids = self.positions_df["plaatsId"].to_list()
-        baks = self.positions_df["branches"].to_list()
+        try:
+            baks = self.positions_df["bakType"].to_list()
+        except KeyError:
+            baks = [None] * len(plaats_ids)
         stand_bak_dict = dict(zip(plaats_ids, baks))
 
         # created soll_nr weighted prefs
@@ -246,6 +255,7 @@ class BaseAllocator:
             stand_bak_dict,
             self.branches,
             weighted_prefs=self.soll_nr_weighted_prefs,
+            blocked_stands=self.blocked_stands,
         )
 
         self.cluster_finder.set_market_info_delegate(self)
@@ -269,17 +279,33 @@ class BaseAllocator:
             self.branches_df.to_excel("../../branches.xls")
 
     def set_mode_blist(self):
+        """set mode to blist, this is used in query format strings"""
         self.list_mode = MODE_BLIST
 
     def market_has_unused_bak_space(self):
+        """
+        Check if the market has unused bak space.
+        This will allow non bak vpl merchants that want to move
+        to get a bak stand.
+        """
         df = self.merchants_df.query("has_bak == True")
         return df["voorkeur.maximum"].sum() < self.num_bak_stands
 
     def market_has_unused_evi_space(self):
+        """
+        Check if the market has unused evi space.
+        This will allow non evi vpl merchants that want to move
+        to get an evi stand.
+        """
         df = self.merchants_df.query("has_evi == 'yes'")
         return df["voorkeur.maximum"].sum() < self.num_evi_stands
 
     def market_has_unused_branche_space(self, branches):
+        """
+        Check if the market has unused branche space.
+        This will allow non branche vpl merchants that want to move
+        to get a branched stand.
+        """
         for branche in branches:
 
             def has_branch(x):
@@ -305,15 +331,29 @@ class BaseAllocator:
         return True
 
     def get_debug_data(self):
+        """helper to track in which phase a merchant is allocated"""
         return self.allocations_per_phase
 
     def set_allocation_phase(self, phase_id):
+        """set current allocation phase, used in logging"""
         self.phase_id = phase_id
 
     def set_expansion_mode(self, mode):
+        """
+        set expansion mode:
+        'EXPANSION_MODE_GREEDY' will allocate minimum stands in first pass
+        (not market-regulation compatible)
+        """
         self.expansion_mode = mode
 
-    def _prepare_expansion(self, erk, stands, size, merchant_branches, bak, evi):
+    def _prepare_expansion(
+        self, erk, stands, size, merchant_branches, bak, evi, bak_type
+    ):
+        """
+        If a merchant wants to expand, the stands can not be assigned right away.
+        We 'reserve' the stands suited for expansion by trying to avoid them later in
+        allocation process. This increases the changes for expansion.
+        """
         if len(stands) == 0:
             return
         expansion_candidates = self.cluster_finder.find_valid_expansion(
@@ -323,6 +363,7 @@ class BaseAllocator:
             bak_merchant=bak,
             evi_merchant=evi,
             ignore_check_available=stands,
+            bak_type=bak_type,
         )
         for exp in expansion_candidates:
             self.cluster_finder.set_stands_reserved(exp)
@@ -335,18 +376,23 @@ class BaseAllocator:
             )
 
     def create_merchant_dict(self):
+        """create a sparse datastructure for merchant lookup, by 'erkenningsnummer'"""
         d = {}
         for m in self.merchants:
             d[m["erkenningsNummer"]] = m
         return d
 
     def merchant_object_by_id(self, merchant_id):
+        """merchant lookup"""
         try:
             return self.merchants_dict[merchant_id]
         except KeyError:
             raise MerchantNotFoundError(f"mechant not found: {merchant_id}")
 
     def add_has_stands(self):
+        """add has_stands boolean to the merchant dataframe,
+        exp merchants may or may not have stands"""
+
         def has_stands(x):
             try:
                 if len(x["plaatsen"]) > 0:
@@ -358,10 +404,22 @@ class BaseAllocator:
 
         self.merchants_df["has_stands"] = self.merchants_df.apply(has_stands, axis=1)
 
+    def add_bak_type(self):
+        """add bak_type to the merchant dataframe
+        make sure there is a value so we don't have data quality issues later on."""
+
+        def bak_type(x):
+            try:
+                return x["voorkeur.bakType"]
+            except Exception:
+                return "geen"
+
+        self.merchants_df["bak_type"] = self.merchants_df.apply(bak_type, axis=1)
+
     def add_has_bak(self):
         def has_bak(x):
             try:
-                if "bak" in x["voorkeur.branches"]:
+                if x["voorkeur.bakType"] == "bak":
                     return True
                 return False
             except Exception:
@@ -435,6 +493,7 @@ class BaseAllocator:
         self.add_evi_for_merchant()
         self.add_has_stands()
         self.add_has_bak()
+        self.add_bak_type()
         self.create_expanders_set()
         self.create_reducers_set()
         self.merchants_df.set_index("erkenningsNummer", inplace=True)
@@ -718,25 +777,16 @@ class BaseAllocator:
         """get all baking positions for this market"""
 
         def has_bak(x):
-            if "bak" in x:
+            if "bak" == x:
                 return True
             return False
 
-        has_bak_df = self.positions_df["branches"].apply(has_bak)
-        result_df = self.positions_df[has_bak_df]["plaatsId"]
-        return result_df.to_list()
-
-    def get_baking_positions_df(self):
-        """get all baking positions for this market"""
-
-        def has_bak(x):
-            if "bak" in x:
-                return True
-            return False
-
-        has_bak_df = self.positions_df["branches"].apply(has_bak)
-        result_df = self.positions_df[has_bak_df]
-        return result_df
+        try:
+            has_bak_df = self.positions_df["bakType"].apply(has_bak)
+            result_df = self.positions_df[has_bak_df]["plaatsId"]
+            return result_df.to_list()
+        except KeyError:
+            return []
 
     def get_rsvp_for_merchant(self, merchant_number):
         """boolean, Is this mechant attending this market?"""
@@ -846,6 +896,8 @@ class BaseAllocator:
             return True
         # if anywhere is off all stands should be in prefs
         prefs = self.get_prefs_for_merchant(erk)
+        if len(prefs) == 0:
+            return True
         return all([std in prefs for std in stands_to_alloc])
 
     def _allocation_allowed(self, merchant_obj, branches):
@@ -870,6 +922,10 @@ class BaseAllocator:
             stand_dequeue_error = False
             allocation_wanted = self._allocation_wanted(erk, stands_to_alloc)
             try:
+                bakType = merchant_obj["voorkeur"]["bakType"]
+            except KeyError:
+                bakType = None
+            try:
                 branches = merchant_obj["voorkeur"]["branches"]
             except KeyError:
                 clog.error(
@@ -879,7 +935,14 @@ class BaseAllocator:
                 clog.error(
                     f"ondernemer {erk} heeft geen branche in zijn voorkeur, markt {m_id} op {m_date}"
                 )
-            allocation_allowed = self._allocation_allowed(merchant_obj, branches)
+
+            allocation_allowed = self._allocation_allowed(
+                merchant_obj, branches + [bakType]
+            )
+            if not allocation_allowed:
+                self.rejection_reasons.add_rejection_reason_for_merchant(
+                    erk, BRANCHE_FULL
+                )
 
             if allocation_allowed and allocation_wanted:
                 # some times we need to know the phase in wich a merchant is allocated
@@ -907,6 +970,12 @@ class BaseAllocator:
                         "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
                     )
 
+                # max 'bak' is specified in the branches section
+                # so append bak (or bak-licht) to the allocated branches
+                if bakType is not None and bakType != "geen":
+                    branches = branches.copy()
+                    branches.append(bakType)
+
                 self.branches_scrutenizer.add_allocation(branches, stands_to_alloc)
                 self.cluster_finder.set_stands_allocated(stands_to_alloc)
                 self.market_output.add_allocation(erk, stands_to_alloc, merchant_obj)
@@ -921,7 +990,7 @@ class BaseAllocator:
 
         if print_df:
             print(result_list)
-            print(self.cluster_finder.stands_allocated)
+            # print(self.cluster_finder.stands_allocated)
 
         if result_list is None:
             return
@@ -938,6 +1007,7 @@ class BaseAllocator:
             merchant_branches = row["voorkeur.branches"]
             evi = row["has_evi"] == "yes"
             bak = row["has_bak"]
+            bak_type = row["bak_type"]
             try:
                 anywhere = row["voorkeur.anywhere"]
             except KeyError:
@@ -952,6 +1022,7 @@ class BaseAllocator:
                 anywhere=anywhere,
                 check_branche_bak_evi=check_branche_bak_evi,
                 erk=erk,
+                bak_type=bak_type,
             )
             if len(minimal_possible) == 0:
                 # do not reject yet, this merchant should be able to compete
@@ -985,6 +1056,7 @@ class BaseAllocator:
                     anywhere=anywhere,
                     check_branche_bak_evi=check_branche_bak_evi,
                     erk=erk,
+                    bak_type=bak_type,
                 )
 
             # 2. then try to find cluster for the minimum wanted number of stands
@@ -999,6 +1071,7 @@ class BaseAllocator:
                     merchant_branches,
                     bak,
                     evi,
+                    bak_type,
                 )
             if len(stds) > 1 and query != "all":
                 # TODO: find the sweetspot inside this cluster
@@ -1015,6 +1088,7 @@ class BaseAllocator:
             evi = row["has_evi"] == "yes"
             maxi = row["voorkeur.maximum"]
             status = row["status"]
+            bak_type = row["bak_type"]
 
             # exp, expf can not expand
             if status in ("exp", "expf"):
@@ -1032,6 +1106,7 @@ class BaseAllocator:
                     evi_merchant=evi,
                     ignore_check_available=assigned_stands,
                     erk=erk,
+                    bak_type=bak_type,
                 )
                 if len(stands) > 0:
                     self._allocate_stands_to_merchant(
@@ -1052,6 +1127,7 @@ class BaseAllocator:
                 merchant_branches = row["voorkeur.branches"]
                 evi = row["has_evi"] == "yes"
                 bak = row["has_bak"]
+                bak_type = row["bak_type"]
                 if expand:
                     self._prepare_expansion(
                         erk,
@@ -1060,6 +1136,7 @@ class BaseAllocator:
                         merchant_branches,
                         bak,
                         evi,
+                        bak_type,
                     )
                 self._allocate_stands_to_merchant(stands, erk)
             except MarketStandDequeueError:

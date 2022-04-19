@@ -423,36 +423,40 @@ class AllocatorTest(unittest.TestCase):
         self.assertListEqual(merchants, expected_merchants)
 
     def test_get_merchant_for_branche(self):
-        merchants = self.sut.get_merchant_for_branche("bak")
+        merchants = self.sut.get_merchant_for_branche("101-agf")
         expected_merchants = [
-            "1020185000",
-            "0000181012",
-            "2000113080",
-            "7000117002",
-            "8032002080",
-            "7002002000",
-            "2002004040",
-            "4022004040",
-            "1062008080",
-            "5022001050",
-            "0042004002",
+            "0000182030",
+            "2000180000",
+            "0020181040",
+            "6042004040",
+            "5002008060",
         ]
         self.assertListEqual(merchants, expected_merchants)
-        merchants = self.sut.get_merchant_for_branche("bak", status="soll")
-        expected_merchants = ["0042004002"]
-        self.assertListEqual(merchants, expected_merchants)
-        merchants = self.sut.get_merchant_for_branche("bak", status="vpl")
+        merchants = self.sut.get_merchant_for_branche(
+            "309-kleding-volwassenen-hoofddeksels", status="soll"
+        )
         expected_merchants = [
-            "1020185000",
-            "0000181012",
-            "2000113080",
-            "7000117002",
-            "8032002080",
-            "7002002000",
-            "2002004040",
-            "4022004040",
-            "1062008080",
-            "5022001050",
+            "3000113030",
+            "8020113000",
+            "8020113002",
+            "1040112000",
+            "2000114000",
+            "5030116050",
+            "3020117060",
+            "8022002040",
+            "4002003000",
+            "2022007032",
+            "1022020060",
+        ]
+
+        self.assertListEqual(merchants, expected_merchants)
+        merchants = self.sut.get_merchant_for_branche("101-agf", status="vpl")
+        expected_merchants = [
+            "0000182030",
+            "2000180000",
+            "0020181040",
+            "6042004040",
+            "5002008060",
         ]
         self.assertListEqual(merchants, expected_merchants)
 

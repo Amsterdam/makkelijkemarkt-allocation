@@ -44,26 +44,26 @@
         {
             "plaatsId": "1",
             "branches": [
-                "209-vis-gebakken",
-                "bak"
+                "209-vis-gebakken"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
             "properties": [
                 "water"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "2",
             "branches": [
-                "209-vis-gebakken",
-                "bak"
+                "209-vis-gebakken"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "3",
@@ -98,40 +98,38 @@
         {
             "plaatsId": "6",
             "branches": [
-                "205-loempias",
-                "bak"
+                "205-loempias"
             ],
             "verkoopinrichting": [],
             "properties": [
                 "electra"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "7",
             "branches": [
-                "205-loempias",
-                "bak"
+                "205-loempias"
             ],
             "verkoopinrichting": [],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "8",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "9",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "10",
@@ -875,45 +873,40 @@
         },
         {
             "plaatsId": "126",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "127",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "128",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "129",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "130",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "131",

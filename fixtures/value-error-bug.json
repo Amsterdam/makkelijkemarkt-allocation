@@ -290,26 +290,26 @@
         {
             "plaatsId": "33",
             "branches": [
-                "209-vis-gebakken",
-                "bak"
+                "209-vis-gebakken"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "34",
             "branches": [
-                "209-vis-gebakken",
-                "bak"
+                "209-vis-gebakken"
             ],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
             "properties": [
                 "water"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "35",

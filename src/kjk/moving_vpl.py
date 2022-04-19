@@ -108,6 +108,7 @@ class MovingVPLSolver:
             merchant_branches = row["voorkeur.branches"]
             bak = row["has_bak"]
             evi = row["has_evi"] == "yes"
+            bak_type = row["bak_type"]
 
             # some merchants have their own fixed stands as pref
             # don't ask me why we deal with this by checking overlap
@@ -137,6 +138,7 @@ class MovingVPLSolver:
                     merchant_branches,
                     bak,
                     evi,
+                    bak_type,
                 )
             try:
                 self.allocator._allocate_stands_to_merchant(stands_to_alloc, erk)
@@ -181,6 +183,7 @@ class MovingVPLSolver:
             merchant_branches = row["voorkeur.branches"]
             bak = row["has_bak"]
             evi = row["has_evi"] == "yes"
+            bak_type = row["bak_type"]
 
             valid_pref_stands = self.allocator.cluster_finder.find_valid_cluster(
                 pref,
@@ -215,6 +218,7 @@ class MovingVPLSolver:
                         merchant_branches,
                         bak,
                         evi,
+                        bak_type,
                     )
                 self.allocator._allocate_stands_to_merchant(stands_to_alloc, erk)
             except Exception:
@@ -254,6 +258,7 @@ class MovingVPLSolver:
             bak = row["has_bak"]
             evi = row["has_evi"] == "yes"
             expand = row["wants_expand"]
+            bak_type = row["bak_type"]
             valid_pref_stands = self.allocator.cluster_finder.find_valid_cluster(
                 pref,
                 size=len(stands),
@@ -271,6 +276,7 @@ class MovingVPLSolver:
                         merchant_branches,
                         bak,
                         evi,
+                        bak_type,
                     )
                 # unable to solve conflict stay on fixed positions
                 try:
@@ -291,6 +297,7 @@ class MovingVPLSolver:
                         merchant_branches,
                         bak,
                         evi,
+                        bak_type,
                     )
                 # no conflicts savely switch positions
                 self.allocator._allocate_stands_to_merchant(valid_pref_stands, erk)

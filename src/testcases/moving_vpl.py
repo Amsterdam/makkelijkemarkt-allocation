@@ -376,7 +376,7 @@ class TestMovingVPL(unittest.TestCase):
         # stands
         self.dp.add_stand(
             plaatsId="9",
-            branches=["bak"],
+            bakType="bak",
             properties=[],
             verkoopinrichting=["eigen-materieel"],
         )
@@ -398,7 +398,7 @@ class TestMovingVPL(unittest.TestCase):
             sollicitatieNummer="1",
             description="frank zappa",
             voorkeur={
-                "branches": ["bak"],
+                "bakType": "bak",
                 "maximum": 1,
                 "minimum": 1,
                 "verkoopinrichting": [],
@@ -414,7 +414,7 @@ class TestMovingVPL(unittest.TestCase):
             sollicitatieNummer="2",
             description="c beefheart",
             voorkeur={
-                "branches": ["bak"],
+                "bakType": "bak",
                 "maximum": 1,
                 "minimum": 1,
                 "verkoopinrichting": [],
@@ -433,7 +433,7 @@ class TestMovingVPL(unittest.TestCase):
         # stands
         self.dp.add_stand(
             plaatsId="9",
-            branches=["bak"],
+            bakType="bak",
             properties=[],
             verkoopinrichting=[],
         )
@@ -490,7 +490,7 @@ class TestMovingVPL(unittest.TestCase):
         # stands
         self.dp.add_stand(
             plaatsId="9",
-            branches=["bak"],
+            bakType="bak",
             properties=[],
             verkoopinrichting=[],
         )

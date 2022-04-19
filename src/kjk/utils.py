@@ -110,6 +110,7 @@ class MarketStandClusterFinder:
         bak_dict,
         branches,
         weighted_prefs=[],
+        blocked_stands=[],
     ):
         self.should_check_branche_bak_evi_space = False
         self.weighted_prefs = weighted_prefs
@@ -133,7 +134,10 @@ class MarketStandClusterFinder:
                 pl = gr["plaatsList"]
                 self.flattened_list.append(None)
                 for i, stand_nr in enumerate(pl):
-                    self.flattened_list.append(stand_nr)
+                    if stand_nr in blocked_stands:
+                        self.flattened_list.append(["blocked"])
+                    else:
+                        self.flattened_list.append(stand_nr)
                     try:
                         obs = self.obstacle_dict[str(stand_nr)]
                         self.flattened_list.append(obs)
@@ -218,9 +222,15 @@ class MarketStandClusterFinder:
 
     def stand_has_bak(self, std):
         try:
-            return "bak" in self.bak_dict[std]
+            return "bak" == self.bak_dict[std]
         except TypeError:
             return False
+
+    def stand_bak_type(self, std):
+        try:
+            return self.bak_dict[std]
+        except TypeError:
+            return "geen"
 
     def option_is_valid_branche(
         self,
@@ -229,6 +239,7 @@ class MarketStandClusterFinder:
         bak_merchant,
         evi_merchant,
         erk=None,
+        bak_type=None,
     ):
         AV = namedtuple(
             "AllocationVars",
@@ -244,8 +255,10 @@ class MarketStandClusterFinder:
                 "stand_has_evi",
                 "stand_has_bak",
                 "market_has_unused_branche_space",
+                "stand_bak_type",
+                "merchant_bak_type",
             ],
-            defaults=(None,) * 11,
+            defaults=(None,) * 13,
         )
 
         illegal_combos = [
@@ -276,6 +289,10 @@ class MarketStandClusterFinder:
                 merchant_has_evi=False,
                 stand_has_evi=True,
             ),
+            AV(
+                merchant_bak_type="bak-licht",
+                stand_bak_type="geen",
+            ),
         ]
 
         is_required = self.branche_is_required(merchant_branches[0])
@@ -288,6 +305,7 @@ class MarketStandClusterFinder:
             stand_required_br = self.stand_has_required_branche(branches)
             std_has_evi = self.stand_has_evi(std)
             std_has_bak = self.stand_has_bak(std)
+            std_bak_type = self.stand_bak_type(std)
 
             # print("- "*23)
             # print("ERK: ", erk)
@@ -298,6 +316,8 @@ class MarketStandClusterFinder:
             # print("stand bak: ", std_has_bak)
             # print("merchant bak: ", bak_merchant)
             # print("merchant evi: ", evi_merchant)
+            # print("merchant bak type:", bak_type)
+            # print("stand bak type:", std_bak_type)
 
             # branche
             branch_vars = AV(
@@ -313,6 +333,14 @@ class MarketStandClusterFinder:
                 stand_has_bak=std_has_bak,
             )
             if bak_vars in illegal_combos:
+                return False
+
+            # bak licht
+            bak_licht_vars = AV(
+                merchant_bak_type=bak_type,
+                stand_bak_type=std_bak_type,
+            )
+            if bak_licht_vars in illegal_combos:
                 return False
 
             # evi
@@ -390,6 +418,7 @@ class MarketStandClusterFinder:
         evi_merchant=False,
         ignore_check_available=None,
         erk=None,
+        bak_type=None,
     ):
         """
         check all adjacent clusters of the requested size,
@@ -408,7 +437,12 @@ class MarketStandClusterFinder:
                 branche_valid_for_option = True
                 if merchant_branche:
                     branche_valid_for_option = self.option_is_valid_branche(
-                        option, merchant_branche, bak_merchant, evi_merchant, erk=erk
+                        option,
+                        merchant_branche,
+                        bak_merchant,
+                        evi_merchant,
+                        erk=erk,
+                        bak_type=bak_type,
                     )
                 if ignore_check_available:
                     option = list(set(option) - set(ignore_check_available))
@@ -431,6 +465,7 @@ class MarketStandClusterFinder:
         anywhere=True,
         check_branche_bak_evi=True,
         erk=None,
+        bak_type=None,
     ):
         """
         check all adjacent clusters of the requested size
@@ -457,6 +492,7 @@ class MarketStandClusterFinder:
                             bak_merchant,
                             evi_merchant,
                             erk=erk,
+                            bak_type=bak_type,
                         )
                     if branche_valid_for_option and option_is_available:
                         valid_options.append(option)
@@ -476,6 +512,7 @@ class MarketStandClusterFinder:
                 bak_merchant=bak_merchant,
                 erk=erk,
                 mode=mode,
+                bak_type=bak_type,
             )
             if option:
                 return option
@@ -489,6 +526,7 @@ class MarketStandClusterFinder:
         bak_merchant=False,
         erk=None,
         mode=1,
+        bak_type=None,
     ):
         valid_options = []
         for i, _ in enumerate(self.flattened_list):
@@ -501,7 +539,12 @@ class MarketStandClusterFinder:
                     continue
                 if merchant_branche:
                     branche_valid_for_option = self.option_is_valid_branche(
-                        option, merchant_branche, bak_merchant, evi_merchant, erk=erk
+                        option,
+                        merchant_branche,
+                        bak_merchant,
+                        evi_merchant,
+                        erk=erk,
+                        bak_type=bak_type,
                     )
                 if branche_valid_for_option and option_is_available:
                     if mode != self.MODE_AVOID_NONE:

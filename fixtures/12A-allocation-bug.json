@@ -44,89 +44,81 @@
     "marktplaatsen": [
         {
             "plaatsId": "1",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "2",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "3",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
             "properties": [
                 "electra"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "4",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "5",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "6",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "7",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
             "properties": [
                 "water"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "8",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
             "properties": [
                 "electra"
-            ]
+            ],
+            "bakType": "bak"
         },
         {
             "plaatsId": "9",
@@ -154,33 +146,30 @@
         },
         {
             "plaatsId": "12",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "13",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "14",
-            "branches": [
-                "bak"
-            ],
+            "branches": [],
             "verkoopinrichting": [
                 "eigen-materieel"
             ],
-            "properties": []
+            "properties": [],
+            "bakType": "bak"
         },
         {
             "plaatsId": "15",
