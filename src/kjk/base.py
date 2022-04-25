@@ -688,7 +688,7 @@ class BaseAllocator:
     def df_for_attending_merchants(self):
         """
         Wich merchants are actually attending the market?
-        - vpl and tvpl only have to tell when they are NOT attending
+        - vpl, tvpl and eb only have to tell when they are NOT attending
         - non vpl (tvplz, soll and exp) do have to attend.
         """
 
@@ -708,10 +708,10 @@ class BaseAllocator:
             is_attending_market
         )
         df_1 = self.merchants_df.query(
-            "attending != 'no' & (status == 'vpl' | status == 'tvpl')"
+            "attending != 'no' & (status == 'vpl' | status == 'tvpl' | status == 'eb')"
         )
         df_2 = self.merchants_df.query(
-            "attending == 'yes' & (status != 'vpl' & status != 'tvpl')"
+            "attending == 'yes' & (status != 'vpl' & status != 'tvpl' & status != 'eb')"
         )
         self.merchants_df = pd.concat([df_1, df_2])
 
