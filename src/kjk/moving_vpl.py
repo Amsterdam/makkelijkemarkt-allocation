@@ -40,7 +40,12 @@ class MovingVPLSolver:
         if print_df:
             print(df)
         self.df = df.copy()
-        self.df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
+
+        # bak_type : ('bak', 'bak-licht', 'geen') happens to be alphabetically
+        # this simplifies sorting
+        self.df.sort_values(
+            by=["bak_type", "sollicitatieNummer"], inplace=True, ascending=True
+        )
 
         # STEP 1:
         # first allocate the vpl's that can not move to avoid conflicts
@@ -57,7 +62,9 @@ class MovingVPLSolver:
             if df is None:
                 return
             self.df = df.copy()
-            self.df.sort_values(by=["sollicitatieNummer"], inplace=True, ascending=True)
+            self.df.sort_values(
+                by=["bak_type", "sollicitatieNummer"], inplace=True, ascending=True
+            )
 
             d = self._compute_fixed_wanted()
             merch_dict = d["merch_dict"]
