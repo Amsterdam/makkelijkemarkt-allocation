@@ -433,6 +433,14 @@ class MarketStandClusterFinder:
             valid = all(elem in option for elem in fixed_positions) and all(
                 isinstance(x, str) for x in option
             )
+
+            # NOTE: we remove the already assigned positions from the option
+            # this prevents this position to be re-evaluated
+            # some vpl or eb merchants have fixed stands assigned by 'marktbureau'
+            # that are illegal according to the assigment rules, this would prevent
+            # expansion that would normally be legal
+            option = [x for x in option if x not in fixed_positions]
+
             if valid:
                 branche_valid_for_option = True
                 if merchant_branche:
