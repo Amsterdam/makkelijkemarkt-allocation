@@ -296,19 +296,19 @@ class ClusterFinderTestCase(unittest.TestCase):
 
     def test_find_valid_expansion(self):
         res = self.sut.find_valid_expansion(["5", "7"], total_size=3)
-        self.assertListEqual([["5", "7", "9"]], res)
+        self.assertListEqual([["9"]], res)
         res = self.sut.find_valid_expansion(["213", "215"], total_size=3)
-        self.assertListEqual([["211", "213", "215"], ["213", "215", "217"]], res)
+        self.assertListEqual([["211"], ["217"]], res)
         res = self.sut.find_valid_expansion(["246", "248"], total_size=3)
-        self.assertListEqual([["244", "246", "248"]], res)
+        self.assertListEqual([["244"]], res)
         res = self.sut.find_valid_expansion(["211", "213"], total_size=4)
-        self.assertListEqual(
-            [["207 - 209", "211", "213", "215"], ["211", "213", "215", "217"]], res
-        )
+        self.assertListEqual([["207 - 209", "215"], ["215", "217"]], res)
+
+    def test_find_valid_expansion_prefs(self):
         res = self.sut.find_valid_expansion(
-            ["213", "215"], total_size=3, prefs=["999", "215"], preferred=True
+            ["213", "215"], total_size=3, prefs=["211", "215"], preferred=True
         )
-        self.assertListEqual(["211", "213", "215"], res)
+        self.assertListEqual(["211"], res)
 
     def test_get_neighbours(self):
         res = self.sut.get_neighbours_for_stand_id("155")
