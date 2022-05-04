@@ -366,7 +366,7 @@ class BaseAllocator:
             bak_type=bak_type,
         )
         for exp in expansion_candidates:
-            self.cluster_finder.set_stands_reserved(exp)
+            self.cluster_finder.set_stands_reserved(exp, erk=erk)
         if (
             len(expansion_candidates) > 0
             and self.expansion_mode == EXPANSION_MODE_GREEDY
@@ -1107,6 +1107,7 @@ class BaseAllocator:
                     ignore_check_available=assigned_stands,
                     erk=erk,
                     bak_type=bak_type,
+                    allocate=True,
                 )
                 if len(stands) > 0:
                     self._allocate_stands_to_merchant(

@@ -1,4 +1,5 @@
 import redis
+from pprint import pprint
 import os
 from collections import namedtuple
 from kjk.rejection_reasons import MARKET_FULL
@@ -88,6 +89,52 @@ class PreferredStandFinder:
             return self.cluster[:1]
 
 
+class ExpansionOptimizer:
+    """
+    If multiple merchants have the same exapnsion options
+    try to maximize the numer of allocated stands to create a fuller
+    market.
+    """
+
+    def __init__(self):
+        # flat reserved stand list
+        self.stands_reserved_for_expansion = []
+
+        # reserved stands per merchant
+        self.reserved_stands_per_merchant = {}
+
+        # how many reservations per stand
+        self.weighted_expansion_options = {}
+
+    def add_expansion_reservation(self, stands_to_reserve, erk):
+        self.stands_reserved_for_expansion += stands_to_reserve
+        if erk not in self.reserved_stands_per_merchant:
+            self.reserved_stands_per_merchant[erk] = []
+        self.reserved_stands_per_merchant[erk] += stands_to_reserve
+        for o in stands_to_reserve:
+            if o not in self.weighted_expansion_options:
+                self.weighted_expansion_options[o] = 0
+            self.weighted_expansion_options[o] += 1
+
+    def get_optimized(self, options, erk):
+        if len(options) < 2:
+            return options
+        else:
+            print(erk)
+            print(options)
+            print(self.weighted_expansion_options)
+            print(self.reserved_stands_per_merchant[erk])
+            return options
+
+    def trace(self):
+        """
+        Print out the contents of the data for debugging
+        """
+        pprint(self.weighted_expansion_options)
+        pprint(self.reserved_stands_per_merchant)
+        pprint(self.stands_reserved_for_expansion)
+
+
 class MarketStandClusterFinder:
 
     """
@@ -123,6 +170,7 @@ class MarketStandClusterFinder:
 
         self.stands_allocated = []
         self.stands_reserved_for_expansion = []
+        self.expansion_optimizer = ExpansionOptimizer()
         self.branches_dict = branches_dict
         self.evi_dict = evi_dict
         self.bak_dict = bak_dict
@@ -167,8 +215,9 @@ class MarketStandClusterFinder:
     def set_stands_available(self, stands):
         self.stands_allocated = list(set(self.stands_allocated) - set(stands))
 
-    def set_stands_reserved(self, stands_to_reserve):
+    def set_stands_reserved(self, stands_to_reserve, erk=None):
         self.stands_reserved_for_expansion += stands_to_reserve
+        self.expansion_optimizer.add_expansion_reservation(stands_to_reserve, erk)
 
     def _process_obstacle_dict(self, obs):
         d = {}
@@ -411,14 +460,13 @@ class MarketStandClusterFinder:
         self,
         fixed_positions,
         total_size=0,
-        prefs=[],
-        preferred=False,
         merchant_branche=None,
         bak_merchant=False,
         evi_merchant=False,
         ignore_check_available=None,
         erk=None,
         bak_type=None,
+        allocate=False,
     ):
         """
         check all adjacent clusters of the requested size,
@@ -458,10 +506,9 @@ class MarketStandClusterFinder:
                     option
                 ):
                     valid_options.append(option)
-        if preferred:
-            return self.filter_preferred(valid_options, prefs)
-        else:
-            return valid_options
+        if allocate:
+            self.expansion_optimizer.get_optimized(valid_options, erk)
+        return valid_options
 
     def find_valid_cluster(
         self,

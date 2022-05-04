@@ -160,6 +160,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df = self.expanders_df.query(
             "status == 'vpl' | status == 'tvpl' | status == 'tvplz' | status == 'eb'"
         )
+        # print(df)
         self._expand_for_merchants(df)
         self.cluster_finder.set_check_branche_bak_evi(False)
 
