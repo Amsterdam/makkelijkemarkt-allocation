@@ -90,32 +90,26 @@ class PreferredStandFinder:
 
 class ExpansionOptimizer:
     """
-    If multiple merchants have the same exapnsion options
-    try to maximize the numer of allocated stands to create a fuller
+    If multiple merchants have the same expansion options
+    try to maximize the number of allocated stands to create a fuller
     market.
     """
 
     def __init__(self):
-        # flat reserved stand list
-        self.stands_reserved_for_expansion = []
-
-        # reserved stands per merchant
-        self.reserved_stands_per_merchant = {}
-
         # how many reservations per stand
         self.weighted_expansion_options = {}
 
     def add_expansion_reservation(self, stands_to_reserve, erk):
-        self.stands_reserved_for_expansion += stands_to_reserve
-        if erk not in self.reserved_stands_per_merchant:
-            self.reserved_stands_per_merchant[erk] = []
-        self.reserved_stands_per_merchant[erk] += stands_to_reserve
         for o in stands_to_reserve:
             if o not in self.weighted_expansion_options:
                 self.weighted_expansion_options[o] = 0
             self.weighted_expansion_options[o] += 1
 
     def get_optimized(self, options, erk):
+        """
+        return the option with the lowest weight.
+        (fewest expansion claims)
+        """
         if len(options) < 2:
             return options
         else:
