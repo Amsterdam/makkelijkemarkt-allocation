@@ -7,8 +7,8 @@ from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc, alloc
 
 class DapperTestCase(unittest.TestCase):
     def setUp(self):
-        # dp = FixtureDataprovider("../fixtures/dapp_20211030/a_input.json")
-        dp = FixtureDataprovider("/home/johan/Desktop/eb-uitbreiden_4.json")
+        dp = FixtureDataprovider("../fixtures/dapp_20211030/a_input.json")
+        # dp = FixtureDataprovider("/home/johan/Desktop/eb-uitbreiden_4.json")
         # dp = FixtureDataprovider("/home/johan/Desktop/eb-uitbreiden_3.json")
         # dp = FixtureDataprovider("/home/johan/Desktop/eb-uitbreiden_2.json")
         # dp = FixtureDataprovider("/home/johan/Desktop/eb-uitbreiden.json")

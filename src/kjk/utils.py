@@ -1,5 +1,4 @@
 import redis
-from pprint import pprint
 import os
 from collections import namedtuple
 from kjk.rejection_reasons import MARKET_FULL
@@ -120,19 +119,15 @@ class ExpansionOptimizer:
         if len(options) < 2:
             return options
         else:
-            print(erk)
-            print(options)
-            print(self.weighted_expansion_options)
-            print(self.reserved_stands_per_merchant[erk])
-            return options
-
-    def trace(self):
-        """
-        Print out the contents of the data for debugging
-        """
-        pprint(self.weighted_expansion_options)
-        pprint(self.reserved_stands_per_merchant)
-        pprint(self.stands_reserved_for_expansion)
+            w = 9999
+            best_option = None
+            for o in options:
+                for plaats_id in o:
+                    weight = self.weighted_expansion_options[plaats_id]
+                    if weight < w:
+                        w = weight
+                        best_option = o
+            return [best_option]
 
 
 class MarketStandClusterFinder:
@@ -507,7 +502,7 @@ class MarketStandClusterFinder:
                 ):
                     valid_options.append(option)
         if allocate:
-            self.expansion_optimizer.get_optimized(valid_options, erk)
+            return self.expansion_optimizer.get_optimized(valid_options, erk)
         return valid_options
 
     def find_valid_cluster(

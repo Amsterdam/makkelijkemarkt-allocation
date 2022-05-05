@@ -35,9 +35,6 @@ class ExpansionOptimizerTestCase(unittest.TestCase):
         self.sut.add_expansion_reservation(["2", "3"], "002")
         self.sut.add_expansion_reservation(["6", "7", "1"], "003")
 
-    def test_trace(self):
-        self.sut.trace()
-
     def test_get_best_option(self):
         res = self.sut.get_optimized(["2", "3"], "002")
         self.assertListEqual(res, ["3"])
