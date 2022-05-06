@@ -366,7 +366,7 @@ class BaseAllocator:
             bak_type=bak_type,
         )
         for exp in expansion_candidates:
-            self.cluster_finder.set_stands_reserved(exp)
+            self.cluster_finder.set_stands_reserved(exp, erk=erk)
         if (
             len(expansion_candidates) > 0
             and self.expansion_mode == EXPANSION_MODE_GREEDY
@@ -1063,6 +1063,11 @@ class BaseAllocator:
             if len(stds) == 0 and len(minimal_possible) > 0:
                 stds = minimal_possible
 
+            if len(stds) > 1 and query != "all":
+                # TODO: find the sweetspot inside this cluster
+                psf = PreferredStandFinder(stds, pref)
+                stds = psf.produce()
+
             if expand:
                 self._prepare_expansion(
                     erk,
@@ -1073,10 +1078,7 @@ class BaseAllocator:
                     evi,
                     bak_type,
                 )
-            if len(stds) > 1 and query != "all":
-                # TODO: find the sweetspot inside this cluster
-                psf = PreferredStandFinder(stds, pref)
-                stds = psf.produce()
+
             self._allocate_stands_to_merchant(stds, erk)
 
     def _expand_for_merchants(self, df):
@@ -1107,6 +1109,7 @@ class BaseAllocator:
                     ignore_check_available=assigned_stands,
                     erk=erk,
                     bak_type=bak_type,
+                    allocate=True,
                 )
                 if len(stands) > 0:
                     self._allocate_stands_to_merchant(

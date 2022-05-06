@@ -17,6 +17,7 @@ from kjk.utils import BranchesScrutenizer
 from kjk.utils import AllocationDebugger
 from kjk.utils import PreferredStandFinder
 from kjk.utils import RejectionReasonManager
+from kjk.utils import ExpansionOptimizer
 from kjk.test_utils import (
     print_alloc,
     stands_erk,
@@ -25,6 +26,18 @@ from kjk.test_utils import (
     ErkenningsnummerNotFoudError,
 )
 from kjk.utils import TradePlacesSolver
+
+
+class ExpansionOptimizerTestCase(unittest.TestCase):
+    def setUp(self):
+        self.sut = ExpansionOptimizer()
+        self.sut.add_expansion_reservation(["1", "2"], "001")
+        self.sut.add_expansion_reservation(["2", "3"], "002")
+        self.sut.add_expansion_reservation(["6", "7", "1"], "003")
+
+    def test_get_best_option(self):
+        res = self.sut.get_optimized(["2", "3"], "002")
+        self.assertListEqual(res, ["3"])
 
 
 class RejectionManagerTestCase(unittest.TestCase):
@@ -303,12 +316,6 @@ class ClusterFinderTestCase(unittest.TestCase):
         self.assertListEqual([["244"]], res)
         res = self.sut.find_valid_expansion(["211", "213"], total_size=4)
         self.assertListEqual([["207 - 209", "215"], ["215", "217"]], res)
-
-    def test_find_valid_expansion_prefs(self):
-        res = self.sut.find_valid_expansion(
-            ["213", "215"], total_size=3, prefs=["211", "215"], preferred=True
-        )
-        self.assertListEqual(["211"], res)
 
     def test_get_neighbours(self):
         res = self.sut.get_neighbours_for_stand_id("155")
