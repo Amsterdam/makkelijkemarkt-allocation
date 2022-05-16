@@ -904,6 +904,8 @@ class BaseAllocator:
         # vpl always gets the stand, even if max branche is exeeded
         if "vpl" in merchant_obj["status"]:
             return True
+        if "eb" in merchant_obj["status"]:
+            return True
         return self.branches_scrutenizer.allocation_allowed(branches)
 
     def _allocate_stands_to_merchant(self, stands_to_alloc, erk, dequeue_merchant=True):
