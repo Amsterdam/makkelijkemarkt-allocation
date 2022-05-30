@@ -103,11 +103,11 @@ class AllocationDebuggerTestCase(unittest.TestCase):
         result = self.sut.get_allocation_phase_for_merchant("6041993100")
         self.assertEqual("merchant: 6041993100 -> Phase 11", result)
 
-    def test_by_unknwon_merchant(self):
+    def test_by_unknown_merchant_1(self):
         result = self.sut.get_allocation_phase_for_merchant("xx6041993100")
         self.assertEqual(None, result)
 
-    def test_by_unknwon_merchant(self):
+    def test_by_unknown_merchant_2(self):
         result = self.sut.get_allocation_phase_for_stand("1234")
         self.assertEqual(None, result)
 
@@ -521,7 +521,7 @@ class AllocatorTest(unittest.TestCase):
 
     def test_dequeue_merchant(self):
         l1 = self.sut.num_merchants_in_queue()
-        self.sut.dequeue_marchant("3000187072")
+        self.sut.dequeue_merchant("3000187072")
         l2 = self.sut.num_merchants_in_queue()
         self.assertEqual(l1, l2 + 1)
 

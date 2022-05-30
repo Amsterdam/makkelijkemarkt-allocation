@@ -429,6 +429,15 @@ class BaseAllocator:
         self.merchants_df["has_bak"] = self.merchants_df.apply(has_bak, axis=1)
 
     def create_expanders_set(self):
+        """
+        Add boolean column to the merchants dataframe
+        for people who want to expand.
+        And create a separate dataframe with the expanders.
+        Soll merchants get 1 stand as default.
+        Vpl and equivalent will get their fixed positions and want to expand
+        if max (or min) is larger than len(fixed)
+        """
+
         def wants_to_expand(x):
             if x["status"] in ("vpl", "tvpl", "exp", "expf", "eb"):
                 try:
@@ -451,6 +460,11 @@ class BaseAllocator:
         self.expanders_df = self.merchants_df.query("wants_expand == True").copy()
 
     def create_reducers_set(self):
+        """
+        vpl merchants can opt to have less stands than their fixed positions.
+        Add a boolean column to the merchants dataframe.
+        """
+
         def wants_to_reduce(x):
             if x["status"] in ("vpl", "tvpl", "exp", "expf", "eb"):
                 try:
@@ -541,6 +555,9 @@ class BaseAllocator:
             pass
 
     def get_required_for_branche(self, b):
+        """
+        Add a required column to the branches dataframe
+        """
         try:
             if len(b) == 0:
                 return "no"
@@ -575,6 +592,11 @@ class BaseAllocator:
             return "no"
 
     def add_alist_status_for_merchant(self):
+        """
+        Add an A-list boolean to the merchants dataframe.
+        If true a merchant will allocated bofore others (B-list)
+        """
+
         def prefs(x):
             try:
                 result_df = self.a_list_df[
@@ -606,6 +628,11 @@ class BaseAllocator:
                 self.merchants_df[c[0]] = [c[1] for x in range(len(self.merchants_df))]
 
     def add_required_branche_for_merchant(self):
+        """
+        Does the merchant sell a required branche?
+        If true this merchant will only be allocated on 'branched' stands.
+        """
+
         def required(x):
             try:
                 return self.get_required_for_branche(x)
@@ -624,6 +651,10 @@ class BaseAllocator:
         self.merchants_df["voorkeur.branches"] = cleansed_branches
 
     def add_evi_for_merchant(self):
+        """
+        Does the merchant bring his own stand inventory.
+        """
+
         def has_evi(x):
             try:
                 if "eigen-materieel" in x:
@@ -837,7 +868,7 @@ class BaseAllocator:
         result_df = result_df["erkenningsNummer"]
         return result_df.to_list()
 
-    def dequeue_marchant(self, merchant_id):
+    def dequeue_merchant(self, merchant_id):
         self.merchants_df.drop(merchant_id, inplace=True)
 
     def dequeue_market_stand(self, stand_id):
@@ -856,6 +887,10 @@ class BaseAllocator:
         return stand["branches"].iloc[0]
 
     def get_stand_for_branche(self, branche):
+        """
+        Get the stands data-slice for given branche.
+        """
+
         def is_branche(x):
             try:
                 if branche in x:
@@ -868,6 +903,9 @@ class BaseAllocator:
         return self.positions_df[stands]
 
     def reject_remaining_merchants(self):
+        """
+        If the market is full, reject the merchants still in the queue.
+        """
         log.warning(
             "Ondernemers af te wijzen in deze fase: {}".format(len(self.merchants_df))
         )
@@ -877,15 +915,22 @@ class BaseAllocator:
             self._reject_merchant(erk, reason)
 
     def _reject_merchant(self, erk, reason):
+        """
+        Reject a merchant, and dequeue.
+        """
         self.market_output.add_rejection(erk, reason, self.merchant_object_by_id(erk))
         try:
-            self.dequeue_marchant(erk)
+            self.dequeue_merchant(erk)
         except KeyError:
             raise MerchantDequeueError(
                 "Could not dequeue merchant, there may be a duplicate merchant id in the input data!"
             )
 
     def _allocation_wanted(self, erk, stands_to_alloc):
+        """
+        Does the soll merchant want the assigned stand?
+        If anywhere is false he only wants his preferred stands.
+        """
         try:
             df = self.merchants_df.query(
                 "`voorkeur.anywhere` == False & status == 'soll'"
@@ -901,7 +946,10 @@ class BaseAllocator:
         return all([std in prefs for std in stands_to_alloc])
 
     def _allocation_allowed(self, merchant_obj, branches):
-        # vpl always gets the stand, even if max branche is exeeded
+        """
+        Allocation is allowed if max branches is not exceeded.
+        vpl, eb always gets the stand, even if max branche is exeeded
+        """
         if "vpl" in merchant_obj["status"]:
             return True
         if "eb" in merchant_obj["status"]:
@@ -961,7 +1009,7 @@ class BaseAllocator:
                         stand_dequeue_error = True
                 try:
                     if dequeue_merchant:
-                        self.dequeue_marchant(erk)
+                        self.dequeue_merchant(erk)
                 except KeyError:
                     stand_dequeue_error = True
 
