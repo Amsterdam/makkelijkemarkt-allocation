@@ -459,6 +459,26 @@ class BaseAllocator:
         )
         self.expanders_df = self.merchants_df.query("wants_expand == True").copy()
 
+    def _add_vpl_moved_status_to_expanders(self, movers_dict):
+        """
+        If two vpl's compete for the same expansion spot.
+        The vpl that did not move should get the stand.
+        """
+
+        def did_succesfully_expand(x):
+            erk = x["erkenningsNummer"]
+            if erk in movers_dict:
+                return True
+            return False
+
+        if self.expanders_df is not None:
+            if len(self.expanders_df) > 0:
+                self.expanders_df["vpl_did_move"] = self.expanders_df.apply(
+                    did_succesfully_expand, axis=1
+                )
+            else:
+                self.expanders_df["vpl_did_move"] = False
+
     def create_reducers_set(self):
         """
         vpl merchants can opt to have less stands than their fixed positions.

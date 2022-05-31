@@ -102,7 +102,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
         solver = MovingVPLSolver(
             self, "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
         )
-        solver.execute()
+        solver.execute(print_df=False)
+        self._add_vpl_moved_status_to_expanders(solver.get_successful_movers())
 
     def check_vpl_done(self):
         # double check all vpls allocated
@@ -158,7 +159,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
         if self.expanders_df is None:
             return
         df = self.expanders_df.query(
-            "status == 'vpl' | status == 'tvpl' | status == 'tvplz' | status == 'eb'"
+            "(status == 'vpl' | status == 'tvpl' | status == 'tvplz' | status == 'eb') & vpl_did_move == False"
+        )
+        self._expand_for_merchants(df)
+        df = self.expanders_df.query(
+            "(status == 'vpl' | status == 'tvpl' | status == 'tvplz' | status == 'eb') & vpl_did_move == True"
         )
         self._expand_for_merchants(df)
         self.cluster_finder.set_check_branche_bak_evi(False)
