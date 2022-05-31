@@ -158,3 +158,9 @@ De meeste allocatie methods in de base allocatie class hebben een debug paramete
 
     self._allocate_vpl_for_query("status == 'vpl' & will_move == 'no'", print_df=True)
 
+## testing util functions
+
+In de module `kjk.test_utils` zijn enkele test utils opgenomen. Om bijvoorbeeld te testen of sollicitatienummer `63` plaats `75` heeft gekregen kun je de volgende code gebruiken. Zie de module voor meer info.
+
+    tw = alloc_sollnr(63, self.market_allocation)
+    self.assertListEqual(tw["plaatsen"], ["75"])

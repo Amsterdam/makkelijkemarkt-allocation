@@ -3,10 +3,11 @@ from kjk import allocation
 from kjk.inputdata import FixtureDataprovider
 from kjk.utils import AllocationDebugger
 
-allocation.DEBUG = True
+# allocation.DEBUG = True
 
 dp = FixtureDataprovider("/home/johan/Desktop/eb-bak-zwaar_5.json")
 allocator = Allocator(dp)
+breakpoint()
 allocator.get_allocation()
 
 
