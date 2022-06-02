@@ -27,6 +27,7 @@ class MovingVPLSolver:
         self.query = query
         self.df = None
         self.has_conflicts = False
+        self.successful_movers = {}
 
     def execute(self, print_df=False):
         # set the state of the cluster finder
@@ -218,6 +219,7 @@ class MovingVPLSolver:
             try:
                 expand = row["wants_expand"]
                 if expand:
+                    self.successful_movers[erk] = stands_to_alloc
                     self.allocator._prepare_expansion(
                         erk,
                         stands_to_alloc,
@@ -232,6 +234,9 @@ class MovingVPLSolver:
                 clog.error(
                     f"VPL plaatsen (verplaatsing) niet beschikbaar voor erkenningsNummer {erk}"
                 )
+
+    def get_successful_movers(self):
+        return self.successful_movers
 
     def _finalize(self):
         # first check if we have rejections
@@ -297,6 +302,7 @@ class MovingVPLSolver:
                         )
             else:
                 if expand:
+                    self.successful_movers[erk] = valid_pref_stands
                     self.allocator._prepare_expansion(
                         erk,
                         valid_pref_stands,
