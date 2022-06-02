@@ -127,8 +127,8 @@ Het is mogelijk om de input van een allocatie vanuit de browser op te slaan en a
             }
 
 5. Laad de opgeslagen fixture in de debug script. zie `debug.py`
-6. Run de debug allocatie: `export $(cat .env.local) && python debug.py` (Zet de env vars voor de lokale redis)
-7. De indeling is nu te bekijken op 127.0.0.1:8080/job/1
+6. Run de debug allocatie: `export $(cat ../.env.local) && python debug.py` (Zet de env vars voor de lokale redis)
+7. De indeling is nu te bekijken op 127.0.0.1:8093/job/1
 
 
 ## overige debug tools
