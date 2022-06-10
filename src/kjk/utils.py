@@ -105,11 +105,28 @@ class ExpansionOptimizer:
                 self.weighted_expansion_options[o] = 0
             self.weighted_expansion_options[o] += 1
 
-    def get_optimized(self, options, erk):
+    def _get_optimized_by_prefs(self, options, erk, prefs):
+        if len(options) < 2:
+            return options
+        else:
+            for std in prefs:
+                for option in options:
+                    if std in option:
+                        return [option]
+            return []
+
+    def get_optimized(self, options, erk, prefs=None):
         """
+        First check if we have prefs (right now only for EB merchants)
+        if an options matches the pref return that option else
         return the option with the lowest weight.
         (fewest expansion claims)
         """
+        if prefs is not None:
+            result = self._get_optimized_by_prefs(options, erk, prefs)
+            if len(result) > 0:
+                return result
+
         if len(options) < 2:
             return options
         else:
@@ -456,6 +473,7 @@ class MarketStandClusterFinder:
         erk=None,
         bak_type=None,
         allocate=False,
+        prefs=None,
     ):
         """
         check all adjacent clusters of the requested size,
@@ -496,7 +514,9 @@ class MarketStandClusterFinder:
                 ):
                     valid_options.append(option)
         if allocate:
-            return self.expansion_optimizer.get_optimized(valid_options, erk)
+            return self.expansion_optimizer.get_optimized(
+                valid_options, erk, prefs=prefs
+            )
         return valid_options
 
     def find_valid_cluster(
