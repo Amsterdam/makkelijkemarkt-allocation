@@ -67,7 +67,7 @@ class TestAlistAllocations(unittest.TestCase):
 
     def test_assign_pref_to_blist_evi_and_baking(self):
         """
-        krijgt geen voorrang over EVI- en verplichte branche sollicitanten op de B-lijst
+        krijgt WEL voorrang over EVI- en verplichte branche sollicitanten op de B-lijst
         """
         dp = MockDataprovider("../fixtures/test_input.json")
 
@@ -126,7 +126,7 @@ class TestAlistAllocations(unittest.TestCase):
         dp.mock()
         allocator = Allocator(dp)
         allocation = allocator.get_allocation()
-        erk = alloc_erk("1", allocation)
+        erk = alloc_erk("2", allocation)
         self.assertListEqual(erk["plaatsen"], ["1"])
 
     def test_assign_pref_to_blist(self):
