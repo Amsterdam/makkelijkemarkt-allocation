@@ -4,6 +4,7 @@ from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider, MockDataprovider
 from kjk.test_utils import print_alloc
 from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc
+from kjk.utils import AllocationDebugger
 
 
 class TestEBExpansionPref(unittest.TestCase):
@@ -41,8 +42,39 @@ class TestEBExpansionPref(unittest.TestCase):
         self.dp.mock()
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
-        alloc = alloc_erk("1", allocation)
-        self.assertEqual(2, len(alloc["plaatsen"]))
-        self.assertIn("2", alloc["plaatsen"])
-        self.assertNotIn("1", alloc["plaatsen"])
-        self.assertIn("3", alloc["plaatsen"])
+        allocated = alloc_erk("1", allocation)
+        self.assertEqual(2, len(allocated["plaatsen"]))
+        self.assertIn("2", allocated["plaatsen"])  # vaste plaats
+        self.assertIn("3", allocated["plaatsen"])  # uitbreiding: get preferred 3
+        self.assertNotIn("1", allocated["plaatsen"])
+
+    def test_eb_expansion_with_sollicitant_on_same_stand(self):
+        self.dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="222",
+            description="Sollicitant",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "anywhere": False,
+            },
+        )
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="3", priority=1)
+        self.dp.add_rsvp(erkenningsNummer="2", attending=True)
+        self.dp.set_alist([{"erkenningsNummer": "2"}])
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+
+        allocated_1 = alloc_erk("1", allocation)
+        self.assertEqual(2, len(allocated_1["plaatsen"]))
+        self.assertIn("2", allocated_1["plaatsen"])  # vaste plaats
+        self.assertIn("1", allocated_1["plaatsen"])  # uitbreiding: 1 instead of preferred 3
+        self.assertNotIn("3", allocated_1["plaatsen"])  # 3 should be obtained by Sollicitant
+
+        allocated_2 = alloc_erk("2", allocation)
+        self.assertEqual(1, len(allocated_2["plaatsen"]))
+        self.assertIn("3", allocated_2["plaatsen"])  # Sollicitant got priority on 2
