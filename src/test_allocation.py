@@ -36,8 +36,26 @@ class ExpansionOptimizerTestCase(unittest.TestCase):
         self.sut.add_expansion_reservation(["6", "7", "1"], "003")
 
     def test_get_best_option(self):
-        res = self.sut.get_optimized(["2", "3"], "002")
-        self.assertListEqual(res, ["3"])
+        res = self.sut.get_optimized([["2"], ["3"]], "002")
+        self.assertListEqual(res, [["3"]])
+
+    def test_get_optimized_with_single_option(self):
+        single_option = [["2"]]
+        pref = single_option
+        res = self.sut.get_optimized(single_option, "002", pref)
+        self.assertListEqual(res, single_option)
+
+    def test_get_optimized_with_pref(self):
+        options = [["2"], ["3"]]
+        pref = options[0]
+        res = self.sut.get_optimized(options, "002", pref)
+        self.assertListEqual(res, [pref])
+
+    def test_get_optimized_with_pref_not_in_options(self):
+        options = [["2"], ["3"]]
+        pref_not_in_options = ["1"]
+        res = self.sut.get_optimized(options, "002", pref_not_in_options)
+        self.assertListEqual(res, [["3"]])
 
 
 class RejectionManagerTestCase(unittest.TestCase):

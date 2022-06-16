@@ -137,3 +137,6 @@ dmypy.json
 
 # asdf tool-versions
 .tool-versions
+
+# editors
+.idea/

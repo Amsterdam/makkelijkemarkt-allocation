@@ -324,44 +324,44 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self._phase_msg(10, "Sollicitanten met een EVI op de A-lijst")
         self.evi_soll(list_mode=MODE_ALIST)
 
+        self._phase_msg(11, "Overige sollicitanten op de A-lijst")
+        self.regular_soll(list_mode=MODE_ALIST)
+
         # expansion alist vpl and branche-bak-evi soll
         self.enable_expansion("VPL + BRANCHE-BAK-EVI soll A-lijst")
         while not self.expansion_finished():
-            self._phase_msg(11, "Uitbreidings fase voor vpl.")
+            self._phase_msg(12, "Uitbreidings fase voor vpl.")
             self.expand_vpl()
 
-            self._phase_msg(12, "Uitbreidings fase voor branche sollicitanten.")
+            self._phase_msg(13, "Uitbreidings fase voor branche sollicitanten.")
             self.expand_branche_soll(list_mode=MODE_ALIST)
 
-            self._phase_msg(13, "Uitbreidings fase voor BAK sollicitanten.")
+            self._phase_msg(14, "Uitbreidings fase voor BAK sollicitanten.")
             self.expand_bak_soll(list_mode=MODE_ALIST)
 
-            self._phase_msg(14, "Uitbreidings fase voor EVI sollicitanten.")
+            self._phase_msg(15, "Uitbreidings fase voor EVI sollicitanten.")
             self.expand_evi_soll(list_mode=MODE_ALIST)
 
-        self._phase_msg(15, "Sollicitanten met verplichte branche op de B-lijst")
+        self._phase_msg(16, "Sollicitanten met verplichte branche op de B-lijst")
         self.branche_soll(list_mode=MODE_BLIST)
 
-        self._phase_msg(16, "Sollicitanten met BAK op de B-lijst")
+        self._phase_msg(17, "Sollicitanten met BAK op de B-lijst")
         self.bak_soll(list_mode=MODE_BLIST)
 
-        self._phase_msg(17, "Sollicitanten met een EVI op de B-lijst")
+        self._phase_msg(18, "Sollicitanten met een EVI op de B-lijst")
         self.evi_soll(list_mode=MODE_BLIST)
 
         # expansion blist branche-bak-evi soll
         self.enable_expansion("BRANCHE-BAK-EVI soll B-lijst")
         while not self.expansion_finished():
-            self._phase_msg(18, "Uitbreidings fase voor branche sollicitanten.")
+            self._phase_msg(19, "Uitbreidings fase voor branche sollicitanten.")
             self.expand_branche_soll(list_mode=MODE_BLIST)
 
-            self._phase_msg(19, "Uitbreidings fase voor BAK sollicitanten.")
+            self._phase_msg(20, "Uitbreidings fase voor BAK sollicitanten.")
             self.expand_bak_soll(list_mode=MODE_BLIST)
 
-            self._phase_msg(20, "Uitbreidings fase voor EVI sollicitanten.")
+            self._phase_msg(21, "Uitbreidings fase voor EVI sollicitanten.")
             self.expand_evi_soll(list_mode=MODE_BLIST)
-
-        self._phase_msg(21, "Overige sollicitanten op de A-lijst")
-        self.regular_soll(list_mode=MODE_ALIST)
 
         # expansion alist soll
         self.enable_expansion("Overige soll A-lijst")
@@ -375,7 +375,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         # expansion blist soll
         self.enable_expansion("Overige soll B-lijst")
         while not self.expansion_finished():
-            self._phase_msg(23, "Uitbreidings fase overige sollicitanten.")
+            self._phase_msg(24, "Uitbreidings fase overige sollicitanten.")
             self.expand_regular_soll(list_mode=MODE_BLIST)
 
         # validation

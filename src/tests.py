@@ -16,6 +16,7 @@ from testcases.avoid_pref_by_sollnr import *
 from testcases.baklicht import *
 from testcases.art_312_lid_2 import *
 from testcases.bug_fixes import *
+from testcases.eb_expansion_pref import *
 
 # unit-test
 from test_allocation import *

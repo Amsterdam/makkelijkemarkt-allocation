@@ -1161,6 +1161,9 @@ class BaseAllocator:
             maxi = row["voorkeur.maximum"]
             status = row["status"]
             bak_type = row["bak_type"]
+            expansion_prefs = None
+            if status == "eb":
+                expansion_prefs = row["pref"]
 
             # exp, expf can not expand
             if status in ("exp", "expf"):
@@ -1180,6 +1183,7 @@ class BaseAllocator:
                     erk=erk,
                     bak_type=bak_type,
                     allocate=True,
+                    prefs=expansion_prefs,
                 )
                 if len(stands) > 0:
                     self._allocate_stands_to_merchant(
