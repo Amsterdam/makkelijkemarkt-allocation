@@ -3,11 +3,11 @@ from pprint import pprint
 from kjk.allocation import Allocator
 from kjk.inputdata import FixtureDataprovider, MockDataprovider
 from kjk.test_utils import print_alloc
-from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc
+from kjk.test_utils import alloc_erk, alloc_sollnr, stands_erk, reject_erk, print_alloc
 from kjk.utils import AllocationDebugger
 
 
-class TestEBExpansionPref(unittest.TestCase):
+class TestEBExpansionPrefWithMock(unittest.TestCase):
     def setUp(self):
         dp = MockDataprovider("../fixtures/test_input.json")
 
@@ -78,3 +78,17 @@ class TestEBExpansionPref(unittest.TestCase):
         allocated_2 = alloc_erk("2", allocation)
         self.assertEqual(1, len(allocated_2["plaatsen"]))
         self.assertIn("3", allocated_2["plaatsen"])  # Sollicitant got priority on 2
+
+
+class TestEBExpansionPref(unittest.TestCase):
+    def setUp(self):
+        dp = FixtureDataprovider("../fixtures/eb-expansion-prefs.json")
+        allocator = Allocator(dp)
+        self.market_allocation = allocator.get_allocation()
+
+    def test_eb_expansion_direction(self):
+        allocated = alloc_sollnr(9744, self.market_allocation)
+        self.assertEqual(2, len(allocated["plaatsen"]))
+        self.assertIn("189", allocated["plaatsen"])  # vaste plaats
+        self.assertIn("191", allocated["plaatsen"])  # uitbreiding: 191 instead of preferred 189
+        self.assertNotIn("187", allocated["plaatsen"])  # without pref 187 would be allocated
