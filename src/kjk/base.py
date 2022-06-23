@@ -1162,10 +1162,7 @@ class BaseAllocator:
             anywhere = None
             if status == "eb":
                 expansion_prefs = row["pref"]
-                try:
-                    anywhere = row["voorkeur.anywhere"]
-                except KeyError:
-                    anywhere = True
+                anywhere = row.get("voorkeur.anywhere", True)
 
             # exp, expf can not expand
             if status in ("exp", "expf"):
