@@ -106,7 +106,7 @@ class ExpansionOptimizer:
             self.weighted_expansion_options[o] += 1
 
     def _get_optimized_by_prefs(self, options, erk, prefs, anywhere):
-        if len(options) < 2 and anywhere: 
+        if len(options) < 2 and anywhere:
             return options
         else:
             for std in prefs:
@@ -123,10 +123,10 @@ class ExpansionOptimizer:
         (fewest expansion claims)
         """
         if prefs is not None:
-            #We ignore anywhere (default=True) if EB merchant did not set any prefs
-            if len(prefs) == 0 and status == 'eb':
+            # We ignore anywhere (default=True) if EB merchant did not set any prefs
+            if len(prefs) == 0 and status == "eb":
                 anywhere = True
-            
+
             result = self._get_optimized_by_prefs(options, erk, prefs, anywhere)
             if len(result) > 0 or not anywhere:
                 return result
@@ -521,7 +521,11 @@ class MarketStandClusterFinder:
                     valid_options.append(option)
         if allocate:
             return self.expansion_optimizer.get_optimized(
-                valid_options, erk, prefs=prefs, anywhere=anywhere, status=status,
+                valid_options,
+                erk,
+                prefs=prefs,
+                anywhere=anywhere,
+                status=status,
             )
         return valid_options
 

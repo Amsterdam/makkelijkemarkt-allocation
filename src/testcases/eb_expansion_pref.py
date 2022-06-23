@@ -88,8 +88,12 @@ class TestEBExpansionPrefWithMock(unittest.TestCase):
         allocated_1 = alloc_erk("1", allocation)
         self.assertEqual(2, len(allocated_1["plaatsen"]))
         self.assertIn("2", allocated_1["plaatsen"])  # vaste plaats
-        self.assertIn("1", allocated_1["plaatsen"])  # uitbreiding: 1 instead of preferred 3
-        self.assertNotIn("3", allocated_1["plaatsen"])  # 3 should be obtained by Sollicitant
+        self.assertIn(
+            "1", allocated_1["plaatsen"]
+        )  # uitbreiding: 1 instead of preferred 3
+        self.assertNotIn(
+            "3", allocated_1["plaatsen"]
+        )  # 3 should be obtained by Sollicitant
 
         allocated_2 = alloc_erk("2", allocation)
         self.assertEqual(1, len(allocated_2["plaatsen"]))
@@ -133,9 +137,13 @@ class TestEBExpansionPrefWithMock(unittest.TestCase):
         allocation = allocator.get_allocation()
 
         allocated_1 = alloc_erk("1", allocation)
-        self.assertEqual(1, len(allocated_1["plaatsen"])) # should get one place because expansion place is taken
+        self.assertEqual(
+            1, len(allocated_1["plaatsen"])
+        )  # should get one place because expansion place is taken
         self.assertIn("2", allocated_1["plaatsen"])  # vaste plaats
-        self.assertNotIn("3", allocated_1["plaatsen"])  # 3 should be obtained by Sollicitant
+        self.assertNotIn(
+            "3", allocated_1["plaatsen"]
+        )  # 3 should be obtained by Sollicitant
 
         allocated_2 = alloc_erk("2", allocation)
         self.assertEqual(1, len(allocated_2["plaatsen"]))
@@ -152,5 +160,9 @@ class TestEBExpansionPref(unittest.TestCase):
         allocated = alloc_sollnr(9744, self.market_allocation)
         self.assertEqual(2, len(allocated["plaatsen"]))
         self.assertIn("189", allocated["plaatsen"])  # vaste plaats
-        self.assertIn("191", allocated["plaatsen"])  # uitbreiding: 191 instead of preferred 189
-        self.assertNotIn("187", allocated["plaatsen"])  # without pref 187 would be allocated
+        self.assertIn(
+            "191", allocated["plaatsen"]
+        )  # uitbreiding: 191 instead of preferred 189
+        self.assertNotIn(
+            "187", allocated["plaatsen"]
+        )  # without pref 187 would be allocated
