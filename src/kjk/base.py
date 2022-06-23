@@ -1078,10 +1078,7 @@ class BaseAllocator:
             evi = row["has_evi"] == "yes"
             bak = row["has_bak"]
             bak_type = row["bak_type"]
-            try:
-                anywhere = row["voorkeur.anywhere"]
-            except KeyError:
-                anywhere = False
+            anywhere = row.get("voorkeur.anywhere", False)
 
             minimal_possible = self.cluster_finder.find_valid_cluster(
                 pref,
