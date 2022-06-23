@@ -1162,8 +1162,13 @@ class BaseAllocator:
             status = row["status"]
             bak_type = row["bak_type"]
             expansion_prefs = None
+            anywhere = None
             if status == "eb":
                 expansion_prefs = row["pref"]
+                try:
+                    anywhere = row["voorkeur.anywhere"]
+                except KeyError:
+                    anywhere = True
 
             # exp, expf can not expand
             if status in ("exp", "expf"):
@@ -1184,6 +1189,8 @@ class BaseAllocator:
                     bak_type=bak_type,
                     allocate=True,
                     prefs=expansion_prefs,
+                    anywhere=anywhere,
+                    status=status,
                 )
                 if len(stands) > 0:
                     self._allocate_stands_to_merchant(

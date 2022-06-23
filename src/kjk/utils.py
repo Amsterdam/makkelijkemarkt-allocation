@@ -105,8 +105,8 @@ class ExpansionOptimizer:
                 self.weighted_expansion_options[o] = 0
             self.weighted_expansion_options[o] += 1
 
-    def _get_optimized_by_prefs(self, options, erk, prefs):
-        if len(options) < 2:
+    def _get_optimized_by_prefs(self, options, erk, prefs, anywhere):
+        if len(options) < 2 and anywhere: 
             return options
         else:
             for std in prefs:
@@ -115,7 +115,7 @@ class ExpansionOptimizer:
                         return [option]
             return []
 
-    def get_optimized(self, options, erk, prefs=None):
+    def get_optimized(self, options, erk, prefs=None, anywhere=True, status=None):
         """
         First check if we have prefs (right now only for EB merchants)
         if an options matches the pref return that option else
@@ -123,8 +123,12 @@ class ExpansionOptimizer:
         (fewest expansion claims)
         """
         if prefs is not None:
-            result = self._get_optimized_by_prefs(options, erk, prefs)
-            if len(result) > 0:
+            #We ignore anywhere (default=True) if EB merchant did not set any prefs
+            if len(prefs) == 0 and status == 'eb':
+                anywhere = True
+            
+            result = self._get_optimized_by_prefs(options, erk, prefs, anywhere)
+            if len(result) > 0 or not anywhere:
                 return result
 
         if len(options) < 2:
@@ -474,6 +478,8 @@ class MarketStandClusterFinder:
         bak_type=None,
         allocate=False,
         prefs=None,
+        anywhere=True,
+        status=None,
     ):
         """
         check all adjacent clusters of the requested size,
@@ -515,7 +521,7 @@ class MarketStandClusterFinder:
                     valid_options.append(option)
         if allocate:
             return self.expansion_optimizer.get_optimized(
-                valid_options, erk, prefs=prefs
+                valid_options, erk, prefs=prefs, anywhere=anywhere, status=status,
             )
         return valid_options
 
