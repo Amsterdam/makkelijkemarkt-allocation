@@ -1078,10 +1078,7 @@ class BaseAllocator:
             evi = row["has_evi"] == "yes"
             bak = row["has_bak"]
             bak_type = row["bak_type"]
-            try:
-                anywhere = row["voorkeur.anywhere"]
-            except KeyError:
-                anywhere = False
+            anywhere = row.get("voorkeur.anywhere", False)
 
             minimal_possible = self.cluster_finder.find_valid_cluster(
                 pref,
@@ -1162,8 +1159,10 @@ class BaseAllocator:
             status = row["status"]
             bak_type = row["bak_type"]
             expansion_prefs = None
+            anywhere = None
             if status == "eb":
                 expansion_prefs = row["pref"]
+                anywhere = row.get("voorkeur.anywhere", True)
 
             # exp, expf can not expand
             if status in ("exp", "expf"):
@@ -1184,6 +1183,8 @@ class BaseAllocator:
                     bak_type=bak_type,
                     allocate=True,
                     prefs=expansion_prefs,
+                    anywhere=anywhere,
+                    status=status,
                 )
                 if len(stands) > 0:
                     self._allocate_stands_to_merchant(
