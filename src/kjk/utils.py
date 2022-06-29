@@ -138,7 +138,7 @@ class ExpansionOptimizer:
             best_option = None
             for o in options:
                 for plaats_id in o:
-                    weight = self.weighted_expansion_options[plaats_id]
+                    weight = self.weighted_expansion_options.get(plaats_id, 9998)
                     if weight < w:
                         w = weight
                         best_option = o
