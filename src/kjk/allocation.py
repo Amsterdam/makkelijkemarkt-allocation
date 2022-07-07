@@ -24,7 +24,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
     """
 
     def _phase_msg(self, phase_id, message):
-        self.set_allocation_phase("Phase 2")
+        self.set_allocation_phase(f"Phase {phase_id}")
         log.info("")
         clog.info(f"--- ALLOCATIE FASE {phase_id} ---")
         log.info(message)
