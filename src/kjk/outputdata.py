@@ -9,6 +9,10 @@ class ConvertToRejectionError(Exception):
     pass
 
 
+class PrefKeyNotFoundException(Exception):
+    pass
+
+
 class MarketArrangement:
     """
     A MarketArrangement is responsible for producing the output JSON structure for KjK.
@@ -125,7 +129,10 @@ class MarketArrangement:
             weighted_prefs = {}
             for pref in self.prefs:
                 if allocation["erkenningsNummer"] == pref.get('erkenningsNummer'):
-                    weighted_prefs[pref.get('plaatsId')] = pref.get('priority')
+                    try:
+                        weighted_prefs[pref['plaatsId']] = pref['priority']
+                    except KeyError:
+                        raise PrefKeyNotFoundException("Pref is missing plaatsId or priority")
             weighted_prefs_result = sorted(weighted_prefs, key=weighted_prefs.__getitem__)
             allocation["ondernemer"]["plaatsvoorkeuren"] = weighted_prefs_result
 
