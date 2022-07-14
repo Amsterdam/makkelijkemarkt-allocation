@@ -9,6 +9,10 @@ class ConvertToRejectionError(Exception):
     pass
 
 
+class PrefKeyNotFoundException(Exception):
+    pass
+
+
 class MarketArrangement:
     """
     A MarketArrangement is responsible for producing the output JSON structure for KjK.
@@ -28,6 +32,7 @@ class MarketArrangement:
         self.obstacles = []
         self.market_positions = []
         self.merchants = []
+        self.prefs = []
 
         self.assigned_stands = {}
 
@@ -83,6 +88,9 @@ class MarketArrangement:
     def set_merchants(self, merchants):
         self.merchants = merchants
 
+    def set_prefs(self, prefs):
+        self.prefs = prefs
+
     def set_branches(self, branches):
         self.branches = branches
 
@@ -110,8 +118,27 @@ class MarketArrangement:
         self.output["ondernemers"] = self.merchants
         self.output["markt"] = self.market_config
         self.output["toewijzingen"] = list(self.allocation_dict.values())
+        self.__add_prefs_to_allocations(self.output["toewijzingen"])
         self.output["afwijzingen"] = self.rejection_list
+        self.__add_prefs_to_allocations(self.output["afwijzingen"])
         return self.output
+
+    def __add_prefs_to_allocations(self, allocations):
+        for allocation in allocations:
+            allocation["ondernemer"]["plaatsvoorkeuren"] = []
+            weighted_prefs = {}
+            for pref in self.prefs:
+                if allocation["erkenningsNummer"] == pref.get("erkenningsNummer"):
+                    try:
+                        weighted_prefs[pref["plaatsId"]] = pref["priority"]
+                    except KeyError:
+                        raise PrefKeyNotFoundException(
+                            "Pref is missing plaatsId or priority"
+                        )
+            weighted_prefs_result = sorted(
+                weighted_prefs, key=weighted_prefs.__getitem__
+            )
+            allocation["ondernemer"]["plaatsvoorkeuren"] = weighted_prefs_result
 
     def to_json_file(self, file_name="../test_output.json"):
         f = open(file_name, "w")

@@ -185,6 +185,7 @@ class BaseAllocator:
         self.market_output.set_branches(self.branches)
         self.market_output.set_market_positions(self.open_positions)
         self.market_output.set_merchants(self.merchants)
+        self.market_output.set_prefs(self.prefs)
         self.market_output.set_market_blocks(self.market_blocks)
         self.market_output.set_obstacles(self.obstacles)
         self.market_output.set_rsvp(self.rsvp)
