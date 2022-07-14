@@ -128,12 +128,16 @@ class MarketArrangement:
             allocation["ondernemer"]["plaatsvoorkeuren"] = []
             weighted_prefs = {}
             for pref in self.prefs:
-                if allocation["erkenningsNummer"] == pref.get('erkenningsNummer'):
+                if allocation["erkenningsNummer"] == pref.get("erkenningsNummer"):
                     try:
-                        weighted_prefs[pref['plaatsId']] = pref['priority']
+                        weighted_prefs[pref["plaatsId"]] = pref["priority"]
                     except KeyError:
-                        raise PrefKeyNotFoundException("Pref is missing plaatsId or priority")
-            weighted_prefs_result = sorted(weighted_prefs, key=weighted_prefs.__getitem__)
+                        raise PrefKeyNotFoundException(
+                            "Pref is missing plaatsId or priority"
+                        )
+            weighted_prefs_result = sorted(
+                weighted_prefs, key=weighted_prefs.__getitem__
+            )
             allocation["ondernemer"]["plaatsvoorkeuren"] = weighted_prefs_result
 
     def to_json_file(self, file_name="../test_output.json"):
