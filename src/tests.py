@@ -1,6 +1,7 @@
 """
 pass DEBUG as parameter to get debug logging when running tests
 """
+import logging
 import sys
 import unittest
 
@@ -36,6 +37,7 @@ if __name__ == "__main__":
         log.disabled = True
     else:
         sys.argv = [arg for arg in sys.argv if arg != DEBUG]
+        clog.set_level(logging.DEBUG)
 
     unittest.main()
 
