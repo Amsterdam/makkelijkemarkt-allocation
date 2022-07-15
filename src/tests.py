@@ -1,5 +1,8 @@
+"""
+pass DEBUG as parameter to get debug logging when running tests
+"""
+import sys
 import unittest
-
 
 # market scenario tests
 from testcases.basic_allocations import *
@@ -22,12 +25,17 @@ from testcases.crash import *
 # unit-test
 from test_allocation import *
 
+DEBUG = "DEBUG"
+
 if __name__ == "__main__":
     from kjk.logging import *
 
-    logging.disable(logging.CRITICAL)
-    clog.disabled = True
-    log.disabled = True
+    if DEBUG not in sys.argv:
+        logging.disable(logging.CRITICAL)
+        clog.disabled = True
+        log.disabled = True
+    else:
+        sys.argv = [arg for arg in sys.argv if arg != DEBUG]
 
     unittest.main()
 
