@@ -43,6 +43,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         elif min_demand < num_available:
             self.strategy = STRATEGY_EXP_SOME
 
+        clog.debug(f'ANALYZE MARKET strategy: {self.strategy}')
         log.info("")
         log.info("max {}".format(max_demand))
         log.info("min {}".format(int(min_demand)))
@@ -245,7 +246,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.merchants_df.sort_values(
             by=["sollicitatieNummer"], inplace=True, ascending=True
         )
+        log.info('Sollicitanten allocatie extra poging')
         self._allocate_solls_for_query("all")
+        log.info('Extra poging voor koopmannen met anywhere die nog niet maximum plaatsen hebben')
 
         self.validate_double_allocation()
         self.validate_evi_allocations()
@@ -379,8 +382,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
             self.expand_regular_soll(list_mode=MODE_BLIST)
 
         # validation
+        self._phase_msg(25, "Validatie fase")
         self.validate()
-
         # rejection
         self.reject()
 

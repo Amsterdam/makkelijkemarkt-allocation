@@ -366,8 +366,12 @@ class BaseAllocator:
             ignore_check_available=stands,
             bak_type=bak_type,
         )
+        clog.debug(
+            f'PREPARE EXPANSION {erk} stands: {stands} expansion_candidates: {expansion_candidates}',
+        )
         for exp in expansion_candidates:
             self.cluster_finder.set_stands_reserved(exp, erk=erk)
+        clog.debug(f'RESERVED STANDS {self.cluster_finder.stands_reserved_for_expansion}')
         if (
             len(expansion_candidates) > 0
             and self.expansion_mode == EXPANSION_MODE_GREEDY
@@ -978,6 +982,7 @@ class BaseAllocator:
         return self.branches_scrutenizer.allocation_allowed(branches)
 
     def _allocate_stands_to_merchant(self, stands_to_alloc, erk, dequeue_merchant=True):
+        clog.debug(f'ALLOCATE STAND TO MERCHANT {erk} fase: {self.phase_id} stands: {stands_to_alloc}')
         if len(stands_to_alloc) > 0:
             merchant_obj = self.merchant_object_by_id(erk)
 
@@ -1070,6 +1075,7 @@ class BaseAllocator:
         for _, row in result_list.iterrows():
 
             erk = row["erkenningsNummer"]
+            clog.debug(f'TRYING TO ALLOCATE SOLLICITANT {erk} phase: {self.phase_id}')
 
             pref = row["pref"]
             minimal = row["voorkeur.minimum"]
@@ -1126,6 +1132,10 @@ class BaseAllocator:
                     erk=erk,
                     bak_type=bak_type,
                 )
+
+            clog.debug(
+                f'ALLOCATE SOLLICITANT {erk} minimal {minimal} maximal {maximal} pref {pref} minimal_possible {minimal_possible} stds {stds}'
+            )
 
             # 2. then try to find cluster for the minimum wanted number of stands
             if len(stds) == 0 and len(minimal_possible) > 0:
@@ -1186,6 +1196,9 @@ class BaseAllocator:
                     prefs=expansion_prefs,
                     anywhere=anywhere,
                     status=status,
+                )
+                clog.debug(
+                    f'EXPAND FOR MERCHANTS {erk} status {status} assigned {assigned_stands} anywhere {anywhere} prefs {expansion_prefs} stands {stands}'
                 )
                 if len(stands) > 0:
                     self._allocate_stands_to_merchant(
