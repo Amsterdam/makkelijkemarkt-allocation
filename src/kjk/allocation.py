@@ -203,6 +203,41 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df = self.expanders_df.query(f"status == 'soll' & {list_mode}")
         self._expand_for_merchants(df)
 
+    def retry_to_maximize_stands_for_anywhere_soll(self):
+        self.merchants_df_bak = self.merchants_df.copy()
+        toewijzingen_to_retry = []
+        toewijzingen = self.market_output.to_data()["toewijzingen"]
+        for toewijzing in toewijzingen:
+            plaatsen = toewijzing["plaatsen"]
+            ondernemer = toewijzing["ondernemer"]
+            isSoll = ondernemer["status"] == 'soll'
+            _max = ondernemer["voorkeur"]["maximum"]
+            anywhere = ondernemer["voorkeur"].get("anywhere", False)
+            if isSoll and anywhere and len(plaatsen) < _max:
+                toewijzingen_to_retry.append(toewijzing)
+
+        for retry in toewijzingen_to_retry:
+            current_stands = retry['plaatsen'].copy()
+            erk = retry['ondernemer']['erkenningsNummer']
+            self.merchants_df = self.back_up_merchant_queue.query(f"erkenningsNummer == '{erk}'").copy()
+
+            try:
+                self._allocate_solls_for_query("all")
+                allocation_dict = self.market_output.allocation_dict[erk]
+                updated_stands = allocation_dict['plaatsen']
+                if len(updated_stands) > len(current_stands):
+                    new_stands = [stand for stand in updated_stands if stand not in current_stands]
+                    self.market_output.allocation_dict[erk]['plaatsen'] = new_stands
+                    clog.debug(f'RELEASING {erk} stands {current_stands}')
+                    self.cluster_finder.set_stands_available(current_stands)
+                    for stand in current_stands:
+                        df = self.back_up_stand_queue.query(f"plaatsId == '{stand}'")
+                        self.positions_df = pd.concat([self.positions_df, df])
+            except Exception as e:
+                clog.debug(e)
+            finally:
+                self.merchants_df = self.merchants_df_bak.copy()
+
     def validate(self):
         # merchants who have 'anywhere' false
         # and do not have a preferred stand
@@ -248,7 +283,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         )
         log.info('Sollicitanten allocatie extra poging')
         self._allocate_solls_for_query("all")
+
         log.info('Extra poging voor koopmannen met anywhere die nog niet maximum plaatsen hebben')
+        self.retry_to_maximize_stands_for_anywhere_soll()
 
         self.validate_double_allocation()
         self.validate_evi_allocations()
