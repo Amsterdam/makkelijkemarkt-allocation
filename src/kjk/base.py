@@ -1174,7 +1174,7 @@ class BaseAllocator:
                 if len(assigned_stands) >= maxi:
                     continue
                 stands = self.cluster_finder.find_valid_expansion(
-                    assigned_stands,
+                    fixed_positions=assigned_stands,
                     total_size=len(assigned_stands) + 1,
                     merchant_branche=merchant_branches,
                     bak_merchant=bak,
