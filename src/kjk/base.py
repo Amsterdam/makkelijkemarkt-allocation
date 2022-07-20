@@ -1032,6 +1032,7 @@ class BaseAllocator:
                     try:
                         self.dequeue_market_stand(st)
                     except KeyError:
+                        clog.debug(f'STAND DEQUEUE ERROR {st}')
                         stand_dequeue_error = True
                 try:
                     if dequeue_merchant:
