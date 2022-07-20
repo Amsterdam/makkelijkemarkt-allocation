@@ -285,6 +285,32 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         self.reject_remaining_merchants()
 
+    def extra_debug_report(self):
+        data = self.market_output.to_data()
+        toewijzingen = data['toewijzingen']
+        afwijzingen = data['afwijzingen']
+
+        ondernemers_to_plaatsen = {}
+        plaatsen_to_ondernemers = {}
+        for toewijzing in toewijzingen:
+            ondernemer = toewijzing['ondernemer']['erkenningsNummer']
+            plaatsen = toewijzing['plaatsen']
+            ondernemers_to_plaatsen[ondernemer] = plaatsen
+            for plaats in plaatsen:
+                plaatsen_to_ondernemers[plaats] = ondernemer
+
+        clog.debug('ondernemers_to_plaatsen:')
+        clog.debug(ondernemers_to_plaatsen)
+        clog.debug('plaatsen_to_ondernemers:')
+        clog.debug(plaatsen_to_ondernemers)
+
+        clog.debug(f'Afwijzingen: {len(afwijzingen)}')
+        for afwijzing in afwijzingen:
+            clog.debug(afwijzing)
+
+        clog.debug(f'Open plaatsen: {self.positions_df.index.to_list()}')
+        clog.debug(f'Reclaimed: {self.reclaimed_number_stands}')
+
     def get_allocation(self):
 
         clog.info("--- Makkelijkemarkt Allocatie ---")
@@ -386,6 +412,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.validate()
         # rejection
         self.reject()
+        self.extra_debug_report()
 
         if DEBUG:
             json_file = self.market_output.to_json_file()
