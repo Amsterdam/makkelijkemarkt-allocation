@@ -74,6 +74,9 @@ class ValidatorMixin:
                         (erk, status, f"aantal kramen {_num} kleiner dan min {_min}")
                     )
                     merchants_to_be_rejected.append(erk)
+                    clog.debug(
+                        f"AFWIJZING {erk} want aantal plaatsen {tw['plaatsen']} minder dan minimum {_min}"
+                    )
             except KeyError:
                 pass
         if verbose:
