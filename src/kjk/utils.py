@@ -106,7 +106,7 @@ class ExpansionOptimizer:
             if o not in self.weighted_expansion_options:
                 self.weighted_expansion_options[o] = 0
             self.weighted_expansion_options[o] += 1
-            clog.debug(f'WEIGHTED EXPANSION {self.weighted_expansion_options}')
+            clog.debug(f"WEIGHTED EXPANSION {self.weighted_expansion_options}")
 
     def _get_optimized_by_prefs(self, options, erk, prefs, anywhere):
         if len(options) < 2 and anywhere:
@@ -125,7 +125,9 @@ class ExpansionOptimizer:
         return the option with the lowest weight.
         (fewest expansion claims)
         """
-        clog.debug(f'GET OPTIMIZED {erk} status: {status} options: {options} prefs: {prefs} anywhere: {anywhere}')
+        clog.debug(
+            f"GET OPTIMIZED {erk} status: {status} options: {options} prefs: {prefs} anywhere: {anywhere}"
+        )
         if prefs is not None:
             # We ignore anywhere (default=True) if EB merchant did not set any prefs
             if len(prefs) == 0 and status == "eb":
@@ -143,7 +145,7 @@ class ExpansionOptimizer:
             for o in options:
                 for plaats_id in o:
                     weight = self.weighted_expansion_options.get(plaats_id, 9998)
-                    clog.debug(f'GET WEIGHT plaats_id: {plaats_id} weight: {weight}')
+                    clog.debug(f"GET WEIGHT plaats_id: {plaats_id} weight: {weight}")
                     if weight < w:
                         w = weight
                         best_option = o
@@ -526,7 +528,7 @@ class MarketStandClusterFinder:
                     valid_options.append(option)
         if allocate:
             clog.debug(
-                f'EXPANSION GET OPTIMIZED {erk} valid_options: {valid_options} weighted_expansion_options {self.expansion_optimizer.weighted_expansion_options}'
+                f"EXPANSION GET OPTIMIZED {erk} valid_options: {valid_options} weighted_expansion_options {self.expansion_optimizer.weighted_expansion_options}"
             )
             return self.expansion_optimizer.get_optimized(
                 valid_options,
