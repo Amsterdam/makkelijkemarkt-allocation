@@ -28,7 +28,7 @@ Run de commands vanuit de `src` dir.
 
     python test_allocation.py
 
-## run the all tests
+## run all the tests
 
     python tests.py
 
