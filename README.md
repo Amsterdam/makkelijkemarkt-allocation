@@ -40,6 +40,12 @@ Run de commands vanuit de `src` dir.
 
     python tests.py TestBasicAllocation.test_assign_empty_stand
 
+## run test with extra debug logging
+
+    python tests.py DEBUG
+    python tests.py TestBasicAllocation DEBUG
+    python tests.py TestBasicAllocation.test_assign_empty_stand DEBUG
+
 
 # Code formatting
 
@@ -126,9 +132,11 @@ Het is mogelijk om de input van een allocatie vanuit de browser op te slaan en a
               "progress": 0
             }
 
-5. Laad de opgeslagen fixture in de debug script. zie `debug.py`
-6. Run de debug allocatie: `export $(cat ../.env.local) && python debug.py` (Zet de env vars voor de lokale redis)
-7. De indeling is nu te bekijken op 127.0.0.1:8093/job/1
+5. Anonymiseer de data, run python script anonymizer `python anonymizer.py`
+   (you will be prompted for the json path. Supply random integers as input for the other questions, i.e. 2 and 12)
+6. Laad de opgeslagen fixture in de debug script. zie `debug.py`
+7. Run de debug allocatie: `export $(cat ../.env.local) && python debug.py` (Zet de env vars voor de lokale redis)
+8. De indeling is nu te bekijken op 127.0.0.1:8093/job/1
 
 
 ## overige debug tools
