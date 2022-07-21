@@ -22,6 +22,7 @@ from testcases.art_312_lid_2 import *
 from testcases.bug_fixes import *
 from testcases.eb_expansion_pref import *
 from testcases.crash import *
+from testcases.bug_50364_soll_does_not_get_2_stands import *
 
 # unit-test
 from test_allocation import *
