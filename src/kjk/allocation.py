@@ -24,7 +24,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
     """
 
     def _phase_msg(self, phase_id, message):
-        self.set_allocation_phase("Phase 2")
+        self.set_allocation_phase(f"Phase {phase_id}")
         log.info("")
         clog.info(f"--- ALLOCATIE FASE {phase_id} ---")
         log.info(message)
@@ -43,6 +43,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         elif min_demand < num_available:
             self.strategy = STRATEGY_EXP_SOME
 
+        clog.debug(f"ANALYZE MARKET strategy: {self.strategy}")
         log.info("")
         log.info("max {}".format(max_demand))
         log.info("min {}".format(int(min_demand)))
@@ -202,6 +203,45 @@ class Allocator(BaseAllocator, ValidatorMixin):
         df = self.expanders_df.query(f"status == 'soll' & {list_mode}")
         self._expand_for_merchants(df)
 
+    def retry_to_maximize_stands_for_anywhere_soll(self):
+        self.merchants_df_bak = self.merchants_df.copy()
+        toewijzingen_to_retry = []
+        toewijzingen = self.market_output.to_data()["toewijzingen"]
+        for toewijzing in toewijzingen:
+            plaatsen = toewijzing["plaatsen"]
+            ondernemer = toewijzing["ondernemer"]
+            isSoll = ondernemer["status"] == "soll"
+            _max = ondernemer["voorkeur"]["maximum"]
+            anywhere = ondernemer["voorkeur"].get("anywhere", False)
+            if isSoll and anywhere and len(plaatsen) < _max:
+                toewijzingen_to_retry.append(toewijzing)
+
+        for retry in toewijzingen_to_retry:
+            current_stands = retry["plaatsen"].copy()
+            erk = retry["ondernemer"]["erkenningsNummer"]
+            self.merchants_df = self.back_up_merchant_queue.query(
+                f"erkenningsNummer == '{erk}'"
+            ).copy()
+
+            try:
+                self._allocate_solls_for_query("all")
+                allocation_dict = self.market_output.allocation_dict[erk]
+                updated_stands = allocation_dict["plaatsen"]
+                if len(updated_stands) > len(current_stands):
+                    new_stands = [
+                        stand for stand in updated_stands if stand not in current_stands
+                    ]
+                    self.market_output.allocation_dict[erk]["plaatsen"] = new_stands
+                    clog.debug(f"RELEASING {erk} stands {current_stands}")
+                    self.cluster_finder.set_stands_available(current_stands)
+                    for stand in current_stands:
+                        df = self.back_up_stand_queue.query(f"plaatsId == '{stand}'")
+                        self.positions_df = pd.concat([self.positions_df, df])
+            except Exception as e:
+                clog.debug(e)
+            finally:
+                self.merchants_df = self.merchants_df_bak.copy()
+
     def validate(self):
         # merchants who have 'anywhere' false
         # and do not have a preferred stand
@@ -245,7 +285,13 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.merchants_df.sort_values(
             by=["sollicitatieNummer"], inplace=True, ascending=True
         )
+        log.info("Sollicitanten allocatie extra poging")
         self._allocate_solls_for_query("all")
+
+        log.info(
+            "Extra poging voor koopmannen met anywhere die nog niet maximum plaatsen hebben"
+        )
+        self.retry_to_maximize_stands_for_anywhere_soll()
 
         self.validate_double_allocation()
         self.validate_evi_allocations()
@@ -281,6 +327,32 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         self.reject_remaining_merchants()
+
+    def extra_debug_report(self):
+        data = self.market_output.to_data()
+        toewijzingen = data["toewijzingen"]
+        afwijzingen = data["afwijzingen"]
+
+        ondernemers_to_plaatsen = {}
+        plaatsen_to_ondernemers = {}
+        for toewijzing in toewijzingen:
+            ondernemer = toewijzing["ondernemer"]["erkenningsNummer"]
+            plaatsen = toewijzing["plaatsen"]
+            ondernemers_to_plaatsen[ondernemer] = plaatsen
+            for plaats in plaatsen:
+                plaatsen_to_ondernemers[plaats] = ondernemer
+
+        clog.debug("ondernemers_to_plaatsen:")
+        clog.debug(ondernemers_to_plaatsen)
+        clog.debug("plaatsen_to_ondernemers:")
+        clog.debug(plaatsen_to_ondernemers)
+
+        clog.debug(f"Afwijzingen: {len(afwijzingen)}")
+        for afwijzing in afwijzingen:
+            clog.debug(afwijzing)
+
+        clog.debug(f"Open plaatsen: {self.positions_df.index.to_list()}")
+        clog.debug(f"Reclaimed: {self.reclaimed_number_stands}")
 
     def get_allocation(self):
 
@@ -379,10 +451,11 @@ class Allocator(BaseAllocator, ValidatorMixin):
             self.expand_regular_soll(list_mode=MODE_BLIST)
 
         # validation
+        self._phase_msg(25, "Validatie fase")
         self.validate()
-
         # rejection
         self.reject()
+        self.extra_debug_report()
 
         if DEBUG:
             json_file = self.market_output.to_json_file()
