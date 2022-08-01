@@ -141,6 +141,7 @@ dmypy.json
 # editors
 .idea/
 
-*.png
 
 .vscode/
+
+diagrams/img/*.png
