@@ -219,6 +219,7 @@ class ValidatorMixin:
                         _pref = (prefs[:8] + ["..."]) if len(prefs) > 8 else prefs
                         errors.append((erk, _pref, p, status, flex))
                         merchants_to_be_rejected.append(erk)
+                        break
                 except KeyError:
                     pass
         if verbose:

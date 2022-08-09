@@ -140,3 +140,5 @@ dmypy.json
 
 # editors
 .idea/
+
+*.png
