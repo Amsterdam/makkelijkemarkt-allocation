@@ -11,18 +11,11 @@ MINIMUM_UNAVAILABLE = {
     "message": "Minimum aantal plaatsen niet beschikbaar.",
 }
 MARKET_FULL = {"code": 4, "message": "Alle marktplaatsen zijn reeds ingedeeld."}
-
 VPL_POSITION_NOT_AVAILABLE = {
     "code": 5,
     "message": "De vaste plaatsen voor de vpl zijn niet beschikbaar",
 }
-
 PREF_NOT_AVAILABLE = {
     "code": 6,
     "message": "Geen geschikte locatie gevonden met huidige voorkeuren.",
-}
-
-NO_SPOT_DURING_VALIDATION = {
-    "code": 7,
-    "message": "Tijdens validatie fase is er geen locatie gevonden voor huidige voorkeuren.",
 }
