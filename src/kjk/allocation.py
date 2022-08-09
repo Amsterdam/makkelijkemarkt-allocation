@@ -274,6 +274,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         # merchants who have 'anywhere' false
         # and do not have a preferred stand
         rejected = self.correct_preferences()
+        clog.info(f"IN VALIDATE, found {len(rejected)} rejected")
         self.reclaimed_number_stands = 0
         for r in rejected:
             try:
