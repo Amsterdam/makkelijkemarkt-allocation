@@ -169,6 +169,26 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self._expand_for_merchants(df)
         self.cluster_finder.set_check_branche_bak_evi(False)
 
+    def expand_static_vpl(self):
+        self.cluster_finder.set_check_branche_bak_evi(True)
+        if self.expanders_df is None:
+            return
+        df = self.expanders_df.query(
+            "(status == 'vpl' | status == 'tvpl' | status == 'tvplz' | status == 'eb') & will_move == False"
+        )
+        self._expand_for_merchants(df)
+        self.cluster_finder.set_check_branche_bak_evi(False)
+
+    def expand_moving_vpl(self):
+        self.cluster_finder.set_check_branche_bak_evi(True)
+        if self.expanders_df is None:
+            return
+        df = self.expanders_df.query(
+            "(status == 'vpl' | status == 'tvpl') & will_move == True"
+        )
+        self._expand_for_merchants(df)
+        self.cluster_finder.set_check_branche_bak_evi(False)
+
     def expand_branche_soll(self, list_mode=MODE_ALIST):
         if self.expanders_df is None:
             return
@@ -371,8 +391,20 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self._phase_msg(4, "ondenemers (exp, expf and eb) die niet mogen verplaatsen:")
         self.exp_not_moving()
 
+        self.enable_expansion("VPL die niet verplaatsen")
+        while not self.expansion_finished():
+            #  Alleen uitbreiden TVPLz
+            self._phase_msg(12.1, "Uitbreiden van NIET verplaatsende VPLs")
+            self.expand_static_vpl()
+
         self._phase_msg(5, "ondenemers (vpl) die WEL willen verplaatsen.")
         self.vpl_moving()
+
+        self.enable_expansion("VPL die wel verplaatsen")
+        while not self.expansion_finished():
+            self._phase_msg(12.2, "Uitbreiden van verplaatsende VPLs")
+            self.expand_moving_vpl()
+            # self.expand_vpl()
 
         # all vpls should now be allocated
         self._phase_msg(
@@ -402,8 +434,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
         # expansion alist vpl and branche-bak-evi soll
         self.enable_expansion("VPL + BRANCHE-BAK-EVI soll A-lijst")
         while not self.expansion_finished():
-            self._phase_msg(12, "Uitbreidings fase voor vpl.")
-            self.expand_vpl()
 
             self._phase_msg(13, "Uitbreidings fase voor branche sollicitanten.")
             self.expand_branche_soll(list_mode=MODE_ALIST)
@@ -413,6 +443,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
             self._phase_msg(15, "Uitbreidings fase voor EVI sollicitanten.")
             self.expand_evi_soll(list_mode=MODE_ALIST)
+
 
         self._phase_msg(16, "Sollicitanten met verplichte branche op de B-lijst")
         self.branche_soll(list_mode=MODE_BLIST)
