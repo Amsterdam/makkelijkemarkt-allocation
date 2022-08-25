@@ -139,7 +139,7 @@ class TestVPLExpansionPrio(unittest.TestCase):
 
     def test_vpl_verplaatsen_gaat(self):
         """
-        uitbreidende eb gaat voor plaatsen soll
+        static vpl gaat voor verplaatsende vpl
         """
         self.dp.update_merchant(
             erkenningsNummer="2",
@@ -168,10 +168,10 @@ class TestVPLExpansionPrio(unittest.TestCase):
         stands_1 = get_toew_by_erk(toewijzingen, "1")["plaatsen"]
         stands_2 = get_toew_by_erk(toewijzingen, "2")["plaatsen"]
 
-        self.assertEqual(2, len(stands_1))
+        self.assertEqual(3, len(stands_1))
         self.assertEqual(2, len(stands_2))
-        self.assertSetEqual({"1", "2"}, set(stands_1))
-        self.assertSetEqual({"3", "4"}, set(stands_2))
+        self.assertSetEqual({"1", "2", "3"}, set(stands_1))
+        self.assertSetEqual({"4", "5"}, set(stands_2))
 
 
 def get_toew_by_erk(toewijzingen, erkenningsnummer):
