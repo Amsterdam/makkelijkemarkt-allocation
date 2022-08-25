@@ -169,12 +169,20 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self._expand_for_merchants(df)
         self.cluster_finder.set_check_branche_bak_evi(False)
 
+    def expand_tvplz(self):
+        self.cluster_finder.set_check_branche_bak_evi(True)
+        if self.expanders_df is None:
+            return
+        df = self.expanders_df.query("status == 'tvplz'")
+        self._expand_for_merchants(df)
+        self.cluster_finder.set_check_branche_bak_evi(False)
+
     def expand_static_vpl(self):
         self.cluster_finder.set_check_branche_bak_evi(True)
         if self.expanders_df is None:
             return
         df = self.expanders_df.query(
-            "(status == 'vpl' | status == 'tvpl' | status == 'tvplz' | status == 'eb') & will_move == False"
+            "((status == 'vpl' | status == 'tvpl') & will_move != 'yes') | status == 'eb'"
         )
         self._expand_for_merchants(df)
         self.cluster_finder.set_check_branche_bak_evi(False)
@@ -184,7 +192,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         if self.expanders_df is None:
             return
         df = self.expanders_df.query(
-            "(status == 'vpl' | status == 'tvpl') & will_move == True"
+            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
         )
         self._expand_for_merchants(df)
         self.cluster_finder.set_check_branche_bak_evi(False)
@@ -335,9 +343,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         return False
 
     def reject(self):
-        self.set_allocation_phase("Phase 14")
+        self.set_allocation_phase("Phase 26")
         log.info("")
-        clog.info("--- ALLOCATIE FASE 14 ---")
+        clog.info("--- ALLOCATIE FASE 26 ---")
         log.info("Markt allocatie gevalideerd")
         log.info(
             "nog open plaatsen: {}".format(
@@ -404,7 +412,8 @@ class Allocator(BaseAllocator, ValidatorMixin):
         while not self.expansion_finished():
             self._phase_msg(12.2, "Uitbreiden van verplaatsende VPLs")
             self.expand_moving_vpl()
-            # self.expand_vpl()
+
+        # Toekomst: Validatie om leeggekomen mercatoplekken opnieuw te verdelen onder uitbreidende VPLs (en co.)
 
         # all vpls should now be allocated
         self._phase_msg(
@@ -435,15 +444,25 @@ class Allocator(BaseAllocator, ValidatorMixin):
         self.enable_expansion("VPL + BRANCHE-BAK-EVI soll A-lijst")
         while not self.expansion_finished():
 
-            self._phase_msg(13, "Uitbreidings fase voor branche sollicitanten.")
+            self._phase_msg(12, "Uitbreidings fase voor TVPLZs.")
+            self.expand_tvplz()
+
+            self._phase_msg(
+                13, "Uitbreidings fase voor branche sollicitanten op de A-lijst."
+            )
             self.expand_branche_soll(list_mode=MODE_ALIST)
 
-            self._phase_msg(14, "Uitbreidings fase voor BAK sollicitanten.")
+            self._phase_msg(
+                14, "Uitbreidings fase voor BAK sollicitanten op de A-lijst."
+            )
             self.expand_bak_soll(list_mode=MODE_ALIST)
 
-            self._phase_msg(15, "Uitbreidings fase voor EVI sollicitanten.")
+            self._phase_msg(
+                15, "Uitbreidings fase voor EVI sollicitanten op de A-lijst."
+            )
             self.expand_evi_soll(list_mode=MODE_ALIST)
 
+            # Toekomst: Overige soll A lijst
 
         self._phase_msg(16, "Sollicitanten met verplichte branche op de B-lijst")
         self.branche_soll(list_mode=MODE_BLIST)
