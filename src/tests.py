@@ -23,8 +23,8 @@ from testcases.bug_fixes import *
 from testcases.eb_expansion_pref import *
 from testcases.crash import *
 from testcases.bug_50364_soll_does_not_get_2_stands import *
-
 from testcases.bug_Markt133 import *
+from testcases.vpl_expansion_prio import *
 
 # unit-test
 from test_allocation import *
