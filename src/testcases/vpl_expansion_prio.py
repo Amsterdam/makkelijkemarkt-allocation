@@ -1,0 +1,181 @@
+from socket import ALG_OP_DECRYPT
+import unittest
+from pprint import pprint
+from kjk.allocation import Allocator
+from kjk.inputdata import FixtureDataprovider, MockDataprovider
+from kjk.test_utils import alloc_erk, stands_erk, reject_erk, print_alloc
+
+
+class TestVPLExpansionPrio(unittest.TestCase):
+    """
+    Een VPL die wil verplaatsen
+    """
+
+    def setUp(self):
+        dp = MockDataprovider("../fixtures/test_input.json")
+
+        dp.add_merchant(
+            erkenningsNummer="1",
+            plaatsen=["1"],
+            status="vpl",
+            sollicitatieNummer="1",
+            description="frank zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 3,
+                "minimum": 1,
+                "anywhere": False,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_merchant(
+            erkenningsNummer="2",
+            plaatsen=[],
+            status="soll",
+            sollicitatieNummer="2",
+            description="c beefheart",
+            voorkeur={
+                "branches": [],
+                "maximum": 1,
+                "minimum": 1,
+                "anywhere": True,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        dp.add_pref(erkenningsNummer="2", plaatsId="2", priority=0)
+
+        dp.add_rsvp(erkenningsNummer="1", attending=True)
+        dp.add_rsvp(erkenningsNummer="2", attending=True)
+
+        dp.set_alist([{"erkenningsNummer": "2"}])
+
+        dp.add_page(["1", "2", "3", "4", "5"])
+
+        dp.add_stand(
+            plaatsId="1",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="2",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="3",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="4",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+        dp.add_stand(
+            plaatsId="5",
+            branches=[],
+            properties=[],
+            verkoopinrichting=[],
+        )
+
+        self.dp = dp
+
+    def test_vpl_gets_max_expansions(self):
+        """
+        uitbreiden vpl gaat voor plaatsen soll
+        """
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+
+        allocs = allocation["toewijzingen"]
+        stands = allocs[0]["plaatsen"]
+        self.assertSetEqual(set(stands), {"1", "2", "3"})
+
+    def test_eb_gets_prio_over_soll(self):
+        """
+        uitbreidende eb gaat voor plaatsen soll
+        """
+        self.dp.update_merchant(
+            erkenningsNummer="1",
+            plaatsen=["3"],
+            status="eb",
+            sollicitatieNummer="1",
+            description="frank zappa",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 1,
+                "anywhere": False,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_pref(erkenningsNummer="1", plaatsId="2", priority=0)
+
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+
+        toewijzingen = allocation["toewijzingen"]
+        stands = get_toew_by_erk(toewijzingen, "1")["plaatsen"]
+
+        # EB wordt uitgebreid daar de voorkeursplek
+        self.assertSetEqual({"2", "3"}, set(stands))
+
+    def test_vpl_verplaatsen_gaat(self):
+        """
+        static vpl gaat voor verplaatsende vpl
+        """
+        self.dp.update_merchant(
+            erkenningsNummer="2",
+            plaatsen=["4"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="vpl verplaatser",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 1,
+                "anywhere": False,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="2", priority=0)
+
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+
+        toewijzingen = allocation["toewijzingen"]
+        stands_1 = get_toew_by_erk(toewijzingen, "1")["plaatsen"]
+        stands_2 = get_toew_by_erk(toewijzingen, "2")["plaatsen"]
+
+        # Non moving VPL has prio, so they get 3 places
+        self.assertSetEqual({"1", "2", "3"}, set(stands_1))
+        # Moving VPL has no prio so they get remaining 2 places
+        self.assertSetEqual({"4", "5"}, set(stands_2))
+
+
+def get_toew_by_erk(toewijzingen, erkenningsnummer):
+    return list(
+        filter(
+            lambda toew: toew["ondernemer"]["erkenningsNummer"]
+            == str(erkenningsnummer),
+            toewijzingen,
+        )
+    )[0]
