@@ -401,7 +401,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
 
         self.enable_expansion("VPL die niet verplaatsen")
         while not self.expansion_finished():
-            #  Alleen uitbreiden TVPLz
             self._phase_msg(12.1, "Uitbreiden van NIET verplaatsende VPLs")
             self.expand_static_vpl()
 
@@ -412,8 +411,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
         while not self.expansion_finished():
             self._phase_msg(12.2, "Uitbreiden van verplaatsende VPLs")
             self.expand_moving_vpl()
-
-        # Toekomst: Validatie om leeggekomen mercatoplekken opnieuw te verdelen onder uitbreidende VPLs (en co.)
 
         # all vpls should now be allocated
         self._phase_msg(
@@ -461,8 +458,6 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 15, "Uitbreidings fase voor EVI sollicitanten op de A-lijst."
             )
             self.expand_evi_soll(list_mode=MODE_ALIST)
-
-            # Toekomst: Overige soll A lijst
 
         self._phase_msg(16, "Sollicitanten met verplichte branche op de B-lijst")
         self.branche_soll(list_mode=MODE_BLIST)
