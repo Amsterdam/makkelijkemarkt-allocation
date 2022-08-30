@@ -62,14 +62,6 @@ class DapperBugTestCase_3(unittest.TestCase):
         tw = alloc_sollnr(70, self.market_allocation)
         self.assertListEqual(tw["plaatsen"], ["44"])
 
-    def test_bug_3(self):
-        # soll 68 should get 16
-        tw = alloc_sollnr(68, self.market_allocation)
-        a = ["16"]
-        a.sort()
-        tw["plaatsen"].sort()
-        self.assertListEqual(tw["plaatsen"], a)
-
     def test_bug_4(self):
         # soll 73 should get 122
         # because vpl on 120 dropped this stand in prefs
