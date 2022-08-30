@@ -211,17 +211,21 @@ class ValidatorMixin:
                 flex = tw["ondernemer"]["voorkeur"]["anywhere"]
             except KeyError:
                 flex = None
-            for p in tw["plaatsen"]:
-                try:
-                    prefs = pref_dict[erk]
-                    if p not in prefs and flex is False and status == "soll":
-                        status_ok = False
-                        _pref = (prefs[:8] + ["..."]) if len(prefs) > 8 else prefs
-                        errors.append((erk, _pref, p, status, flex))
-                        merchants_to_be_rejected.append(erk)
-                        break
-                except KeyError:
-                    pass
+
+            prefs = set(pref_dict.get(erk, []))
+            plaatsen = set(tw["plaatsen"])
+
+            # Check if there is at least one preferred place is in toegewezen
+            if (
+                status == "soll"
+                and flex == False
+                and len(prefs.intersection(plaatsen)) == 0
+            ):
+                status_ok = False
+                _pref = (prefs[:8] + ["..."]) if len(prefs) > 8 else prefs
+                errors.append((erk, _pref, plaatsen, flex))
+                merchants_to_be_rejected.append(erk)
+
         if verbose:
             if status_ok:
                 clog.info("-> OK")
