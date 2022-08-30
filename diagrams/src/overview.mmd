@@ -4,56 +4,59 @@ graph TD
     fase_2["FASE 2<br>Indeling vasteplaatshouders <b>(vpl)</b>"] -->
     fase_3["FASE 3<br>Indeling tijdelijke vasteplaatshouders <b>(tvpl)</b>"] -->
     fase_4["FASE 4<br>Indeling experimentele plaatshouders<br> <b>(exp, expf <i>met</i> plaatsen)</b>"] -->
-    fase_5["FASE 5<br>Indeling verplaatsende vasteplaatshouders"] -->
+    fase_5["FASE 5<br>Uitbreidings fase voor vasteplaathouders"] -->
 
-    fase_6["FASE 6<br>Indeling tijdelijke vasteplaatshouders <b>(tvplz)</b>"] -->
-    fase_7["FASE 7<br>Indeling experimentele plaatshouders<br> <b>(exp, expf <i>zonder</i> plaatsen)</b>"] -->
-    fase_8["FASE 8<br>Indeling <b><i>BRANCHE</i></b> sollicitanten<br> op de A-lijst"] -->
-    fase_9["FASE 9<br>Indeling <b><i>BAK</i></b> sollicitanten op de A-lijst"] -->
-    fase_10["FASE 10<br>Indeling <b><i>EVI</i></b> sollicitanten op de A-lijst"] -->
-    fase_11["FASE 11<br><b><i>Overige</i></b> sollicitanten op de A-lijst"] -->
+    fase_6["FASE 6<br>Indeling verplaatsende vasteplaatshouders"] -->
+    fase_7["FASE 7<br>Uitbreidings fase voor verplaatsende vasteplaathouders"] -->
 
-    fase_12["FASE 12<br>Uitbreidings fase voor vasteplaathouders"] -->
-    fase_13["FASE 13<br>Uitbreiding <b><i>BRANCHE</i></b> sollicitanten A-lijst"] -->
-    fase_14["FASE 14<br>Uitbreiding <b><i>BAK</i></b> sollicitanten A-lijst"] -->
-    fase_15["FASE 15<br>Uitbreiding <b><i>EVI</i></b> sollicitanten A-lijst"] -->
+    fase_8["FASE 8<br>Indeling tijdelijke vasteplaatshouders <b>(tvplz)</b>"] -->
+    fase_9["FASE 9<br>Uitbreidings fase voor tijdelijke vasteplaathouders <b>(tvplz)</b>"] -->
+    fase_10["FASE 10<br>Indeling experimentele plaatshouders<br> <b>(exp, expf <i>zonder</i> plaatsen)</b>"] -->
+    fase_11["FASE 11<br>Indeling <b><i>BRANCHE</i></b> sollicitanten<br> op de A-lijst"] -->
+    fase_12["FASE 12<br>Indeling <b><i>BAK</i></b> sollicitanten op de A-lijst"] -->
+    fase_13["FASE 13<br>Indeling <b><i>EVI</i></b> sollicitanten op de A-lijst"] -->
+    fase_14["FASE 14<br><b><i>Overige</i></b> sollicitanten op de A-lijst"] -->
+
+    fase_15["FASE 15<br>Uitbreiding <b><i>BRANCHE</i></b> sollicitanten A-lijst"] -->
+    fase_16["FASE 16<br>Uitbreiding <b><i>BAK</i></b> sollicitanten A-lijst"] -->
+    fase_17["FASE 17<br>Uitbreiding <b><i>EVI</i></b> sollicitanten A-lijst"] -->
 
     expansion_done{Zijn er nog meer uitbreidingen mogelijk?}
-    expansion_done --NO--> fase_16
+    expansion_done --NO--> fase_18
     expansion_done --YES--> plus_one
-    plus_one("<b>toegewezen kramen + 1</b>") --> fase_12
+    plus_one("<b>toegewezen kramen + 1</b>") --> fase_15
 
-    fase_16["FASE 16<br>Indeling <b><i>BRANCHE</i></b> sollicitanten<br> op de B-lijst"] -->
-    fase_17["FASE 17<br>Indeling <b><i>BAK</i></b> sollicitanten op de B-lijst"] -->
-    fase_18["FASE 18<br>Indeling <b><i>EVI</i></b> sollicitanten op de B-lijst"] -->
+    fase_18["FASE 18<br>Indeling <b><i>BRANCHE</i></b> sollicitanten<br> op de B-lijst"] -->
+    fase_19["FASE 19<br>Indeling <b><i>BAK</i></b> sollicitanten op de B-lijst"] -->
+    fase_20["FASE 20<br>Indeling <b><i>EVI</i></b> sollicitanten op de B-lijst"] -->
 
-    fase_19["FASE 19<br>Uitbreiding <b><i>BRANCHE</i></b> sollicitanten B-lijst"] -->
-    fase_20["FASE 20<br>Uitbreiding <b><i>BAK</i></b> sollicitanten B-lijst"] -->
-    fase_21["FASE 21<br>Uitbreiding <b><i>EVI</i></b> sollicitanten B-lijst"] -->
+    fase_21["FASE 21<br>Uitbreiding <b><i>BRANCHE</i></b> sollicitanten B-lijst"] -->
+    fase_22["FASE 22<br>Uitbreiding <b><i>BAK</i></b> sollicitanten B-lijst"] -->
+    fase_23["FASE 23<br>Uitbreiding <b><i>EVI</i></b> sollicitanten B-lijst"] -->
 
     expansion_done2{Zijn er nog meer uitbreidingen mogelijk?}
-    expansion_done2 --NO--> fase_22
+    expansion_done2 --NO--> fase_24
     expansion_done2 --YES--> plus_oneb
-    plus_oneb("<b>toegewezen kramen + 1</b>") --> fase_19
+    plus_oneb("<b>toegewezen kramen + 1</b>") --> fase_21
 
-    fase_22["FASE 22<br>Uitbreiding <b><i>overige</i></b> sollicitanten A-lijst"] -->
+    fase_24["FASE 24<br>Uitbreiding <b><i>overige</i></b> sollicitanten A-lijst"] -->
     expansion_done3{Zijn er nog meer uitbreidingen mogelijk?}
-    expansion_done3 --NO--> fase_23
+    expansion_done3 --NO--> fase_25
     expansion_done3 --YES--> plus_onec
-    plus_onec("<b>toegewezen kramen + 1</b>") --> fase_22
+    plus_onec("<b>toegewezen kramen + 1</b>") --> fase_24
 
-    fase_23["FASE 23<br><b><i>Overige</i></b> sollicitanten op de B-lijst"] -->
+    fase_25["FASE 25<br><b><i>Overige</i></b> sollicitanten op de B-lijst"] -->
 
-    fase_24["FASE 24<br>Uitbreiding <b><i>overige</i></b> sollicitanten B-lijst"] -->
+    fase_26["FASE 26<br>Uitbreiding <b><i>overige</i></b> sollicitanten B-lijst"] -->
     expansion_done4{Zijn er nog meer uitbreidingen mogelijk?}
-    expansion_done4 --NO--> fase_25
+    expansion_done4 --NO--> fase_27
     expansion_done4 --YES--> plus_oned
-    plus_oned("<b>toegewezen kramen + 1</b>") --> fase_24
+    plus_oned("<b>toegewezen kramen + 1</b>") --> fase_26
 
-    fase_25["FASE 25<br>Validatiefase <br>Controle <b><i>BRANCHE, BAK, EVI</i></b>"] -->
+    fase_27["FASE 27<br>Validatiefase <br>Controle <b><i>BRANCHE, BAK, EVI</i></b>"] -->
     allocation_valid{Voldoet de indeling aan de regels/verordening?}
-    allocation_valid --YES--> fase_26
+    allocation_valid --YES--> fase_28
     allocation_valid --NO--> fase_5 
-    fase_26["FASE 26<br>Afwijzingsfase niet ingedeelde ondernemers"] -->
+    fase_28["FASE 28<br>Afwijzingsfase niet ingedeelde ondernemers"] -->
     x(Marktindeling opslaan in Kiesjekraam)
 

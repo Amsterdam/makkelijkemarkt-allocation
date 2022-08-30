@@ -2,17 +2,17 @@
 
 diagrams=( 
     overview 
-    # fase_1 
-    # fase_2-3-4 
-    # fase_5
-    # fase_6-7-8-9-10-11
-    # fase_12-13-14-15-16
-    # fase_17-18-19-20
-    # fase_21-22-23-24
-    # fase_25
-    # fase_26
-    # vinden_kramen
-    # vinden_uitbreiding
+    1_analyze
+    2_plaatsen_VPLs
+    3_verplaatsen_VPLs
+    4_plaatsen_nonVPLs
+    5_uitbreiden_nonVPLs
+    6_plaatsen_Blijst
+    7_uitbreiden_Blijst
+    8_validatie
+    9_afwijzing
+    vinden_kramen
+    vinden_uitbreiding
 )
 
 filetypes=(
