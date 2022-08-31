@@ -25,7 +25,7 @@ do
 
 for i in "${diagrams[@]}"
 do
-    docker run -u 1000  -it -v /home/harm/Documents/amsterdam/repositories/makkelijkemarkt/makkelijkemarkt-allocation/diagrams:/data minlag/mermaid-cli -i /data/src/$i.mmd -o /data/img/$i.$f
+    docker run -u 1000  -it -v $(pwd):/data minlag/mermaid-cli -i /data/src/$i.mmd -o /data/img/$i.$f
 done
 
 done
