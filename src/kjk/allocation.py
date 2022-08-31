@@ -29,7 +29,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         clog.info(f"--- ALLOCATIE FASE {phase_id} ---")
         log.info(message)
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
-        log.info("ondenemers nog niet ingedeeld: {} ".format(len(self.merchants_df)))
+        log.info("ondernemers nog niet ingedeeld: {} ".format(len(self.merchants_df)))
 
     def analyze_market(self):
 
@@ -98,7 +98,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
         log.info("")
         clog.info("--- ALLOCATIE FASE 5 ---")
         log.info("nog open plaatsen: {}".format(len(self.positions_df)))
-        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
+        log.info("ondernemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         solver = MovingVPLSolver(
             self, "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
@@ -352,7 +352,7 @@ class Allocator(BaseAllocator, ValidatorMixin):
                 len(self.positions_df) + self.reclaimed_number_stands
             )
         )
-        log.info("ondenemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
+        log.info("ondernemers nog niet ingedeeld: {}".format(len(self.merchants_df)))
 
         self.reject_remaining_merchants()
 
@@ -390,13 +390,13 @@ class Allocator(BaseAllocator, ValidatorMixin):
         )
         self.analyze_market()
 
-        self._phase_msg(2, "ondenemers (vpl) die niet willen verplaatsen:")
+        self._phase_msg(2, "ondernemers (vpl) die niet willen verplaatsen:")
         self.vpl_not_moving()
 
-        self._phase_msg(3, "ondenemers (tvpl) die niet willen verplaatsen:")
+        self._phase_msg(3, "ondernemers (tvpl) die niet willen verplaatsen:")
         self.tvpl_not_moving()
 
-        self._phase_msg(4, "ondenemers (exp, expf and eb) die niet mogen verplaatsen:")
+        self._phase_msg(4, "ondernemers (exp, expf and eb) die niet mogen verplaatsen:")
         self.exp_not_moving()
 
         self.enable_expansion("VPL die niet verplaatsen")
