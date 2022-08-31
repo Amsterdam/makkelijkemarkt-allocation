@@ -144,6 +144,5 @@ dmypy.json
 
 .vscode/
 
-diagrams/img/*.png
-
-diagrams/img/
+diagrams/img/*
+!diagrams/img/.gitkeep
