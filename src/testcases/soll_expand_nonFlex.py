@@ -82,3 +82,17 @@ class TestSollExpandNonFlex(unittest.TestCase):
         stands = stands_erk("1", allocation)
 
         self.assertSetEqual(set(stands), {"1", "2", "3"})
+
+
+class TestSollExpandNoFlexFixture(unittest.TestCase):
+    """
+    Flexibel indelen geldt alleen voor eerste toewijzing, niet uitbreidingsslots.
+    """
+
+    def testFixture(self):
+        dp = FixtureDataprovider("../fixtures/soll_noflex_validation.json")
+        allocator = Allocator(dp)
+        allocation = allocator.get_allocation()
+        stands = stands_erk("1951401478", allocation)
+
+        self.assertIn("221", set(stands))
