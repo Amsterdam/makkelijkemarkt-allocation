@@ -145,3 +145,5 @@ dmypy.json
 .vscode/
 
 diagrams/img/*.png
+
+diagrams/img/
