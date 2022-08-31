@@ -1,4 +1,3 @@
-from socket import ALG_OP_DECRYPT
 import unittest
 from pprint import pprint
 from kjk.allocation import Allocator
