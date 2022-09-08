@@ -93,6 +93,16 @@ class Allocator(BaseAllocator, ValidatorMixin):
             "(status == 'eb') & has_stands == True", print_df=False
         )
 
+    def reserve_spaces_for_moving_vpls(self):
+        self._reserve_spaces_by_query(
+            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
+        )
+
+    def release_reserved_spaces_for_moving_vpls(self):
+        self._release_reserved_spaces_by_query(
+            "(status == 'vpl' | status == 'tvpl') & will_move == 'yes'"
+        )
+
     def vpl_moving(self):
         self.set_allocation_phase("Phase 5")
         log.info("")
@@ -390,6 +400,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         )
         self.analyze_market()
 
+        self._phase_msg(1.5, "Reserve spaces for moving vpls")
+        self.reserve_spaces_for_moving_vpls()
+
         self._phase_msg(2, "ondernemers (vpl) die niet willen verplaatsen:")
         self.vpl_not_moving()
 
@@ -403,6 +416,9 @@ class Allocator(BaseAllocator, ValidatorMixin):
         while not self.expansion_finished():
             self._phase_msg(12.1, "Uitbreiden van NIET verplaatsende VPLs")
             self.expand_static_vpl()
+
+        self._phase_msg(5, "Release spaces for moving vpls")
+        self.release_reserved_spaces_for_moving_vpls()
 
         self._phase_msg(5, "ondenemers (vpl) die WEL willen verplaatsen.")
         self.vpl_moving()

@@ -159,6 +159,7 @@ class BaseAllocator:
         self.open_positions = dp.get_market_locations()
         self.market_blocks = dp.get_market_blocks()
         self.obstacles = dp.get_obstacles()
+        self.reserved_stands = pd.DataFrame()
 
         self.blocked_stands = []
         if self.market["kiesJeKraamGeblokkeerdePlaatsen"] is not None:
@@ -901,6 +902,9 @@ class BaseAllocator:
     def dequeue_market_stand(self, stand_id):
         self.positions_df.drop(stand_id, inplace=True)
 
+    def requeue_marktet_stand(self, stand_id):
+        pass
+
     def num_merchants_in_queue(self):
         return len(self.merchants_df)
 
@@ -1243,3 +1247,31 @@ class BaseAllocator:
                     clog.error(
                         f"VPL plaatsen niet beschikbaar voor erkenningsNummer {erk}"
                     )
+
+    def _reserve_spaces_by_query(self, query, print_df=False):
+        df = self.merchants_df.query(query)
+        reserved_stand_ids = df["plaatsen"].sum()
+        stands_to_be_reserved = self.positions_df[
+            self.positions_df["plaatsId"].isin(reserved_stand_ids)
+        ]
+        self.reserved_stands = pd.concat([self.reserved_stands, stands_to_be_reserved])
+        self.positions_df = self.positions_df[
+            ~self.positions_df["plaatsId"].isin(stands_to_be_reserved["plaatsId"])
+        ]
+        clog.debug(
+            f"Reserved {len(stands_to_be_reserved)} stands for merchants from query: {query}"
+        )
+
+    def _release_reserved_spaces_by_query(self, query, print_df=False):
+        df = self.merchants_df.query(query)
+        reserved_stand_ids = df["plaatsen"].sum()
+        stands_to_be_released = self.reserved_stands[
+            self.reserved_stands["plaatsId"].isin(reserved_stand_ids)
+        ]
+        self.positions_df = pd.concat([self.positions_df, stands_to_be_released])
+        self.reserved_stands = self.reserved_stands[
+            ~self.reserved_stands["plaatsId"].isin(stands_to_be_released["plaatsId"])
+        ]
+        clog.debug(
+            f"Released {len(reserved_stand_ids)} stands for merchants from query: {query}"
+        )
