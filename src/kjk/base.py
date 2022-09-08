@@ -1251,27 +1251,35 @@ class BaseAllocator:
     def _reserve_spaces_by_query(self, query, print_df=False):
         df = self.merchants_df.query(query)
         reserved_stand_ids = df["plaatsen"].sum()
-        stands_to_be_reserved = self.positions_df[
-            self.positions_df["plaatsId"].isin(reserved_stand_ids)
-        ]
-        self.reserved_stands = pd.concat([self.reserved_stands, stands_to_be_reserved])
-        self.positions_df = self.positions_df[
-            ~self.positions_df["plaatsId"].isin(stands_to_be_reserved["plaatsId"])
-        ]
-        clog.debug(
-            f"Reserved {len(stands_to_be_reserved)} stands for merchants from query: {query}"
-        )
+        if reserved_stand_ids:
+            stands_to_be_reserved = self.positions_df[
+                self.positions_df["plaatsId"].isin(reserved_stand_ids)
+            ]
+            self.reserved_stands = pd.concat(
+                [self.reserved_stands, stands_to_be_reserved]
+            )
+            self.positions_df = self.positions_df[
+                ~self.positions_df["plaatsId"].isin(stands_to_be_reserved["plaatsId"])
+            ]
+            self.cluster_finder.set_stands_allocated(reserved_stand_ids)
+            clog.debug(
+                f"Reserved {len(stands_to_be_reserved)} stands for merchants from query: {query}"
+            )
 
     def _release_reserved_spaces_by_query(self, query, print_df=False):
         df = self.merchants_df.query(query)
         reserved_stand_ids = df["plaatsen"].sum()
-        stands_to_be_released = self.reserved_stands[
-            self.reserved_stands["plaatsId"].isin(reserved_stand_ids)
-        ]
-        self.positions_df = pd.concat([self.positions_df, stands_to_be_released])
-        self.reserved_stands = self.reserved_stands[
-            ~self.reserved_stands["plaatsId"].isin(stands_to_be_released["plaatsId"])
-        ]
-        clog.debug(
-            f"Released {len(reserved_stand_ids)} stands for merchants from query: {query}"
-        )
+        if reserved_stand_ids:
+            stands_to_be_released = self.reserved_stands[
+                self.reserved_stands["plaatsId"].isin(reserved_stand_ids)
+            ]
+            self.positions_df = pd.concat([self.positions_df, stands_to_be_released])
+            self.reserved_stands = self.reserved_stands[
+                ~self.reserved_stands["plaatsId"].isin(
+                    stands_to_be_released["plaatsId"]
+                )
+            ]
+            self.cluster_finder.set_stands_available(reserved_stand_ids)
+            clog.debug(
+                f"Released {len(reserved_stand_ids)} stands for merchants from query: {query}"
+            )
