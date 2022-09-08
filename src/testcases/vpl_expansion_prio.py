@@ -97,8 +97,7 @@ class TestVPLExpansionPrio(unittest.TestCase):
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
 
-        allocs = allocation["toewijzingen"]
-        stands = allocs[0]["plaatsen"]
+        stands = stands_erk("1", allocation)
         self.assertSetEqual(set(stands), {"1", "2", "3"})
 
     def test_eb_gets_prio_over_soll(self):
@@ -127,13 +126,12 @@ class TestVPLExpansionPrio(unittest.TestCase):
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
 
-        toewijzingen = allocation["toewijzingen"]
-        stands = get_toew_by_erk(toewijzingen, "1")["plaatsen"]
+        stands = stands_erk("1", allocation)
 
         # EB wordt uitgebreid daar de voorkeursplek
         self.assertSetEqual({"2", "3"}, set(stands))
 
-    def test_vpl_verplaatsen_gaat(self):
+    def test_vpl_verplaatsen_gaat_na_vaste_vpl(self):
         """
         static vpl gaat voor verplaatsende vpl
         """
@@ -160,21 +158,60 @@ class TestVPLExpansionPrio(unittest.TestCase):
         allocator = Allocator(self.dp)
         allocation = allocator.get_allocation()
 
-        toewijzingen = allocation["toewijzingen"]
-        stands_1 = get_toew_by_erk(toewijzingen, "1")["plaatsen"]
-        stands_2 = get_toew_by_erk(toewijzingen, "2")["plaatsen"]
+        stands_1 = stands_erk("1", allocation)
+        stands_2 = stands_erk("2", allocation)
 
         # Non moving VPL has prio, so they get 3 places
         self.assertSetEqual({"1", "2", "3"}, set(stands_1))
         # Moving VPL has no prio so they get remaining 2 places
         self.assertSetEqual({"4", "5"}, set(stands_2))
 
-
-def get_toew_by_erk(toewijzingen, erkenningsnummer):
-    return list(
-        filter(
-            lambda toew: toew["ondernemer"]["erkenningsNummer"]
-            == str(erkenningsnummer),
-            toewijzingen,
+    def test_vpl_uitbreiden_niet_over_mercato_verplaatser(self):
+        """
+        static vpl gaat voor verplaatsende vpl
+        """
+        self.dp.update_merchant(
+            erkenningsNummer="2",
+            plaatsen=["3"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="vpl verplaatser",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 1,
+                "anywhere": False,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
         )
-    )[0]
+        self.dp.add_merchant(
+            erkenningsNummer="3",
+            plaatsen=["5"],
+            status="vpl",
+            sollicitatieNummer="3",
+            description="vpl blokkade",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 1,
+                "anywhere": False,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="5", priority=0)
+
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+
+        stands_1 = stands_erk("1", allocation)
+        stands_2 = stands_erk("2", allocation)
+        stands_3 = stands_erk("3", allocation)
+        self.assertSetEqual(set(stands_1), {"1", "2"})
+        self.assertSetEqual(set(stands_2), {"3"})
+        self.assertSetEqual(set(stands_3), {"4", "5"})
