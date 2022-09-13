@@ -215,3 +215,137 @@ class TestVPLExpansionPrio(unittest.TestCase):
         self.assertSetEqual(set(stands_1), {"1", "2"})
         self.assertSetEqual(set(stands_2), {"3"})
         self.assertSetEqual(set(stands_3), {"4", "5"})
+
+    def test_vpl_uitbreiden_niet_over_mercato_verplaatser(self):
+        """
+        static vpl gaat voor verplaatsende vpl
+        """
+        self.dp.update_merchant(
+            erkenningsNummer="2",
+            plaatsen=["2"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="vpl verplaatser",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 1,
+                "anywhere": False,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_merchant(
+            erkenningsNummer="3",
+            plaatsen=["4"],
+            status="vpl",
+            sollicitatieNummer="3",
+            description="vpl blokkade",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 1,
+                "anywhere": False,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        # self.dp.add_merchant(
+        #     erkenningsNummer="4",
+        #     plaatsen=["5"],
+        #     status="vpl",
+        #     sollicitatieNummer="4",
+        #     description="vpl",
+        #     voorkeur={
+        #         "branches": [],
+        #         "maximum": 2,
+        #         "minimum": 1,
+        #         "anywhere": False,
+        #         "verkoopinrichting": [],
+        #         "absentFrom": "",
+        #         "absentUntil": "",
+        #     },
+        # )
+
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="4", priority=0)
+        self.dp.add_pref(erkenningsNummer="3", plaatsId="5", priority=0)
+
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+
+        stands_1 = stands_erk("1", allocation)
+        stands_2 = stands_erk("2", allocation)
+        stands_3 = stands_erk("3", allocation)
+        self.assertSetEqual(set(stands_1), {"1", "2"})
+        self.assertSetEqual(set(stands_2), {"3"})
+        self.assertSetEqual(set(stands_3), {"4", "5"})
+
+    def test_vpl_verplaatsende_plekken_reserved(self):
+        """
+        static vpl gaat voor verplaatsende vpl
+        """
+        self.dp.update_merchant(
+            erkenningsNummer="2",
+            plaatsen=["2"],
+            status="vpl",
+            sollicitatieNummer="2",
+            description="vpl verplaatser",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 1,
+                "anywhere": False,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_merchant(
+            erkenningsNummer="3",
+            plaatsen=["4"],
+            status="vpl",
+            sollicitatieNummer="3",
+            description="vpl blokkade",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 1,
+                "anywhere": False,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+        self.dp.add_merchant(
+            erkenningsNummer="4",
+            plaatsen=["5"],
+            status="vpl",
+            sollicitatieNummer="4",
+            description="vpl",
+            voorkeur={
+                "branches": [],
+                "maximum": 2,
+                "minimum": 1,
+                "anywhere": False,
+                "verkoopinrichting": [],
+                "absentFrom": "",
+                "absentUntil": "",
+            },
+        )
+
+        self.dp.add_pref(erkenningsNummer="2", plaatsId="4", priority=0)
+        self.dp.add_pref(erkenningsNummer="3", plaatsId="5", priority=0)
+
+        self.dp.mock()
+        allocator = Allocator(self.dp)
+        allocation = allocator.get_allocation()
+
+        stands_1 = stands_erk("1", allocation)
+        stands_2 = stands_erk("2", allocation)
+        stands_3 = stands_erk("3", allocation)
+        self.assertSetEqual(set(stands_1), {"1", "2"})
+        self.assertSetEqual(set(stands_2), {"3"})
+        self.assertSetEqual(set(stands_3), {"4", "5"})
