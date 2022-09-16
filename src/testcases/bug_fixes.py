@@ -50,7 +50,7 @@ class DapperBugTestCase_3(unittest.TestCase):
 
     def test_rejections(self):
         num_rejects = len(self.market_allocation["afwijzingen"])
-        self.assertEqual(5, num_rejects)
+        self.assertEqual(6, num_rejects)
 
     def test_bug_1(self):
         # soll 110 should get 46
@@ -61,14 +61,6 @@ class DapperBugTestCase_3(unittest.TestCase):
         # soll 70 should get 44
         tw = alloc_sollnr(70, self.market_allocation)
         self.assertListEqual(tw["plaatsen"], ["44"])
-
-    def test_bug_3(self):
-        # soll 68 should get 16
-        tw = alloc_sollnr(68, self.market_allocation)
-        a = ["16"]
-        a.sort()
-        tw["plaatsen"].sort()
-        self.assertListEqual(tw["plaatsen"], a)
 
     def test_bug_4(self):
         # soll 73 should get 122
