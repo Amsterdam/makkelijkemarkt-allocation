@@ -9,6 +9,7 @@ from kjk.allocation import Allocator
 from kjk.inputdata import RedisDataprovider
 from kjk.logging import clog
 from kjk.mail import KjKEmailclient
+from v2.allocate import parse_and_allocate as allocate_v2
 
 SAVE_JOB_DATA = True
 
@@ -72,9 +73,15 @@ class JobDispatcher:
             f = open("job.json", "w")
             json.dump(data, f, indent=4)
             f.close()
-        dp = RedisDataprovider(job["data"])
-        a = Allocator(dp)
-        output = a.get_allocation()
+
+        if data["version"] == '2':
+            output, logs = allocate_v2(data)
+            log_result = json.dumps(logs)
+        else:
+            dp = RedisDataprovider(job["data"])
+            a = Allocator(dp)
+            output = a.get_allocation()
+            log_result = json.dumps(clog.get_logs())
 
         # store results in REDIS for 10 min
         json_result = json.dumps(output)
@@ -82,7 +89,6 @@ class JobDispatcher:
         self.r.expire(f"RESULT_{job_id}", 10 * 60)
 
         # store logs in REDIS for 10 min
-        log_result = json.dumps(clog.get_logs())
         self.r.set(f"LOGS_{job_id}", log_result)
         self.r.expire(f"LOGS_{job_id}", 10 * 60)
 
