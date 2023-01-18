@@ -74,7 +74,7 @@ class JobDispatcher:
             json.dump(data, f, indent=4)
             f.close()
 
-        if data["version"] == '2':
+        if data.get("version") == '2':
             output, logs = allocate_v2(data)
             log_result = json.dumps(logs)
         else:
