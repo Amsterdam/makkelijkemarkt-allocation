@@ -4,7 +4,7 @@ from collections import defaultdict
 from v2.branche import Branche
 from v2.kramen import Kraam
 from v2.ondernemers import Ondernemer
-from v2.conf import logger, Status
+from v2.conf import logger, Status, BAK_TYPE_BRANCHE_IDS
 
 
 class Parse:
@@ -43,7 +43,8 @@ class Parse:
                 kraam_props = {}
 
                 branche_id = next(iter(kraam.get('branches')), None)
-                branche = self.branches_map[branche_id] if branche_id else Branche()
+                branche = (self.branches_map[branche_id] if branche_id and branche_id not in BAK_TYPE_BRANCHE_IDS
+                           else Branche())
 
                 bak_type = kraam['bakType']
                 if bak_type == 'bak':
