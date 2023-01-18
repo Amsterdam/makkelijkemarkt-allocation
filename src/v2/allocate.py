@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from v2.markt import Markt
 from v2.conf import logger, KraamTypes
@@ -25,28 +26,29 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
     verplichte_branches = markt.get_verplichte_branches()
     for branche in verplichte_branches:
         logger.log(f'\n======> VERPLICHTE BRANCHE {branche}')
-        verplichte_branche_strategy = HierarchyStrategy(markt, branche=branche)
+        verplichte_branche_strategy = HierarchyStrategy(markt, f'verplichte_branche_hierarchy {branche}',
+                                                        branche=branche)
         verplichte_branche_strategy.run()
         logger.log('\n==> FILL UP')
-        fill_up_strategy_b_list = FillUpStrategyBList(markt, branche=branche)
+        fill_up_strategy_b_list = FillUpStrategyBList(markt, f'verplichte_branche_fill_up_b {branche}', branche=branche)
         fill_up_strategy_b_list.run()
         markt.kramen.remove_verplichte_branche(branche=branche)
         markt.report_indeling()
 
     for kraam_type in KraamTypes.BAK, KraamTypes.BAK_LICHT, KraamTypes.EVI:
         logger.log(f'\n======> Kraam type: {kraam_type}')
-        bak_strategy = HierarchyStrategy(markt, kraam_type=kraam_type)
+        bak_strategy = HierarchyStrategy(markt, f'{kraam_type} hierarchy', kraam_type=kraam_type)
         bak_strategy.run()
-        fill_up_strategy_b_list = FillUpStrategyBList(markt, kraam_type=kraam_type)
+        fill_up_strategy_b_list = FillUpStrategyBList(markt, f'{kraam_type} fill_up_b', kraam_type=kraam_type)
         fill_up_strategy_b_list.run()
         markt.kramen.remove_kraam_type(kraam_type=kraam_type)
         markt.report_indeling()
 
     logger.log('\n======> REMAINING STRATEGY')
     remaining_query = dict(kraam_type__not__in=[*KraamTypes], branche__not__in=verplichte_branches)
-    remaining_strategy = HierarchyStrategy(markt, **remaining_query)
+    remaining_strategy = HierarchyStrategy(markt, f'remaining_hierarchy', **remaining_query)
     remaining_strategy.run()
-    fill_up_strategy_b_list = FillUpStrategyBList(markt, **remaining_query)
+    fill_up_strategy_b_list = FillUpStrategyBList(markt, f'remaining_fill_up_b', **remaining_query)
     fill_up_strategy_b_list.run()
 
     logger.log(f"\n\n========FINAL ONDERNEMERS=======================\n")
@@ -78,10 +80,15 @@ if __name__ == '__main__':
     # json_file = '/Users/pim/projects/notebook/allocation/v2/input_data/local.json'
     # parsed = Parse(json_file=json_file)
 
-    json_file = '/Users/pim/projects/notebook/allocation/v2/input_data/4045_2023-01-12.json'
+    # json_file = '/Users/pim/projects/notebook/allocation/v2/input_data/4045_2023-01-12.json'
+    # json_file = '/Users/pim/projects/notebook/allocation/v2/input_data/AC-2023-01-21.json'
+    json_file = '/Users/pim/projects/notebook/allocation/v2/input_data/ACC-AC-2023-01-18.json'
     logger.local = True
     parsed = Parse(json_file=json_file)
     output = allocate(**parsed.__dict__)
+
+    logs = logger.get_logs()
+    json.dumps(logs)
 
     # for fixtures use:
     # output = allocate(fix_markt_meta, fix_rows, fix_branches, fix_ondernemers)

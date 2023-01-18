@@ -1,6 +1,6 @@
 from enum import Enum
 
-BAK_TYPE_BRANCHE_IDS = ['bak', 'bak_licht']
+BAK_TYPE_BRANCHE_IDS = ['bak', 'bak-licht']
 
 
 class ComparableEnum(Enum):
