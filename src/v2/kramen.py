@@ -168,7 +168,7 @@ class Cluster:
 
     def validate_assignment(self, ondernemer):
         if self.does_exceed_branche_max(ondernemer.branche):
-            ondernemer.soft_reject(RejectionReason.EXCEEDS_BRANCHE_MAX)
+            ondernemer.reject(RejectionReason.EXCEEDS_BRANCHE_MAX)
             return False
         if not ondernemer.likes_proposed_kramen(self.kramen):
             return False
