@@ -3,7 +3,7 @@ import pandas as pd
 
 from v2.kramen import Kramen
 from v2.ondernemers import Ondernemers
-from v2.conf import logger, Status, RejectionReason, ALL_VPH_STATUS, BAK_TYPE_BRANCHE_IDS
+from v2.conf import logger, Status, RejectionReason, TraceMixin, ALL_VPH_STATUS, BAK_TYPE_BRANCHE_IDS
 
 pd.set_option('display.max_colwidth', None)  # so auto truncate of broad columns is turned off
 pd.set_option('display.max_columns', None)  # so auto truncate of columns is turned off
@@ -11,7 +11,7 @@ pd.set_option('display.max_rows', None)  # so auto truncate of rows is turned of
 pd.set_option('display.width', 1000)
 
 
-class Markt:
+class Markt(TraceMixin):
     def __init__(self, meta, rows, branches, ondernemers):
         self.afkorting = '4045'
         self.naam = "Plein '40 - '45"
@@ -29,6 +29,8 @@ class Markt:
         self.step = 1
         self.working_copy = []
         self.allocation_hashes = []
+
+        self.trace.set_rows(self.kramen.as_flat_rows())
 
     def is_allocation_hash_same_as_previous_round(self):
         allocation_hash = self.kramen.calculate_allocation_hash()
