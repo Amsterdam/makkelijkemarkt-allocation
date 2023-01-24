@@ -1,3 +1,4 @@
+import datetime
 import json
 from collections import defaultdict
 
@@ -85,26 +86,37 @@ class Parse:
         presence = {rsvp['erkenningsNummer'] for rsvp in self.input_data['aanwezigheid']}
 
         for ondernemer_data in self.input_data['ondernemers']:
+            voorkeur = ondernemer_data.get('voorkeur', {})
             erkenningsnummer = ondernemer_data['erkenningsNummer']
+
             if erkenningsnummer in not_present:
-                logger.log(f"Ondernemer {erkenningsnummer} not present today")
+                # logger.log(f"Ondernemer {erkenningsnummer} not present today")
                 continue
 
             if erkenningsnummer not in presence:
-                logger.log(f"Ondernemer {erkenningsnummer} - {ondernemer_data['sollicitatieNummer']} - ({ondernemer_data['status']}) not in presence list")
                 if ondernemer_data['status'] in ['vpl', 'eb', 'tvpl', 'tvplz', 'exp', 'expf']:
-                    # logger.log(f"So implicitly present")
+                    logger.log(f"VPH {ondernemer_data['sollicitatieNummer']} not in presence list "
+                               f"so implicitly present")
                     pass
                 else:
-                    # logger.log(f"So implicitly absent")
+                    logger.log(f"SOLL {ondernemer_data['sollicitatieNummer']} not in presence list "
+                               f"so implicitly absent")
                     continue
 
-            ondernemer_props = {}
-            voorkeur = ondernemer_data.get('voorkeur', {})
+            absent_from = voorkeur.get('absentFrom')
+            absent_until = voorkeur.get('absentUntil')
+            if absent_from and absent_until:
+                absent_from_date = datetime.date.fromisoformat(absent_from)
+                absent_until_date = datetime.date.fromisoformat(absent_until)
+                if absent_from_date <= datetime.date.today() < absent_until_date:
+                    logger.log(f"Ondernemer {erkenningsnummer} - {ondernemer_data['sollicitatieNummer']} "
+                               f"langdurig afwezig)")
+                    continue
 
             branche_id = next(iter(voorkeur.get('branches', [])), None)
             branche = self.branches_map.get(branche_id, Branche()) if branche_id else Branche()
 
+            ondernemer_props = {}
             bak_type = voorkeur.get('bakType')
             if bak_type == 'bak-licht':
                 ondernemer_props['bak_licht'] = True
