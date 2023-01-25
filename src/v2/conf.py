@@ -77,12 +77,14 @@ logger = Logger()
 
 
 class Step:
-    def __init__(self, id, action, kraam=None, ondernemer=None, detail=''):
+    def __init__(self, id, action, kraam=None, ondernemer=None, detail='', phase='', group=''):
         self.id = id
         self.action = action.value
         self.kraam = kraam
         self.ondernemer = ondernemer
         self.detail = detail
+        self.phase = phase
+        self.group = group
 
 
 class Trace:
@@ -91,6 +93,8 @@ class Trace:
         self.count = 1
         self.action = Action
         self.rows = rows or []
+        self.phase = ''
+        self.group = ''
 
     @property
     def content(self):
@@ -102,6 +106,12 @@ class Trace:
     def set_rows(self, rows):
         self.rows = rows
 
+    def set_phase(self, phase):
+        self.phase = phase
+
+    def set_group(self, group):
+        self.group = group.value
+
     def show(self):
         print(self.content)
 
@@ -110,7 +120,7 @@ class Trace:
             json.dump(self.content, f)
 
     def add_step(self, **kwargs):
-        self.steps.append(Step(id=self.count, **kwargs).__dict__)
+        self.steps.append(Step(id=self.count, phase=self.phase, group=self.group, **kwargs).__dict__)
         self.count += 1
 
     def assign_kraam_to_ondernemer(self, kraam, ondernemer):
