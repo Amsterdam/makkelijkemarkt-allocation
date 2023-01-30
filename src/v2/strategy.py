@@ -72,6 +72,8 @@ class ReceiveOwnKramenStrategy(BaseStrategy):
         vpl_allocation.allocate_own_kramen(Status.EB)
         vpl_allocation.allocate_own_kramen(Status.VPL)
         vpl_allocation.allocate_own_kramen(Status.TVPL)
+        vpl_allocation.allocate_own_kramen(Status.EXP)
+        vpl_allocation.allocate_own_kramen(Status.EXPF)
 
 
 class HierarchyStrategy(BaseStrategy):
@@ -92,8 +94,11 @@ class HierarchyStrategy(BaseStrategy):
             vpl_allocation.vph_uitbreiding(vph_status=Status.EB)
             vpl_allocation.vph_uitbreiding(vph_status=Status.VPL)
             vpl_allocation.vph_uitbreiding(vph_status=Status.TVPL)
+            vpl_allocation.vph_uitbreiding(vph_status=Status.EXP)
+            vpl_allocation.vph_uitbreiding(vph_status=Status.EXPF)
             vpl_allocation.move_to_prefs(Status.VPL)
             vpl_allocation.move_to_prefs(Status.TVPL)
+            vpl_allocation.move_to_prefs(Status.EXP)
 
             soll_allocation = SollAllocation(self.markt)
             soll_allocation.set_ondernemer_filter_kwargs(**self.ondernemer_filter_kwargs)
