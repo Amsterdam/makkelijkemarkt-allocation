@@ -12,7 +12,10 @@ class VplAllocation(TraceMixin, BaseAllocation):
         for ondernemer in ondernemers:
             for kraam_id in ondernemer.own:
                 kraam = self.markt.kramen.get_kraam_by_id(kraam_id=kraam_id)
-                kraam.assign(ondernemer)
+                if not kraam:
+                    logger.log(f"Kraam {kraam_id} does not exist or is blocked")
+                else:
+                    kraam.assign(ondernemer)
         self.markt.report_indeling()
 
     def allocate_tvplz(self):

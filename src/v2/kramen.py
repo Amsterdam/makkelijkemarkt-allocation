@@ -223,7 +223,7 @@ class Kramen:
                 self.kramen_map[kraam.id] = kraam
 
     def get_kraam_by_id(self, kraam_id):
-        return self.kramen_map[kraam_id]
+        return self.kramen_map.get(kraam_id)
 
     def as_rows(self):
         return self.rows
