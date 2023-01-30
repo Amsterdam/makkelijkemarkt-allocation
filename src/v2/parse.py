@@ -15,6 +15,8 @@ class Parse:
         self.rows = []
         self.ondernemers = []
         self.markt_meta = {}
+        self.blocked_kramen = []
+        self.blocked_dates = []
 
         if json_file:
             input_data = self.load_json_file(json_file)
@@ -41,6 +43,8 @@ class Parse:
         for input_row in self.input_data['rows']:
             row = []
             for kraam in input_row:
+                if kraam['plaatsId'] in self.blocked_kramen:
+                    continue
                 kraam_props = {}
 
                 branche_id = next(iter(kraam.get('branches')), None)
@@ -70,10 +74,17 @@ class Parse:
         'paginas', 'aanmeldingen', 'voorkeuren', 'ondernemers', 'aanwezigheid', 'aLijst', 'mode'
         """
         # input_data = self.input_data
-        self.markt_meta = self.input_data['markt']
+        self.parse_markt()
         self.parse_branches()
         self.parse_rows()
         self.parse_ondernemers()
+
+    def parse_markt(self):
+        self.markt_meta = self.input_data['markt']
+        blocked_kramen = self.markt_meta.get('kiesJeKraamGeblokkeerdePlaatsen')
+        self.blocked_kramen = blocked_kramen.split(',') if blocked_kramen else []
+        blocked_dates = self.markt_meta.get('kiesJeKraamGeblokkeerdeData', '')
+        self.blocked_dates = blocked_dates.split(',') if blocked_dates else []
 
     def parse_ondernemers(self):
         plaatsvoorkeuren_map = defaultdict(list)
@@ -83,7 +94,7 @@ class Parse:
         a_list = {ondernemer['erkenningsNummer'] for ondernemer in self.input_data['aLijst']}
 
         not_present = {rsvp['erkenningsNummer'] for rsvp in self.input_data['aanwezigheid'] if not rsvp['attending']}
-        presence = {rsvp['erkenningsNummer'] for rsvp in self.input_data['aanwezigheid']}
+        present = {rsvp['erkenningsNummer'] for rsvp in self.input_data['aanwezigheid'] if rsvp['attending']}
 
         for ondernemer_data in self.input_data['ondernemers']:
             voorkeur = ondernemer_data.get('voorkeur', {})
@@ -93,7 +104,7 @@ class Parse:
                 # logger.log(f"Ondernemer {erkenningsnummer} not present today")
                 continue
 
-            if erkenningsnummer not in presence:
+            if erkenningsnummer not in present:
                 if ondernemer_data['status'] in ['vpl', 'eb', 'tvpl', 'tvplz', 'exp', 'expf']:
                     logger.log(f"VPH {ondernemer_data['sollicitatieNummer']} not in presence list "
                                f"so implicitly present")

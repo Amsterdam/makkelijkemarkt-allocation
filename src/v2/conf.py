@@ -1,4 +1,5 @@
 from enum import Enum
+import json
 
 BAK_TYPE_BRANCHE_IDS = ['bak', 'bak-licht']
 
@@ -46,6 +47,11 @@ class RejectionReason(ComparableEnum):
         return hash('RejectionReason')
 
 
+class Action(ComparableEnum):
+    ASSIGN_KRAAM_TO_ONDERNEMER = 1
+    UNASSIGN_KRAAM = 2
+
+
 class Logger:
     def __init__(self):
         self.log_detail_level = 1
@@ -68,3 +74,73 @@ class Logger:
 
 
 logger = Logger()
+
+
+class Step:
+    def __init__(self, id, action, kraam=None, ondernemer=None, detail='', phase='', group=''):
+        self.id = id
+        self.action = action.value
+        self.kraam = kraam
+        self.ondernemer = ondernemer
+        self.detail = detail
+        self.phase = phase
+        self.group = group
+
+
+class Trace:
+    def __init__(self, rows=None):
+        self.steps = []
+        self.count = 1
+        self.action = Action
+        self.rows = rows or []
+        self.phase = ''
+        self.group = ''
+
+    @property
+    def content(self):
+        return {
+            'steps': self.steps,
+            'rows': self.rows,
+        }
+
+    def set_rows(self, rows):
+        self.rows = rows
+
+    def set_phase(self, phase):
+        self.phase = phase
+
+    def set_group(self, group):
+        self.group = group.value
+
+    def show(self):
+        print(self.content)
+
+    def save(self, path):
+        with open(path, 'w') as f:
+            json.dump(self.content, f)
+
+    def add_step(self, **kwargs):
+        self.steps.append(Step(id=self.count, phase=self.phase, group=self.group, **kwargs).__dict__)
+        self.count += 1
+
+    def assign_kraam_to_ondernemer(self, kraam, ondernemer):
+        self.add_step(action=self.action.ASSIGN_KRAAM_TO_ONDERNEMER, kraam=kraam, ondernemer=ondernemer)
+
+    def unassign_kraam(self, kraam):
+        self.add_step(action=self.action.UNASSIGN_KRAAM, kraam=kraam)
+
+    def assign_ondernemer_to_kraam(self):
+        pass
+
+    def unassign_ondernemer(self):
+        pass
+
+    def reject_ondernemer(self):
+        pass
+
+
+trace = Trace()
+
+
+class TraceMixin:
+    trace = trace

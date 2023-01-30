@@ -1,20 +1,27 @@
-from v2.conf import logger, Status
+from v2.conf import logger, Status, TraceMixin
 from v2.allocations.base_allocation import BaseAllocation
 
 
-class VplAllocation(BaseAllocation):
+class VplAllocation(TraceMixin, BaseAllocation):
     def allocate_own_kramen(self, vph_status):
         logger.log(f"\n====> {vph_status.value} allocate own kramen \n")
+        self.trace.set_phase('allocate_own_kramen')
+        self.trace.set_group(vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, allocated=False,
                                                     **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
             for kraam_id in ondernemer.own:
                 kraam = self.markt.kramen.get_kraam_by_id(kraam_id=kraam_id)
-                kraam.assign(ondernemer)
+                if not kraam:
+                    logger.log(f"Kraam {kraam_id} does not exist or is blocked")
+                else:
+                    kraam.assign(ondernemer)
         self.markt.report_indeling()
 
     def allocate_tvplz(self):
         logger.log(f"\n====> TVPLZ \n")
+        self.trace.set_phase('allocate_tvplz')
+        self.trace.set_group(Status.TVPLZ)
         """
         TVPLZ: a TVPL with no vaste kraam (Zonder) from Mercato.
         Typically, purposefully non-existent vaste kramen are assigned to them in Mercato.
@@ -35,6 +42,8 @@ class VplAllocation(BaseAllocation):
 
     def move_to_prefs(self, vph_status):
         logger.log(f"\n====> Moving {vph_status}")
+        self.trace.set_phase('move_to_prefs')
+        self.trace.set_group(vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
             if set(ondernemer.prefs).difference(ondernemer.own):
@@ -51,6 +60,8 @@ class VplAllocation(BaseAllocation):
 
     def vph_uitbreiding(self, vph_status):
         logger.log(f"\n====> Uitbreiden {vph_status}")
+        self.trace.set_phase('vph_uitbreiding')
+        self.trace.set_group(vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
             logger.log(f"\nUitbreiden van {vph_status} ondernemer {ondernemer}")

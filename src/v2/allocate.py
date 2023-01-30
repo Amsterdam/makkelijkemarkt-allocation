@@ -2,7 +2,7 @@ import datetime
 import json
 
 from v2.markt import Markt
-from v2.conf import logger, KraamTypes
+from v2.conf import logger, KraamTypes, trace
 from v2.strategy import ReceiveOwnKramenStrategy, HierarchyStrategy, FillUpStrategyBList
 from v2.validate import ValidateMarkt
 from v2.parse import Parse
@@ -77,18 +77,18 @@ def parse_and_allocate(input_data):
 
 if __name__ == '__main__':
     # to use json input from file use:
-    # json_file = '/Users/pim/projects/notebook/allocation/v2/input_data/local.json'
+    # json_file = './input_data/local.json'
     # parsed = Parse(json_file=json_file)
 
-    # json_file = '/Users/pim/projects/notebook/allocation/v2/input_data/4045_2023-01-12.json'
-    # json_file = '/Users/pim/projects/notebook/allocation/v2/input_data/AC-2023-01-21.json'
-    json_file = '/Users/pim/projects/notebook/allocation/v2/input_data/ACC-AC-2023-01-18.json'
+    json_file = './input_data/4045-2023_01_31.json'
     logger.local = True
     parsed = Parse(json_file=json_file)
     output = allocate(**parsed.__dict__)
 
     logs = logger.get_logs()
     json.dumps(logs)
+
+    trace.show()
 
     # for fixtures use:
     # output = allocate(fix_markt_meta, fix_rows, fix_branches, fix_ondernemers)

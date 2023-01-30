@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from v2.conf import logger, KraamTypes, RejectionReason
+from v2.conf import logger, KraamTypes, RejectionReason, TraceMixin
 
 
 class KraamType:
@@ -26,6 +26,13 @@ class KraamType:
     def __bool__(self):
         return bool(self.props)
 
+    def as_dict(self):
+        return {
+            'B': KraamTypes.BAK in self.props,
+            'L': KraamTypes.BAK_LICHT in self.props,
+            'E': KraamTypes.EVI in self.props,
+        }
+
     def get_active(self):
         try:
             return self.props[-1]
@@ -50,7 +57,7 @@ class KraamType:
             return kraam_type == active_prop
 
 
-class Kraam:
+class Kraam(TraceMixin):
     def __init__(self, id, ondernemer=None, branche=None, **kwargs):
         self.id = id
         self.ondernemer = ondernemer
@@ -59,12 +66,15 @@ class Kraam:
 
     def __str__(self):
         kraam = f"kraam {self.id}"
-        branche = self.branche.shortname if (self.branche and self.branche.verplicht) else ''
+        branche = self.get_verplichte_branche()
         kraam_type = self.kraam_type.get_active()
 
         if branche or kraam_type:
             kraam += f" ({branche}{kraam_type.value if kraam_type else ''})"
         return kraam
+
+    def get_verplichte_branche(self):
+        return self.branche.shortname if (self.branche and self.branche.verplicht) else ''
 
     def __repr__(self):
         return str(self)
@@ -97,12 +107,14 @@ class Kraam:
         else:
             logger.log(f"Assigning kraam {self.id} to ondernemer {ondernemer}")
             self.ondernemer = ondernemer.rank
+            self.trace.assign_kraam_to_ondernemer(self.id, ondernemer.rank)
             ondernemer.assign_kraam(self.id)
 
     def unassign(self, ondernemer):
         if self.ondernemer == ondernemer.rank:
             logger.log(f"Unassigning kraam {self.id} to ondernemer {ondernemer}")
             self.ondernemer = None
+            self.trace.unassign_kraam(self.id)
             ondernemer.unassign_kraam(self.id)
         else:
             logger.log("Could not unassign {self.id}, not owned by {ondernemer.rank} but {self.ondernemer}")
@@ -211,10 +223,18 @@ class Kramen:
                 self.kramen_map[kraam.id] = kraam
 
     def get_kraam_by_id(self, kraam_id):
-        return self.kramen_map[kraam_id]
+        return self.kramen_map.get(kraam_id)
 
     def as_rows(self):
         return self.rows
+
+    def as_flat_rows(self):
+        return [
+            [{
+                'id': kraam.id,
+                'branche': kraam.get_verplichte_branche(),
+                'kraamType': kraam.kraam_type.as_dict(),
+            } for kraam in row] for row in self.rows]
 
     def calculate_allocation_hash(self):
         allocation = []
