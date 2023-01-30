@@ -83,7 +83,7 @@ class Parse:
         a_list = {ondernemer['erkenningsNummer'] for ondernemer in self.input_data['aLijst']}
 
         not_present = {rsvp['erkenningsNummer'] for rsvp in self.input_data['aanwezigheid'] if not rsvp['attending']}
-        presence = {rsvp['erkenningsNummer'] for rsvp in self.input_data['aanwezigheid']}
+        present = {rsvp['erkenningsNummer'] for rsvp in self.input_data['aanwezigheid'] if rsvp['attending']}
 
         for ondernemer_data in self.input_data['ondernemers']:
             voorkeur = ondernemer_data.get('voorkeur', {})
@@ -93,7 +93,7 @@ class Parse:
                 # logger.log(f"Ondernemer {erkenningsnummer} not present today")
                 continue
 
-            if erkenningsnummer not in presence:
+            if erkenningsnummer not in present:
                 if ondernemer_data['status'] in ['vpl', 'eb', 'tvpl', 'tvplz', 'exp', 'expf']:
                     logger.log(f"VPH {ondernemer_data['sollicitatieNummer']} not in presence list "
                                f"so implicitly present")
