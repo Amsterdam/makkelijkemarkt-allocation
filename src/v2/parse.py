@@ -81,8 +81,10 @@ class Parse:
 
     def parse_markt(self):
         self.markt_meta = self.input_data['markt']
-        self.blocked_kramen = self.markt_meta.get('kiesJeKraamGeblokkeerdePlaatsen', '').split(',')
-        self.blocked_dates = self.markt_meta.get('kiesJeKraamGeblokkeerdeData', '').split(',')
+        blocked_kramen = self.markt_meta.get('kiesJeKraamGeblokkeerdePlaatsen')
+        self.blocked_kramen = blocked_kramen.split(',') if blocked_kramen else []
+        blocked_dates = self.markt_meta.get('kiesJeKraamGeblokkeerdeData', '')
+        self.blocked_dates = blocked_dates.split(',') if blocked_dates else []
 
     def parse_ondernemers(self):
         plaatsvoorkeuren_map = defaultdict(list)
