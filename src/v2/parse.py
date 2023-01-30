@@ -15,6 +15,8 @@ class Parse:
         self.rows = []
         self.ondernemers = []
         self.markt_meta = {}
+        self.blocked_kramen = []
+        self.blocked_dates = []
 
         if json_file:
             input_data = self.load_json_file(json_file)
@@ -41,6 +43,8 @@ class Parse:
         for input_row in self.input_data['rows']:
             row = []
             for kraam in input_row:
+                if kraam['plaatsId'] in self.blocked_kramen:
+                    continue
                 kraam_props = {}
 
                 branche_id = next(iter(kraam.get('branches')), None)
@@ -70,10 +74,15 @@ class Parse:
         'paginas', 'aanmeldingen', 'voorkeuren', 'ondernemers', 'aanwezigheid', 'aLijst', 'mode'
         """
         # input_data = self.input_data
-        self.markt_meta = self.input_data['markt']
+        self.parse_markt()
         self.parse_branches()
         self.parse_rows()
         self.parse_ondernemers()
+
+    def parse_markt(self):
+        self.markt_meta = self.input_data['markt']
+        self.blocked_kramen = self.markt_meta.get('kiesJeKraamGeblokkeerdePlaatsen', '').split(',')
+        self.blocked_dates = self.markt_meta.get('kiesJeKraamGeblokkeerdeData', '').split(',')
 
     def parse_ondernemers(self):
         plaatsvoorkeuren_map = defaultdict(list)
