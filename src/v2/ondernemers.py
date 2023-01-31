@@ -41,7 +41,7 @@ class Ondernemer:
         self.kramen.remove(kraam)
 
     def reject(self, reason):
-        logger.log(f"`Rejecting: {reason.value} => {self}")
+        logger.log(f"Rejecting: {reason.value} => {self}")
         self.is_rejected = True
         self.reject_reason = reason
 
