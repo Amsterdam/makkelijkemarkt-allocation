@@ -7,11 +7,6 @@ from v2.strategy import ReceiveOwnKramenStrategy, HierarchyStrategy, FillUpStrat
 from v2.validate import ValidateMarkt
 from v2.parse import Parse
 
-from v2.fixtures.default.kramen import rows as fix_rows
-from v2.fixtures.default.branches import branches as fix_branches
-from v2.fixtures.default.ondernemers import ondernemers as fix_ondernemers
-from v2.fixtures.default.markt import markt_meta as fix_markt_meta
-
 
 def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
     start = datetime.datetime.now()
@@ -77,17 +72,13 @@ def parse_and_allocate(input_data):
 
 if __name__ == '__main__':
     logger.local = True
+    json_file = './input_data/4045-2023_01_31.json'
+    logger.local = True
+    parsed = Parse(json_file=json_file)
+    output = allocate(**parsed.__dict__)
 
-    # json_file = './input_data/4045-2023_01_31.json'
-    # logger.local = True
-    # parsed = Parse(json_file=json_file)
-    # output = allocate(**parsed.__dict__)
-
-    # for fixtures use:
-    output = allocate(fix_markt_meta, fix_rows, fix_branches, fix_ondernemers)
     logs = logger.get_logs()
     json.dumps(logs)
     print(logs)
 
     # trace.show()
-
