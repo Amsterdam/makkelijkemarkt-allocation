@@ -91,14 +91,23 @@ class HierarchyStrategy(BaseStrategy):
             self.markt.report_indeling()
 
             vpl_allocation.allocate_tvplz()
+            # first expand
             vpl_allocation.vph_uitbreiding(vph_status=Status.EB)
             vpl_allocation.vph_uitbreiding(vph_status=Status.VPL)
             vpl_allocation.vph_uitbreiding(vph_status=Status.TVPL)
             vpl_allocation.vph_uitbreiding(vph_status=Status.EXP)
             vpl_allocation.vph_uitbreiding(vph_status=Status.EXPF)
+            # then move to prefs
             vpl_allocation.move_to_prefs(Status.VPL)
             vpl_allocation.move_to_prefs(Status.TVPL)
             vpl_allocation.move_to_prefs(Status.EXP)
+            vpl_allocation.move_to_prefs(Status.EXPF)
+            # After other vphs have moved, expansion could be possible, so try again
+            vpl_allocation.vph_uitbreiding(vph_status=Status.EB)
+            vpl_allocation.vph_uitbreiding(vph_status=Status.VPL)
+            vpl_allocation.vph_uitbreiding(vph_status=Status.TVPL)
+            vpl_allocation.vph_uitbreiding(vph_status=Status.EXP)
+            vpl_allocation.vph_uitbreiding(vph_status=Status.EXPF)
 
             soll_allocation = SollAllocation(self.markt)
             soll_allocation.set_ondernemer_filter_kwargs(**self.ondernemer_filter_kwargs)
