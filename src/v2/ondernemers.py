@@ -6,11 +6,11 @@ from v2.kramen import KraamType
 
 
 class Ondernemer:
-    def __init__(self, rank, erkenningsnummer, description, branche=None, prefs=None, min=0, max=0, anywhere=False,
+    def __init__(self, rank, erkenningsnummer='', description='', branche=None, prefs=None, min=0, max=0, anywhere=False,
                  kramen=None, own=None, status=None, bak=False, bak_licht=False, evi=False):
         self.rank = rank
-        self.erkenningsnummer = erkenningsnummer
-        self.description = description
+        self.erkenningsnummer = erkenningsnummer or rank
+        self.description = description or rank
         self.branche = branche or Branche()
         self.prefs = prefs or []
         self.min = min
