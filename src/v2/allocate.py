@@ -43,7 +43,7 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
         markt.kramen.remove_kraam_type(kraam_type=kraam_type)
         markt.report_indeling()
 
-    trace.set_phase(epic='remaining')
+    trace.set_phase(epic='remaining', story='remaining')
     remaining_query = dict(kraam_type__not__in=[*KraamTypes], branche__not__in=verplichte_branches)
     remaining_strategy = HierarchyStrategy(markt, **remaining_query)
     remaining_strategy.run()
