@@ -5,9 +5,8 @@ from v2.allocations.soll import SollAllocation
 
 
 class BaseStrategy(TraceMixin):
-    def __init__(self, markt, name='BaseStrategy', **filter_kwargs):
+    def __init__(self, markt, **filter_kwargs):
         self.markt = markt
-        self.name = name
         self.working_copies = []
         self.ondernemer_filter_kwargs = filter_kwargs
         self.kramen_filter_kwargs = filter_kwargs
@@ -89,7 +88,7 @@ class HierarchyStrategy(BaseStrategy):
 
         while self.markt.kramen_per_ondernemer <= self.markt.max_aantal_kramen_per_ondernemer:
             self.trace.set_cycle(self.markt.kramen_per_ondernemer)
-            self.trace.log(f"\n========> {self.name} HIERARCHY kramen_per_ondernemer {self.markt.kramen_per_ondernemer}")
+            self.trace.log(f"HIERARCHY kramen_per_ondernemer {self.markt.kramen_per_ondernemer}")
             self.markt.restore_working_copy(self.working_copies[0])  # fallback to the initial state
             self.markt.report_indeling()
 
@@ -122,7 +121,7 @@ class HierarchyStrategy(BaseStrategy):
         self.finish()
 
     def finish(self):
-        self.trace.log(f"\n========> {self.name} Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
+        self.trace.log(f"Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
         super().finish()
 
 
@@ -132,7 +131,7 @@ class FillUpStrategyBList(BaseStrategy):
         self.markt.kramen_per_ondernemer = 1
 
         while self.markt.kramen_per_ondernemer < self.markt.max_aantal_kramen_per_ondernemer:
-            self.trace.log(f"\n========> {self.name} FILL UP B LIST: kramen_per_ondernemer {self.markt.kramen_per_ondernemer}")
+            self.trace.log(f"FILL UP B LIST: kramen_per_ondernemer {self.markt.kramen_per_ondernemer}")
             self.markt.restore_working_copy(self.working_copies[0])  # fallback to the initial state
 
             soll_allocation = SollAllocation(self.markt)
@@ -145,5 +144,5 @@ class FillUpStrategyBList(BaseStrategy):
         self.finish()
 
     def finish(self):
-        self.trace.log(f"\n========>  {self.name} Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
+        self.trace.log(f"Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
         super().finish()
