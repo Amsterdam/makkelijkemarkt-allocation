@@ -106,15 +106,15 @@ class Trace:
     def set_rows(self, rows):
         self.rows = rows
 
-    def set_phase(self, task='', story='', epic='', group=None):
-        if task:
-            self.task = task
-        if story:
-            self.story = story
+    def set_phase(self, epic='', story='', task='', group=None):
         if epic:
             self.epic = epic
+        if story:
+            self.story = story
+        if task:
+            self.task = task
         if group:
-            self.group = group.value
+            self.group = group.value if group else ''
 
     def set_cycle(self, cycle=0):
         if cycle:
