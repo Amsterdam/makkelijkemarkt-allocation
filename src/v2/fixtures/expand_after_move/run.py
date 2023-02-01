@@ -13,6 +13,5 @@ if __name__ == '__main__':
     output = allocate(markt_meta, rows, branches, ondernemers)
     logs = logger.get_logs()
     json.dumps(logs)
-    print(logs)
 
     # trace.show()
