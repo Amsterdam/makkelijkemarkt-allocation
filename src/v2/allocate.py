@@ -72,6 +72,9 @@ def parse_and_allocate(input_data):
 
 
 if __name__ == '__main__':
+    """
+    Usage: allocate.py <input json (relative to src/v2 dir)> <path to tracefile>
+    """
     _script, input_json_file, trace_file_path, *rest = sys.argv
     logger.local = True
 
