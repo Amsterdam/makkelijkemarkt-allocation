@@ -1,8 +1,8 @@
-from v2.conf import trace
+from v2.conf import TraceMixin
 from v2.helpers import clamp
 
 
-class BaseAllocation:
+class BaseAllocation(TraceMixin):
     def __init__(self, markt, **filter_kwargs):
         self.markt = markt
         self.ondernemer_filter_kwargs = filter_kwargs
@@ -18,15 +18,16 @@ class BaseAllocation:
         current_amount_kramen = len(ondernemer.kramen)
         amount_kramen_wanted = ondernemer.max
         right_size = clamp(current_amount_kramen, amount_kramen_wanted, self.markt.kramen_per_ondernemer)
-        trace.log(f"get_right_size_for_ondernemer: (current, wanted, limit)"
-              f"{current_amount_kramen, amount_kramen_wanted, self.markt.kramen_per_ondernemer} = {right_size}")
+        self.trace.log(f"get_right_size_for_ondernemer: (current, wanted, limit)"
+                       f"{current_amount_kramen, amount_kramen_wanted, self.markt.kramen_per_ondernemer} = "
+                       f"{right_size}")
         return right_size
 
     def move_ondernemer_to_new_cluster(self, ondernemer, new_cluster):
         if not new_cluster:
             return
         if new_cluster.kramen_list == ondernemer.kramen:
-            trace.log(f"Not moving, new cluster {new_cluster} same as current kramen for {ondernemer}")
+            self.trace.log(f"Not moving, new cluster {new_cluster} same as current kramen for {ondernemer}")
             return
 
         current_size = len(ondernemer.kramen)

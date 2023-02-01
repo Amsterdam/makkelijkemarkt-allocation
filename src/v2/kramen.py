@@ -174,7 +174,7 @@ class Cluster(TraceMixin):
     def does_exceed_branche_max(self, branche, offset=0):
         if branche.max and branche.assigned_count + len(self.kramen) + offset > branche.max:
             self.trace.log(f"WARNING: Amount of kramen {len(self.kramen)} plus {branche.assigned_count} exceeds "
-                  f"branche '{branche}' max of {branche.max}")
+                           f"branche '{branche}' max of {branche.max}")
             return True
         return False
 

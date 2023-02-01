@@ -42,7 +42,7 @@ class BaseStrategy(TraceMixin):
 
     def should_allocation_loop_continue(self):
         if self.markt.is_allocation_hash_same_as_previous_round():
-            self.trace.log('*** SAME HASH ***')
+            self.trace.log('SAME HASH')
             return False
 
         if not self.kramen_still_available():

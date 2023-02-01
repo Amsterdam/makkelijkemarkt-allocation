@@ -1,8 +1,8 @@
-from v2.conf import Status, TraceMixin
+from v2.conf import Status
 from v2.allocations.base_allocation import BaseAllocation
 
 
-class VplAllocation(TraceMixin, BaseAllocation):
+class VplAllocation(BaseAllocation):
     def allocate_own_kramen(self, vph_status):
         self.trace.set_phase(task='allocate_own_kramen', group=vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, allocated=False,
@@ -27,7 +27,7 @@ class VplAllocation(TraceMixin, BaseAllocation):
         ondernemers = self.markt.ondernemers.select(status=Status.TVPLZ, allocated=False,
                                                     **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
-            self.trace.log(f"\nTrying to allocate TVPLZ {ondernemer}")
+            self.trace.log(f"Trying to allocate TVPLZ {ondernemer}")
             size = min(ondernemer.max, self.markt.kramen_per_ondernemer)
             peer_prefs = self.markt.ondernemers.get_prefs_from_unallocated_peers(peer_status=ondernemer.status,
                                                                                  **self.ondernemer_filter_kwargs)
@@ -41,7 +41,7 @@ class VplAllocation(TraceMixin, BaseAllocation):
         ondernemers = self.markt.ondernemers.select(status=vph_status, **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
             if set(ondernemer.prefs).difference(ondernemer.own):
-                self.trace.log(f"\nTrying to move Ondernemer {ondernemer}")
+                self.trace.log(f"Trying to move Ondernemer {ondernemer}")
                 size = self.get_right_size_for_ondernemer(ondernemer)
                 current_size = len(ondernemer.kramen)
                 if size < current_size:

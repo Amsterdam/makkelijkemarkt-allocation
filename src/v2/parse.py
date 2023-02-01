@@ -116,11 +116,11 @@ class Parse(TraceMixin):
             if erkenningsnummer not in present:
                 if ondernemer_data['status'] in ['vpl', 'eb', 'tvpl', 'tvplz', 'exp', 'expf']:
                     self.trace.log(f"VPH {ondernemer_data['sollicitatieNummer']} not in presence list "
-                               f"so implicitly present")
+                                   f"so implicitly present")
                     pass
                 else:
                     self.trace.log(f"SOLL {ondernemer_data['sollicitatieNummer']} not in presence list "
-                               f"so implicitly absent")
+                                   f"so implicitly absent")
                     continue
 
             absent_from = voorkeur.get('absentFrom')
@@ -130,7 +130,7 @@ class Parse(TraceMixin):
                 absent_until_date = datetime.date.fromisoformat(absent_until)
                 if absent_from_date <= datetime.date.today() < absent_until_date:
                     self.trace.log(f"Ondernemer {erkenningsnummer} - {ondernemer_data['sollicitatieNummer']} "
-                               f"langdurig afwezig)")
+                                   f"langdurig afwezig)")
                     continue
 
             branche_id = next(iter(voorkeur.get('branches', [])), None)

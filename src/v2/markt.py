@@ -101,7 +101,7 @@ class Markt(TraceMixin):
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.SOLL)
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.B_LIST)
             print(pd.DataFrame(ondernemer.__dict__ for ondernemer in ordered_ondernemers))
-        self.trace.log(f"\nRejection log: {self.rejection_log}")
+        self.trace.log(f"Rejection log: {self.rejection_log}")
 
     def get_allocation(self):
         allocation = []
