@@ -1,10 +1,10 @@
-from v2.conf import trace, Status
+from v2.conf import TraceMixin, Status
 
 from v2.allocations.vpl import VplAllocation
 from v2.allocations.soll import SollAllocation
 
 
-class BaseStrategy:
+class BaseStrategy(TraceMixin):
     def __init__(self, markt, name='BaseStrategy', **filter_kwargs):
         self.markt = markt
         self.name = name
@@ -34,7 +34,7 @@ class BaseStrategy:
 
     def kramen_still_available(self):
         available_kramen_count = self.markt.kramen.find_clusters(1, **self.kramen_filter_kwargs)
-        trace.log(f"Available kramen: {available_kramen_count}")
+        self.trace.log(f"Available kramen: {available_kramen_count}")
         return available_kramen_count
 
     def run(self):
@@ -42,7 +42,7 @@ class BaseStrategy:
 
     def should_allocation_loop_continue(self):
         if self.markt.is_allocation_hash_same_as_previous_round():
-            trace.log('*** SAME HASH ***')
+            self.trace.log('*** SAME HASH ***')
             return False
 
         if not self.kramen_still_available():
@@ -86,7 +86,7 @@ class HierarchyStrategy(BaseStrategy):
         self.markt.kramen_per_ondernemer = 1
 
         while self.markt.kramen_per_ondernemer <= self.markt.max_aantal_kramen_per_ondernemer:
-            trace.log(f"\n========> {self.name} HIERARCHY kramen_per_ondernemer {self.markt.kramen_per_ondernemer}")
+            self.trace.log(f"\n========> {self.name} HIERARCHY kramen_per_ondernemer {self.markt.kramen_per_ondernemer}")
             self.markt.restore_working_copy(self.working_copies[0])  # fallback to the initial state
             self.markt.report_indeling()
 
@@ -119,7 +119,7 @@ class HierarchyStrategy(BaseStrategy):
         self.finish()
 
     def finish(self):
-        trace.log(f"\n========> {self.name} Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
+        self.trace.log(f"\n========> {self.name} Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
         super().finish()
 
 
@@ -129,7 +129,7 @@ class FillUpStrategyBList(BaseStrategy):
         self.markt.kramen_per_ondernemer = 1
 
         while self.markt.kramen_per_ondernemer < self.markt.max_aantal_kramen_per_ondernemer:
-            trace.log(f"\n========> {self.name} FILL UP B LIST: kramen_per_ondernemer {self.markt.kramen_per_ondernemer}")
+            self.trace.log(f"\n========> {self.name} FILL UP B LIST: kramen_per_ondernemer {self.markt.kramen_per_ondernemer}")
             self.markt.restore_working_copy(self.working_copies[0])  # fallback to the initial state
 
             soll_allocation = SollAllocation(self.markt)
@@ -142,5 +142,5 @@ class FillUpStrategyBList(BaseStrategy):
         self.finish()
 
     def finish(self):
-        trace.log(f"\n========>  {self.name} Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
+        self.trace.log(f"\n========>  {self.name} Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
         super().finish()

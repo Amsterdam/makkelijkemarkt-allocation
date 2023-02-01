@@ -86,10 +86,10 @@ class Trace:
         }
 
     def log(self, message, detail_level=1):
-        phase = f"{self.epic}__{self.story}__{self.task}"
+        phase = f"{self.epic}__{self.story}__{self.task}__{self.group}"
         if detail_level >= self.log_detail_level:
             if self.local:
-                print(f"{phase}:{message}")
+                print(f"{phase}: {message}")
 
             log_entry = {
                 'level': detail_level,
@@ -103,17 +103,15 @@ class Trace:
     def set_rows(self, rows):
         self.rows = rows
 
-    def set_task(self, task):
-        self.task = task
-
-    def set_story(self, story):
-        self.story = story
-
-    def set_epic(self, epic):
-        self.epic = epic
-
-    def set_group(self, group):
-        self.group = group.value
+    def set_phase(self, task='', story='', epic='', group=None):
+        if task:
+            self.task = task
+        if story:
+            self.story = story
+        if epic:
+            self.epic = epic
+        if group:
+            self.group = group.value
 
     def show(self):
         print(self.content)

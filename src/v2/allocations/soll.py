@@ -6,7 +6,7 @@ class SollAllocation(TraceMixin, BaseAllocation):
     def find_and_assign_kramen_to_ondernemer(self, ondernemer):
         size = min(ondernemer.max, self.markt.kramen_per_ondernemer)
         self.trace.log(f"size {size} = min(ondernemer.max: {ondernemer.max}, kramen_per_ondernemer: "
-                   f"{self.markt.kramen_per_ondernemer})")
+                       f"{self.markt.kramen_per_ondernemer})")
         peer_prefs = self.markt.ondernemers.get_prefs_from_unallocated_peers(peer_status=ondernemer.status,
                                                                              **self.ondernemer_filter_kwargs)
         cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, peer_prefs=peer_prefs,
@@ -19,18 +19,14 @@ class SollAllocation(TraceMixin, BaseAllocation):
         self.markt.report_indeling()
 
     def allocate(self):
-        self.trace.log(f"\n====> Sollicitanten \n")
-        self.trace.set_task('allocate_soll')
-        self.trace.set_group(Status.SOLL)
+        self.trace.set_phase(task='allocate_soll', group=Status.SOLL)
         ondernemers = self.markt.ondernemers.select(status=Status.SOLL, allocated=False,
                                                     **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
             self.find_and_assign_kramen_to_ondernemer(ondernemer)
 
     def allocate_b_list(self):
-        self.trace.log(f"\n====> Sollicitanten op B-Lijst \n")
-        self.trace.set_task('allocate_b_list')
-        self.trace.set_group(Status.B_LIST)
+        self.trace.set_phase(task='allocate_b_list', group=Status.B_LIST)
         ondernemers = self.markt.ondernemers.select(status=Status.B_LIST, allocated=False,
                                                     **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:

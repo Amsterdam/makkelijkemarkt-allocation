@@ -1,9 +1,13 @@
-class ValidateMarkt:
+from v2.conf import TraceMixin
+
+
+class ValidateMarkt(TraceMixin):
     def __init__(self, markt):
         self.markt = markt
         self.validate()
 
     def validate(self):
+        self.trace.set_phase(epic='parse', story='validate')
         self.validate_ondernemers_own_kramen_are_right_branche()
 
     def validate_ondernemers_own_kramen_are_right_branche(self):

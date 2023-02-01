@@ -4,24 +4,20 @@ from v2.allocations.base_allocation import BaseAllocation
 
 class VplAllocation(TraceMixin, BaseAllocation):
     def allocate_own_kramen(self, vph_status):
-        self.trace.log(f"\n====> {vph_status.value} allocate own kramen \n")
-        self.trace.set_task('allocate_own_kramen')
-        self.trace.set_group(vph_status)
+        self.trace.set_phase(task='allocate_own_kramen', group=vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, allocated=False,
                                                     **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
             for kraam_id in ondernemer.own:
                 kraam = self.markt.kramen.get_kraam_by_id(kraam_id=kraam_id)
                 if not kraam:
-                    logger.log(f"Kraam {kraam_id} does not exist or is blocked")
+                    self.trace.log(f"Kraam {kraam_id} does not exist or is blocked")
                 else:
                     kraam.assign(ondernemer)
         self.markt.report_indeling()
 
     def allocate_tvplz(self):
-        self.trace.log(f"\n====> TVPLZ \n")
-        self.trace.set_task('allocate_tvplz')
-        self.trace.set_group(Status.TVPLZ)
+        self.trace.set_phase(task='allocate_tvplz', group=Status.TVPLZ)
         """
         TVPLZ: a TVPL with no vaste kraam (Zonder) from Mercato.
         Typically, purposefully non-existent vaste kramen are assigned to them in Mercato.
@@ -41,9 +37,7 @@ class VplAllocation(TraceMixin, BaseAllocation):
         self.markt.report_indeling()
 
     def move_to_prefs(self, vph_status):
-        self.trace.log(f"\n====> Moving {vph_status}")
-        self.trace.set_task('move_to_prefs')
-        self.trace.set_group(vph_status)
+        self.trace.set_phase(task='move_to_prefs', group=vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
             if set(ondernemer.prefs).difference(ondernemer.own):
@@ -59,9 +53,7 @@ class VplAllocation(TraceMixin, BaseAllocation):
                 self.markt.report_indeling()
 
     def vph_uitbreiding(self, vph_status):
-        self.trace.log(f"\n====> Uitbreiden {vph_status}")
-        self.trace.set_task('vph_uitbreiding')
-        self.trace.set_group(vph_status)
+        self.trace.set_phase(task='vph_uitbreiding', group=vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
             self.trace.log(f"\nUitbreiden van {vph_status} ondernemer {ondernemer}")

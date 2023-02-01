@@ -74,9 +74,18 @@ class Parse(TraceMixin):
         'paginas', 'aanmeldingen', 'voorkeuren', 'ondernemers', 'aanwezigheid', 'aLijst', 'mode'
         """
         # input_data = self.input_data
+        self.trace.set_phase(epic='parse', story='parse')
+
+        self.trace.set_phase(task='markt')
         self.parse_markt()
+
+        self.trace.set_phase(task='branches')
         self.parse_branches()
+
+        self.trace.set_phase(task='rows')
         self.parse_rows()
+
+        self.trace.set_phase(task='ondernemers')
         self.parse_ondernemers()
 
     def parse_markt(self):

@@ -10,29 +10,32 @@ from v2.parse import Parse
 
 
 def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
+    trace.set_phase(epic='initial', story='meta')
     start = datetime.datetime.now()
     trace.log(f"start {start}")
 
     markt = Markt(markt_meta, rows, branches, ondernemers)
     ValidateMarkt(markt)
 
+    trace.set_phase(epic='allocate_own_kramen', story='allocate_own_kramen')
     receive_own_kramen_strategy = ReceiveOwnKramenStrategy(markt)
     receive_own_kramen_strategy.run()
 
     verplichte_branches = markt.get_verplichte_branches()
+    trace.set_phase(epic='verplichte_branches')
     for branche in verplichte_branches:
-        trace.log(f'\n======> VERPLICHTE BRANCHE {branche}')
+        trace.set_phase(story=branche.shortname)
         verplichte_branche_strategy = HierarchyStrategy(markt, f'verplichte_branche_hierarchy {branche}',
                                                         branche=branche)
         verplichte_branche_strategy.run()
-        trace.log('\n==> FILL UP')
         fill_up_strategy_b_list = FillUpStrategyBList(markt, f'verplichte_branche_fill_up_b {branche}', branche=branche)
         fill_up_strategy_b_list.run()
         markt.kramen.remove_verplichte_branche(branche=branche)
         markt.report_indeling()
 
+    trace.set_phase(epic='kraamtypes')
     for kraam_type in KraamTypes.BAK, KraamTypes.BAK_LICHT, KraamTypes.EVI:
-        trace.log(f'\n======> Kraam type: {kraam_type}')
+        trace.set_phase(story=kraam_type.value)
         bak_strategy = HierarchyStrategy(markt, f'{kraam_type} hierarchy', kraam_type=kraam_type)
         bak_strategy.run()
         fill_up_strategy_b_list = FillUpStrategyBList(markt, f'{kraam_type} fill_up_b', kraam_type=kraam_type)
@@ -40,7 +43,7 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
         markt.kramen.remove_kraam_type(kraam_type=kraam_type)
         markt.report_indeling()
 
-    trace.log('\n======> REMAINING STRATEGY')
+    trace.set_phase(epic='remaining')
     remaining_query = dict(kraam_type__not__in=[*KraamTypes], branche__not__in=verplichte_branches)
     remaining_strategy = HierarchyStrategy(markt, f'remaining_hierarchy', **remaining_query)
     remaining_strategy.run()
