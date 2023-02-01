@@ -1,5 +1,6 @@
 import datetime
 import json
+import sys
 
 from v2.markt import Markt
 from v2.conf import logger, KraamTypes, trace
@@ -71,14 +72,16 @@ def parse_and_allocate(input_data):
 
 
 if __name__ == '__main__':
+    _script, input_json_file, trace_file_path, *rest = sys.argv
     logger.local = True
-    json_file = './input_data/4045-2023_01_31.json'
-    logger.local = True
-    parsed = Parse(json_file=json_file)
+
+    print(f"input_json_file: {input_json_file}, trace_file_path: {trace_file_path}")
+    parsed = Parse(json_file=input_json_file)
     output = allocate(**parsed.__dict__)
 
     logs = logger.get_logs()
     json.dumps(logs)
-    print(logs)
 
     # trace.show()
+    if trace_file_path:
+        trace.save(trace_file_path)
