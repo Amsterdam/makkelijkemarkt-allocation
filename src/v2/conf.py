@@ -73,6 +73,7 @@ class Trace:
         self.story = ''
         self.epic = ''
         self.group = ''
+        self.cycle = 0
 
         self.log_detail_level = 1
         self.logs = []
@@ -87,6 +88,8 @@ class Trace:
 
     def log(self, message, detail_level=1):
         phase = f"{self.epic}__{self.story}__{self.task}__{self.group}"
+        if self.cycle:
+            phase += f":{self.cycle}"
         if detail_level >= self.log_detail_level:
             if self.local:
                 print(f"{phase}: {message}")
@@ -112,6 +115,10 @@ class Trace:
             self.epic = epic
         if group:
             self.group = group.value
+
+    def set_cycle(self, cycle=0):
+        if cycle:
+            self.cycle = cycle
 
     def show(self):
         print(self.content)

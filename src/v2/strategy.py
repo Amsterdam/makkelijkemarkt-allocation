@@ -11,6 +11,7 @@ class BaseStrategy(TraceMixin):
         self.working_copies = []
         self.ondernemer_filter_kwargs = filter_kwargs
         self.kramen_filter_kwargs = filter_kwargs
+        self.trace.set_cycle()
 
     def log_rejections(self):
         ondernemers = self.markt.ondernemers.select(**self.ondernemer_filter_kwargs)
@@ -62,6 +63,7 @@ class BaseStrategy(TraceMixin):
         self.log_rejections()
         self.markt.clear_allocation_hashes()
         self.markt.report_ondernemers(**self.ondernemer_filter_kwargs)
+        self.trace.set_cycle()
 
 
 class ReceiveOwnKramenStrategy(BaseStrategy):
@@ -86,6 +88,7 @@ class HierarchyStrategy(BaseStrategy):
         self.markt.kramen_per_ondernemer = 1
 
         while self.markt.kramen_per_ondernemer <= self.markt.max_aantal_kramen_per_ondernemer:
+            self.trace.set_cycle(self.markt.kramen_per_ondernemer)
             self.trace.log(f"\n========> {self.name} HIERARCHY kramen_per_ondernemer {self.markt.kramen_per_ondernemer}")
             self.markt.restore_working_copy(self.working_copies[0])  # fallback to the initial state
             self.markt.report_indeling()
