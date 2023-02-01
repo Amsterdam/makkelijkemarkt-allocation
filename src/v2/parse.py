@@ -5,10 +5,10 @@ from collections import defaultdict
 from v2.branche import Branche
 from v2.kramen import Kraam
 from v2.ondernemers import Ondernemer
-from v2.conf import logger, Status, BAK_TYPE_BRANCHE_IDS
+from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS
 
 
-class Parse:
+class Parse(TraceMixin):
     def __init__(self, input_data=None, json_file=None):
         self.branches = []
         self.branches_map = {}
@@ -106,11 +106,11 @@ class Parse:
 
             if erkenningsnummer not in present:
                 if ondernemer_data['status'] in ['vpl', 'eb', 'tvpl', 'tvplz', 'exp', 'expf']:
-                    logger.log(f"VPH {ondernemer_data['sollicitatieNummer']} not in presence list "
+                    self.trace.log(f"VPH {ondernemer_data['sollicitatieNummer']} not in presence list "
                                f"so implicitly present")
                     pass
                 else:
-                    logger.log(f"SOLL {ondernemer_data['sollicitatieNummer']} not in presence list "
+                    self.trace.log(f"SOLL {ondernemer_data['sollicitatieNummer']} not in presence list "
                                f"so implicitly absent")
                     continue
 
@@ -120,7 +120,7 @@ class Parse:
                 absent_from_date = datetime.date.fromisoformat(absent_from)
                 absent_until_date = datetime.date.fromisoformat(absent_until)
                 if absent_from_date <= datetime.date.today() < absent_until_date:
-                    logger.log(f"Ondernemer {erkenningsnummer} - {ondernemer_data['sollicitatieNummer']} "
+                    self.trace.log(f"Ondernemer {erkenningsnummer} - {ondernemer_data['sollicitatieNummer']} "
                                f"langdurig afwezig)")
                     continue
 

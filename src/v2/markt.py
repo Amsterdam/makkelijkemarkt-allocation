@@ -3,7 +3,7 @@ import pandas as pd
 
 from v2.kramen import Kramen
 from v2.ondernemers import Ondernemers
-from v2.conf import logger, Status, RejectionReason, TraceMixin, ALL_VPH_STATUS, BAK_TYPE_BRANCHE_IDS
+from v2.conf import Status, RejectionReason, TraceMixin, ALL_VPH_STATUS, BAK_TYPE_BRANCHE_IDS
 
 pd.set_option('display.max_colwidth', None)  # so auto truncate of broad columns is turned off
 pd.set_option('display.max_columns', None)  # so auto truncate of columns is turned off
@@ -39,7 +39,7 @@ class Markt(TraceMixin):
         except IndexError:
             last_allocation_hash = None
 
-        logger.log(f"Current hash: {allocation_hash}, last hash {last_allocation_hash}, all: {self.allocation_hashes}")
+        self.trace.log(f"Current hash: {allocation_hash}, last hash {last_allocation_hash}, all: {self.allocation_hashes}")
         if allocation_hash == last_allocation_hash:
             return True
         else:
@@ -67,7 +67,7 @@ class Markt(TraceMixin):
         return meta_data
 
     def report_indeling(self):
-        if logger.local:
+        if self.trace.local:
             dataframes = []
             rows = sorted(self.kramen.as_rows(), key=lambda row: int(row[0].id))
             for row in rows:
@@ -89,7 +89,7 @@ class Markt(TraceMixin):
             print(combined_df.to_string(), '\n')
 
     def report_ondernemers(self, **filter_kwargs):
-        if logger.local:
+        if self.trace.local:
             ordered_ondernemers = []
             ondernemers = self.ondernemers.select(**filter_kwargs)
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status in [Status.VPL,
@@ -101,7 +101,7 @@ class Markt(TraceMixin):
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.SOLL)
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.B_LIST)
             print(pd.DataFrame(ondernemer.__dict__ for ondernemer in ordered_ondernemers))
-        logger.log(f"\nRejection log: {self.rejection_log}")
+        self.trace.log(f"\nRejection log: {self.rejection_log}")
 
     def get_allocation(self):
         allocation = []
@@ -142,7 +142,7 @@ class Markt(TraceMixin):
                                and self.kramen_per_ondernemer < ondernemer.min)]
 
         if unallocated:
-            logger.log(f"WARNING: Not everybody allocated! Unallocated: {unallocated}")
+            self.trace.log(f"WARNING: Not everybody allocated! Unallocated: {unallocated}")
             return False
         return True
 
@@ -153,6 +153,6 @@ class Markt(TraceMixin):
             if branche.id not in BAK_TYPE_BRANCHE_IDS  # better handled as KraamTypes, not as verplichte branche
         ]
         # verplichte branche should also include "Experimentele zone" for EXP
-        logger.log(f"Verplichte branches: {verplichte_branches}")
-        logger.log(f"Ignoring branches: {BAK_TYPE_BRANCHE_IDS}")
+        self.trace.log(f"Verplichte branches: {verplichte_branches}")
+        self.trace.log(f"Ignoring branches: {BAK_TYPE_BRANCHE_IDS}")
         return verplichte_branches

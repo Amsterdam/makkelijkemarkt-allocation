@@ -1,4 +1,4 @@
-from v2.conf import logger
+from v2.conf import trace
 from v2.helpers import clamp
 
 
@@ -18,7 +18,7 @@ class BaseAllocation:
         current_amount_kramen = len(ondernemer.kramen)
         amount_kramen_wanted = ondernemer.max
         right_size = clamp(current_amount_kramen, amount_kramen_wanted, self.markt.kramen_per_ondernemer)
-        logger.log(f"get_right_size_for_ondernemer: (current, wanted, limit)"
+        trace.log(f"get_right_size_for_ondernemer: (current, wanted, limit)"
               f"{current_amount_kramen, amount_kramen_wanted, self.markt.kramen_per_ondernemer} = {right_size}")
         return right_size
 
@@ -26,7 +26,7 @@ class BaseAllocation:
         if not new_cluster:
             return
         if new_cluster.kramen_list == ondernemer.kramen:
-            logger.log(f"Not moving, new cluster {new_cluster} same as current kramen for {ondernemer}")
+            trace.log(f"Not moving, new cluster {new_cluster} same as current kramen for {ondernemer}")
             return
 
         current_size = len(ondernemer.kramen)
