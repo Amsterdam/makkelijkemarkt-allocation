@@ -15,12 +15,14 @@ class BaseAllocation(TraceMixin):
         self.kramen_filter_kwargs = filter_kwargs
 
     def get_limit_for_ondernemer_with_branche_with_max(self, ondernemer):
+        """
+        Returns how many extra kramen the ondernemer is allowed to claim
+        """
         branche = ondernemer.branche
-        limit = self.markt.kramen_per_ondernemer
         branche_ondernemers = self.markt.ondernemers.select(branche=branche)
         eligible_ondernemers = []
         for branche_ondernemer in branche_ondernemers:
-            if branche_ondernemer.status == Status.SOLL:
+            if branche_ondernemer.status == Status.SOLL and not branche_ondernemer.kramen:
                 eligible_ondernemers.append(branche_ondernemer)
             if branche_ondernemer.status in ALL_VPH_STATUS:
                 if len(branche_ondernemer.kramen) < branche_ondernemer.max:
@@ -33,18 +35,17 @@ class BaseAllocation(TraceMixin):
                        f" = available {available}")
         self.trace.log(f"With {ondernemers_count} ondernemers interested")
 
-        if ondernemers_count * limit <= available:
-            self.trace.log(f"Everyone can get {limit} extra")
-            return limit
-        if limit + ondernemers_count_minus_one * (limit - 1) <= available:
-            self.trace.log(f"This one can get {limit} extra, the others one less: {limit - 1}")
-            return limit
-        if ondernemers_count * (limit - 1) <= available:
-            self.trace.log(f"Everyone can get one less extra: {limit - 1}")
-            return limit - 1
-        else:
-            self.trace.log(f"Everyone can just get one")
-            return 1
+        limit = 1
+        while limit < self.markt.kramen_per_ondernemer:
+            if ondernemers_count * limit <= available:
+                limit += 1
+                continue
+            if limit + ondernemers_count_minus_one * (limit - 1) <= available:
+                limit += 1
+                continue
+            else:
+                break
+        return max(limit - 1, 1)
 
     def get_right_size_for_ondernemer(self, ondernemer):
         current_amount_kramen = len(ondernemer.kramen)
@@ -53,8 +54,10 @@ class BaseAllocation(TraceMixin):
         self.trace.log(f"get_right_size_for_ondernemer {ondernemer.status}")
         if ondernemer.branche.max:
             branche_limit = self.get_limit_for_ondernemer_with_branche_with_max(ondernemer) + current_amount_kramen
+            self.trace.log(f"Branche {ondernemer.branche} limit {branche_limit}")
+            self.trace.log(f"kramen_per_ondernemer limit {limit}")
             limit = min(limit, branche_limit)
-            self.trace.log(f"Branche {ondernemer.branche} hard limit to {limit}")
+            self.trace.log(f"Hard limit: {limit}")
 
         if ondernemer.is_vph:
             entitled = self.markt.kramen_per_ondernemer + current_amount_kramen
