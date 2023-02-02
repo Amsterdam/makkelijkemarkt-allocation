@@ -56,7 +56,7 @@ class VplAllocation(BaseAllocation):
         self.trace.set_phase(task='vph_uitbreiding', group=vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
-            self.trace.log(f"\nUitbreiden van {vph_status} ondernemer {ondernemer}")
+            self.trace.log(f"Uitbreiden van {vph_status} ondernemer {ondernemer}")
             size = self.get_right_size_for_ondernemer(ondernemer)
             current_size = len(ondernemer.kramen)
             if size <= current_size:
