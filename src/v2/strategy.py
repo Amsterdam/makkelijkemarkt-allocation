@@ -88,7 +88,6 @@ class HierarchyStrategy(BaseStrategy):
 
         while self.markt.kramen_per_ondernemer <= self.markt.max_aantal_kramen_per_ondernemer:
             self.trace.set_cycle(self.markt.kramen_per_ondernemer)
-            self.trace.log(f"HIERARCHY kramen_per_ondernemer {self.markt.kramen_per_ondernemer}")
             self.markt.restore_working_copy(self.working_copies[0])  # fallback to the initial state
             self.markt.report_indeling()
 
@@ -131,7 +130,6 @@ class FillUpStrategyBList(BaseStrategy):
         self.markt.kramen_per_ondernemer = 1
 
         while self.markt.kramen_per_ondernemer < self.markt.max_aantal_kramen_per_ondernemer:
-            self.trace.log(f"FILL UP B LIST: kramen_per_ondernemer {self.markt.kramen_per_ondernemer}")
             self.markt.restore_working_copy(self.working_copies[0])  # fallback to the initial state
 
             soll_allocation = SollAllocation(self.markt)
