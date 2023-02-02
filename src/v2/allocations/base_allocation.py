@@ -17,10 +17,22 @@ class BaseAllocation(TraceMixin):
     def get_right_size_for_ondernemer(self, ondernemer):
         current_amount_kramen = len(ondernemer.kramen)
         amount_kramen_wanted = ondernemer.max
-        right_size = clamp(current_amount_kramen, amount_kramen_wanted, self.markt.kramen_per_ondernemer)
-        self.trace.log(f"get_right_size_for_ondernemer: (current, wanted, limit)"
-                       f"{current_amount_kramen, amount_kramen_wanted, self.markt.kramen_per_ondernemer} = "
-                       f"{right_size}")
+        limit = self.markt.kramen_per_ondernemer
+        self.trace.log(f"get_right_size_for_ondernemer {ondernemer.status}")
+        if ondernemer.branche.max:
+            limit = min(limit, ondernemer.branche.max_per_ondernemer)
+            self.trace.log(f"Branche {ondernemer.branche} hard limit to {limit}")
+
+        if ondernemer.is_vph:
+            entitled = self.markt.kramen_per_ondernemer + current_amount_kramen
+            limit = min(entitled, limit)
+            right_size = clamp(current_amount_kramen, amount_kramen_wanted, limit)
+            self.trace.log(f"(current, wanted, limit) "
+                           f"{current_amount_kramen, amount_kramen_wanted, limit}"
+                           f" = {right_size}")
+        else:
+            right_size = min(amount_kramen_wanted, limit)
+            self.trace.log(f"(wanted, limit) {amount_kramen_wanted, limit} = {right_size}")
         return right_size
 
     def move_ondernemer_to_new_cluster(self, ondernemer, new_cluster):
