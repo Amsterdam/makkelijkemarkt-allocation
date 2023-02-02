@@ -7,6 +7,9 @@ class VplAllocation(BaseAllocation):
         self.trace.set_phase(task='allocate_own_kramen', group=vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, allocated=False,
                                                     **self.ondernemer_filter_kwargs)
+        if not ondernemers:
+            return
+
         for ondernemer in ondernemers:
             for kraam_id in ondernemer.own:
                 kraam = self.markt.kramen.get_kraam_by_id(kraam_id=kraam_id)
