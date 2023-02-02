@@ -4,7 +4,7 @@ from v2.allocations.base_allocation import BaseAllocation
 
 class SollAllocation(BaseAllocation):
     def find_and_assign_kramen_to_ondernemer(self, ondernemer):
-        size = min(ondernemer.max, self.markt.kramen_per_ondernemer)
+        size = self.get_right_size_for_ondernemer(ondernemer)
         self.trace.log(f"size {size} = min(ondernemer.max: {ondernemer.max}, kramen_per_ondernemer: "
                        f"{self.markt.kramen_per_ondernemer})")
         peer_prefs = self.markt.ondernemers.get_prefs_from_unallocated_peers(peer_status=ondernemer.status,
