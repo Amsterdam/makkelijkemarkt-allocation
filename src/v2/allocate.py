@@ -21,9 +21,8 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
     receive_own_kramen_strategy = ReceiveOwnKramenStrategy(markt)
     receive_own_kramen_strategy.run()
 
-    verplichte_branches = markt.get_verplichte_branches()
     trace.set_phase(epic='verplichte_branches')
-    for branche in verplichte_branches:
+    for branche in markt.verplichte_branches:
         trace.set_phase(story=branche.shortname)
         verplichte_branche_strategy = HierarchyStrategy(markt, branche=branche)
 
@@ -44,7 +43,7 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
         markt.report_indeling()
 
     trace.set_phase(epic='remaining', story='remaining')
-    remaining_query = dict(kraam_type__not__in=[*KraamTypes], branche__not__in=verplichte_branches)
+    remaining_query = dict(kraam_type__not__in=[*KraamTypes], branche__not__in=markt.verplichte_branches)
     remaining_strategy = HierarchyStrategy(markt, **remaining_query)
     remaining_strategy.run()
     fill_up_strategy_b_list = FillUpStrategyBList(markt, **remaining_query)
