@@ -4,7 +4,6 @@ class Branche:
         self.max = max
         self.verplicht = verplicht
         self.assigned_count = 0
-        self.max_per_ondernemer = 0
 
     def __str__(self):
         return f"Branche {self.id}" if self.id else 'Geen branche'
