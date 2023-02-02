@@ -24,7 +24,7 @@ class Status(ComparableEnum):
         return hash('Status')
 
 
-ALL_VPH_STATUS = [Status.VPL, Status.TVPL, Status.TVPLZ, Status.EB]
+ALL_VPH_STATUS = [Status.VPL, Status.TVPL, Status.TVPLZ, Status.EB, Status.EXP, Status.EXPF]
 ALL_SOLL_STATUS = [Status.SOLL, Status.B_LIST]
 
 
@@ -52,30 +52,6 @@ class Action(ComparableEnum):
     UNASSIGN_KRAAM = 2
 
 
-class Logger:
-    def __init__(self):
-        self.log_detail_level = 1
-        self.logs = []
-        self.local = False
-
-    def log(self, message, detail_level=1):
-        if detail_level >= self.log_detail_level:
-            if self.local:
-                print(f"{message}")
-
-            log_entry = {
-                'level': detail_level,
-                'message': message,
-            }
-            self.logs.append(log_entry)
-
-    def get_logs(self):
-        return self.logs
-
-
-logger = Logger()
-
-
 class Step:
     def __init__(self, id, action, kraam=None, ondernemer=None, detail='', phase='', group=''):
         self.id = id
@@ -93,8 +69,15 @@ class Trace:
         self.count = 1
         self.action = Action
         self.rows = rows or []
-        self.phase = ''
+        self.task = ''
+        self.story = ''
+        self.epic = ''
         self.group = ''
+        self.cycle = 0
+
+        self.log_detail_level = 1
+        self.logs = []
+        self.local = False
 
     @property
     def content(self):
@@ -103,14 +86,39 @@ class Trace:
             'rows': self.rows,
         }
 
+    def log(self, message, detail_level=1):
+        phase = f"{self.epic}__{self.story}__{self.task}__{self.group}"
+        if self.cycle:
+            phase += f":{self.cycle}"
+        if detail_level >= self.log_detail_level:
+            if self.local:
+                print(f"{phase}: {message}")
+
+            log_entry = {
+                'level': detail_level,
+                'message': message,
+            }
+            self.logs.append(log_entry)
+
+    def get_logs(self):
+        return self.logs
+
     def set_rows(self, rows):
         self.rows = rows
 
-    def set_phase(self, phase):
-        self.phase = phase
+    def set_phase(self, epic='', story='', task='', group=None):
+        if epic:
+            self.epic = epic
+        if story:
+            self.story = story
+        if task:
+            self.task = task
+        if group:
+            self.group = group.value if group else ''
 
-    def set_group(self, group):
-        self.group = group.value
+    def set_cycle(self, cycle=0):
+        if cycle:
+            self.cycle = cycle
 
     def show(self):
         print(self.content)
@@ -120,7 +128,8 @@ class Trace:
             json.dump(self.content, f)
 
     def add_step(self, **kwargs):
-        self.steps.append(Step(id=self.count, phase=self.phase, group=self.group, **kwargs).__dict__)
+        phase = f"{self.epic}__{self.story}__{self.task}"
+        self.steps.append(Step(id=self.count, phase=phase, group=self.group, **kwargs).__dict__)
         self.count += 1
 
     def assign_kraam_to_ondernemer(self, kraam, ondernemer):

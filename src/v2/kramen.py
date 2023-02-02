@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from v2.conf import logger, KraamTypes, RejectionReason, TraceMixin
+from v2.conf import KraamTypes, RejectionReason, TraceMixin
 
 
 class KraamType:
@@ -85,14 +85,14 @@ class Kraam(TraceMixin):
         if self.branche == ondernemer.branche:
             return True
         else:
-            logger.log(f"Kraam {self} not allowed, different verplichte branche than ondernemer {ondernemer}")
+            self.trace.log(f"Kraam {self} not allowed, different verplichte branche than ondernemer {ondernemer}")
             return False
 
     def does_allow_ondernemer_kraam_type(self, ondernemer):
         if self.kraam_type.does_allow(ondernemer.kraam_type):
             return True
         else:
-            logger.log(f"Kraam {self} not allowed, different verplichte kraam_type than ondernemer {ondernemer}")
+            self.trace.log(f"Kraam {self} not allowed, different verplichte kraam_type than ondernemer {ondernemer}")
             return False
 
     def does_allow(self, ondernemer):
@@ -101,33 +101,33 @@ class Kraam(TraceMixin):
     def assign(self, ondernemer):
         if self.ondernemer:
             if self.ondernemer == ondernemer.rank:
-                logger.log(f"Kraam {self.id} already assigned to own")
+                self.trace.log(f"Kraam {self.id} already assigned to own")
             else:
-                logger.log(f"WARNING: kraam {self.id} already assigned to ondernemer {ondernemer}")
+                self.trace.log(f"WARNING: kraam {self.id} already assigned to ondernemer {ondernemer}")
         else:
-            logger.log(f"Assigning kraam {self.id} to ondernemer {ondernemer}")
+            self.trace.log(f"Assigning kraam {self.id} to ondernemer {ondernemer}")
             self.ondernemer = ondernemer.rank
             self.trace.assign_kraam_to_ondernemer(self.id, ondernemer.rank)
             ondernemer.assign_kraam(self.id)
 
     def unassign(self, ondernemer):
         if self.ondernemer == ondernemer.rank:
-            logger.log(f"Unassigning kraam {self.id} to ondernemer {ondernemer}")
+            self.trace.log(f"Unassigning kraam {self.id} to ondernemer {ondernemer}")
             self.ondernemer = None
             self.trace.unassign_kraam(self.id)
             ondernemer.unassign_kraam(self.id)
         else:
-            logger.log("Could not unassign {self.id}, not owned by {ondernemer.rank} but {self.ondernemer}")
+            self.trace.log("Could not unassign {self.id}, not owned by {ondernemer.rank} but {self.ondernemer}")
 
     def remove_verplichte_branche(self, branche):
         if self.branche == branche and self.branche.verplicht:
             self.branche = None
-            logger.log(f"Removed verplichte branche {branche} from {self}")
+            self.trace.log(f"Removed verplichte branche {branche} from {self}")
         else:
-            logger.log(f"WARNING: kraam {self} does not have verplichte branche {branche}")
+            self.trace.log(f"WARNING: kraam {self} does not have verplichte branche {branche}")
 
 
-class Cluster:
+class Cluster(TraceMixin):
     def __init__(self, kramen=None):
         self.kramen = kramen or []
         self.kramen_list = {kraam.id for kraam in self.kramen}
@@ -173,8 +173,8 @@ class Cluster:
 
     def does_exceed_branche_max(self, branche, offset=0):
         if branche.max and branche.assigned_count + len(self.kramen) + offset > branche.max:
-            logger.log(f"WARNING: Amount of kramen {len(self.kramen)} plus {branche.assigned_count} exceeds "
-                  f"branche '{branche}' max of {branche.max}")
+            self.trace.log(f"WARNING: Amount of kramen {len(self.kramen)} plus {branche.assigned_count} exceeds "
+                           f"branche '{branche}' max of {branche.max}")
             return True
         return False
 
@@ -214,7 +214,7 @@ class Cluster:
         return cluster_score
 
 
-class Kramen:
+class Kramen(TraceMixin):
     def __init__(self, rows):
         self.rows = rows
         self.kramen_map = {}
@@ -261,7 +261,7 @@ class Kramen:
                 continue
             if kraam.kraam_type == kraam_type:
                 active_prop = kraam.kraam_type.remove_active()
-                logger.log(f"Removed active prop {active_prop} from kraam {kraam}")
+                self.trace.log(f"Removed active prop {active_prop} from kraam {kraam}")
 
     def order_clusters_by_ondernemer_prefs(self, clusters, ondernemer):
         prefs = ondernemer.prefs
@@ -274,7 +274,7 @@ class Kramen:
         for cluster in clusters:
             cluster_score = cluster.calculate_cluster_matching_prefs_score(prefs)
             if cluster_score:
-                logger.log(f"Scoring: cluster: {cluster}, prefs: {prefs}, cluster_score: {cluster_score}")
+                self.trace.log(f"Scoring: cluster: {cluster}, prefs: {prefs}, cluster_score: {cluster_score}")
                 pref_clusters[cluster_score].append(cluster)
 
         for key in sorted(pref_clusters.keys(), reverse=True):
@@ -284,7 +284,8 @@ class Kramen:
     def exclude_clusters_preferred_by_peers(self, clusters, peer_prefs):
         for cluster in clusters:
             if cluster.kramen_list.intersection(peer_prefs):
-                logger.log(f"Cluster {cluster} in peer prefs: {peer_prefs}")
+                # logger.log(f"Cluster {cluster} in peer prefs: {peer_prefs}")
+                pass
             else:
                 yield cluster
 
@@ -303,7 +304,7 @@ class Kramen:
             if cluster.is_available(ondernemer) and cluster.has_props(**filter_kwargs):
                 clusters.append(cluster)
         if ondernemer:
-            logger.log(f"Found {len(clusters)} clusters of {size} for ondernemer {ondernemer}: {clusters}")
+            self.trace.log(f"Found {len(clusters)} clusters of {size} for ondernemer {ondernemer}: {clusters}")
         return clusters
 
     def get_cluster(self, size, ondernemer, peer_prefs=None, should_include=None, **filter_kwargs):
@@ -315,13 +316,13 @@ class Kramen:
         if should_include:
             should_include = set(should_include)
             clusters = [cluster for cluster in clusters if should_include.issubset(cluster.kramen_list)]
-            logger.log(f"Should include {should_include}: {clusters}")
+            self.trace.log(f"Should include {should_include}: {clusters}")
         pref_clusters = self.order_clusters_by_ondernemer_prefs(clusters, ondernemer)
 
-        logger.log(f"Anywhere {anywhere}")
+        self.trace.log(f"Anywhere {anywhere}")
         if anywhere or should_include:
             pref_clusters.extend(self.exclude_clusters_preferred_by_peers(clusters, peer_prefs))
             pref_clusters.extend(clusters)
-        logger.log(f"Best matching clusters: {pref_clusters}")
+        self.trace.log(f"Best matching clusters: {pref_clusters}")
         first = next(iter(pref_clusters), Cluster())
         return first

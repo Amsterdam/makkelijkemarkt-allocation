@@ -1,16 +1,16 @@
 import itertools
 
-from v2.conf import logger, RejectionReason, ALL_VPH_STATUS, ALL_SOLL_STATUS
+from v2.conf import TraceMixin, RejectionReason, ALL_VPH_STATUS, ALL_SOLL_STATUS
 from v2.branche import Branche
 from v2.kramen import KraamType
 
 
-class Ondernemer:
-    def __init__(self, rank, erkenningsnummer, description, branche=None, prefs=None, min=0, max=0, anywhere=False,
+class Ondernemer(TraceMixin):
+    def __init__(self, rank, erkenningsnummer='', description='', branche=None, prefs=None, min=0, max=0, anywhere=False,
                  kramen=None, own=None, status=None, bak=False, bak_licht=False, evi=False):
         self.rank = rank
-        self.erkenningsnummer = erkenningsnummer
-        self.description = description
+        self.erkenningsnummer = erkenningsnummer or rank
+        self.description = description or rank
         self.branche = branche or Branche()
         self.prefs = prefs or []
         self.min = min
@@ -32,6 +32,10 @@ class Ondernemer:
     def __repr__(self):
         return str(self)
 
+    @property
+    def is_vph(self):
+        return self.status in ALL_VPH_STATUS
+
     def assign_kraam(self, kraam):
         self.kramen.add(kraam)
         self.branche.assigned_count += 1
@@ -41,7 +45,7 @@ class Ondernemer:
         self.kramen.remove(kraam)
 
     def reject(self, reason):
-        logger.log(f"`Rejecting: {reason.value} => {self}")
+        self.trace.log(f"Rejecting: {reason.value} => {self}")
         self.is_rejected = True
         self.reject_reason = reason
 

@@ -1,6 +1,6 @@
 from v2.ondernemers import Ondernemer
 from v2.conf import Status
-from v2.fixtures.branches import branches
+from v2.fixtures.default.branches import branches
 
 branche_1, branche_2, branche_3, branche_4 = branches
 

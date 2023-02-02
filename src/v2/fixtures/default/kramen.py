@@ -1,5 +1,5 @@
 from v2.kramen import Kraam
-from v2.fixtures.branches import branches
+from v2.fixtures.default.branches import branches
 
 branche_1, branche_2, branche_3, branche_4 = branches
 
@@ -7,7 +7,7 @@ rows = [
     [
         Kraam(id=1, ondernemer=None, branche=branche_1),
         Kraam(id=2, ondernemer=None, branche=branche_1),
-        Kraam(id=3, ondernemer=None, branche=branche_1),
+        Kraam(id=3, ondernemer=None, branche=None),
         Kraam(id=4, ondernemer=None, branche=branche_2),
         Kraam(id=5, ondernemer=None, branche=branche_2),
         Kraam(id=6, ondernemer=None, branche=branche_2),
