@@ -24,7 +24,7 @@ class Status(ComparableEnum):
         return hash('Status')
 
 
-ALL_VPH_STATUS = [Status.VPL, Status.TVPL, Status.TVPLZ, Status.EB]
+ALL_VPH_STATUS = [Status.VPL, Status.TVPL, Status.TVPLZ, Status.EB, Status.EXP, Status.EXPF]
 ALL_SOLL_STATUS = [Status.SOLL, Status.B_LIST]
 
 
