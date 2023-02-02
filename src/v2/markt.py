@@ -25,8 +25,8 @@ class Markt(TraceMixin):
         for branche in branches:
             self.branches_map[branche.id] = branche
         self.branches = branches
+        self.verplichte_branches = self.get_verplichte_branches()
         self.ondernemers = Ondernemers(ondernemers)
-        self.set_branche_max_per_ondernemer()
 
         self.rejection_log = []
         self.step = 1
@@ -142,7 +142,8 @@ class Markt(TraceMixin):
         unallocated = [*unallocated_vph, *unallocated_soll_with_anywhere]
         unallocated = [ondernemer for ondernemer in unallocated
                        if not (ondernemer.reject_reason == RejectionReason.LESS_THAN_MIN
-                               and self.kramen_per_ondernemer < ondernemer.min)]
+                               and self.kramen_per_ondernemer < ondernemer.min)
+                       if not ondernemer.reject_reason == RejectionReason.EXCEEDS_BRANCHE_MAX]
 
         if unallocated:
             self.trace.log(f"WARNING: Not everybody allocated! Unallocated: {unallocated}")
@@ -160,19 +161,3 @@ class Markt(TraceMixin):
         self.trace.log(f"Verplichte branches: {verplichte_branches}")
         self.trace.log(f"Ignoring branches: {BAK_TYPE_BRANCHE_IDS}")
         return verplichte_branches
-
-    def get_branches_with_max(self):
-        return [branche for branche in self.branches if branche.max]
-
-    def set_branche_max_per_ondernemer(self):
-        for branche in self.get_branches_with_max():
-            branche_ondernemers = self.ondernemers.select(branche=branche, status__in=[*ALL_VPH_STATUS, Status.SOLL])
-            own_kramen_count = sum(len(ondernemer.own) for ondernemer in branche_ondernemers)
-            available_kramen = branche.max - own_kramen_count
-            available_kramen = max(available_kramen, 0)
-            branche_ondernemers_count = max(len(branche_ondernemers), 1)
-            max_per_ondernemer = available_kramen / branche_ondernemers_count
-            self.trace.log(f"Branche {branche} with max {branche.max} has {available_kramen} available kramen")
-            self.trace.log(f"Setting branche {branche} max_per_ondernemer to "
-                           f"{available_kramen} / {branche_ondernemers_count} = {max_per_ondernemer}")
-            branche.max_per_ondernemer = math.ceil(max_per_ondernemer)
