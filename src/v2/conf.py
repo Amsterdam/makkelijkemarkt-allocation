@@ -91,12 +91,13 @@ class Trace:
         if self.cycle:
             phase += f":{self.cycle}"
         if detail_level >= self.log_detail_level:
+            complete_message = f"{phase}: {message}"
             if self.local:
-                print(f"{phase}: {message}")
+                print(complete_message)
 
             log_entry = {
                 'level': detail_level,
-                'message': message,
+                'message': complete_message,
             }
             self.logs.append(log_entry)
 
