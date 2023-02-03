@@ -4,7 +4,7 @@ import pandas as pd
 
 from v2.kramen import Kramen
 from v2.ondernemers import Ondernemers
-from v2.conf import Status, RejectionReason, TraceMixin, ALL_VPH_STATUS, BAK_TYPE_BRANCHE_IDS
+from v2.conf import Status, RejectionReason, TraceMixin, ALL_VPH_STATUS, BAK_TYPE_BRANCHE_IDS, PhaseValue
 
 pd.set_option('display.max_colwidth', None)  # so auto truncate of broad columns is turned off
 pd.set_option('display.max_columns', None)  # so auto truncate of columns is turned off
@@ -42,7 +42,7 @@ class Markt(TraceMixin):
         except IndexError:
             last_allocation_hash = None
 
-        self.trace.log(f"Current hash: {allocation_hash}, last hash {last_allocation_hash}, all: {self.allocation_hashes}")
+        self.trace.debug(f"Current hash: {allocation_hash}, last hash {last_allocation_hash}, all: {self.allocation_hashes}")
         if allocation_hash == last_allocation_hash:
             return True
         else:
@@ -157,7 +157,8 @@ class Markt(TraceMixin):
             if branche.id not in BAK_TYPE_BRANCHE_IDS  # better handled as KraamTypes, not as verplichte branche
         ]
         # verplichte branche should also include "Experimentele zone" for EXP
-        self.trace.set_phase(epic='verplichte_branches', story='meta', task='defining')
+        self.trace.set_phase(epic='verplichte_branches', story='meta', task='defining',
+                             group=PhaseValue.unknown, agent=PhaseValue.event)
         self.trace.log(f"Verplichte branches: {verplichte_branches}")
         self.trace.log(f"Ignoring branches: {BAK_TYPE_BRANCHE_IDS}")
         return verplichte_branches

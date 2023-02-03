@@ -7,17 +7,16 @@ class VplAllocation(BaseAllocation):
         self.trace.set_phase(task='allocate_own_kramen', group=vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, allocated=False,
                                                     **self.ondernemer_filter_kwargs)
-        if not ondernemers:
-            return
-
         for ondernemer in ondernemers:
+            self.trace.set_phase(agent=ondernemer.rank)
             for kraam_id in ondernemer.own:
                 kraam = self.markt.kramen.get_kraam_by_id(kraam_id=kraam_id)
                 if not kraam:
                     self.trace.log(f"Kraam {kraam_id} does not exist or is blocked")
                 else:
                     kraam.assign(ondernemer)
-        self.markt.report_indeling()
+        if ondernemers:
+            self.markt.report_indeling()
 
     def allocate_tvplz(self):
         self.trace.set_phase(task='allocate_tvplz', group=Status.TVPLZ)
@@ -30,6 +29,7 @@ class VplAllocation(BaseAllocation):
         ondernemers = self.markt.ondernemers.select(status=Status.TVPLZ, allocated=False,
                                                     **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
+            self.trace.set_phase(agent=ondernemer.rank)
             self.trace.log(f"Trying to allocate TVPLZ {ondernemer}")
             size = min(ondernemer.max, self.markt.kramen_per_ondernemer)
             peer_prefs = self.markt.ondernemers.get_prefs_from_unallocated_peers(peer_status=ondernemer.status,
@@ -43,6 +43,7 @@ class VplAllocation(BaseAllocation):
         self.trace.set_phase(task='move_to_prefs', group=vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
+            self.trace.set_phase(agent=ondernemer.rank)
             if set(ondernemer.prefs).difference(ondernemer.own):
                 self.trace.log(f"Trying to move Ondernemer {ondernemer}")
                 size = self.get_right_size_for_ondernemer(ondernemer)
@@ -59,6 +60,7 @@ class VplAllocation(BaseAllocation):
         self.trace.set_phase(task='vph_uitbreiding', group=vph_status)
         ondernemers = self.markt.ondernemers.select(status=vph_status, **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
+            self.trace.set_phase(agent=ondernemer.rank)
             self.trace.log(f"Uitbreiden van {vph_status} ondernemer {ondernemer}")
             size = self.get_right_size_for_ondernemer(ondernemer)
             current_size = len(ondernemer.kramen)

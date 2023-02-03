@@ -23,6 +23,7 @@ class SollAllocation(BaseAllocation):
         ondernemers = self.markt.ondernemers.select(status=Status.SOLL, allocated=False,
                                                     **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
+            self.trace.set_phase(agent=ondernemer.rank)
             self.find_and_assign_kramen_to_ondernemer(ondernemer)
 
     def allocate_b_list(self):
@@ -30,4 +31,5 @@ class SollAllocation(BaseAllocation):
         ondernemers = self.markt.ondernemers.select(status=Status.B_LIST, allocated=False,
                                                     **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
+            self.trace.set_phase(agent=ondernemer.rank)
             self.find_and_assign_kramen_to_ondernemer(ondernemer)

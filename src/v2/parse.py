@@ -5,7 +5,7 @@ from collections import defaultdict
 from v2.branche import Branche
 from v2.kramen import Kraam
 from v2.ondernemers import Ondernemer
-from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS
+from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS, PhaseValue
 
 
 class Parse(TraceMixin):
@@ -73,8 +73,7 @@ class Parse(TraceMixin):
         'naam', 'marktId', 'marktDate', 'markt', 'marktplaatsen', 'rows', 'branches', 'obstakels',
         'paginas', 'aanmeldingen', 'voorkeuren', 'ondernemers', 'aanwezigheid', 'aLijst', 'mode'
         """
-        # input_data = self.input_data
-        self.trace.set_phase(epic='parse', story='parse')
+        self.trace.set_phase(epic='parse', story='parse', group=PhaseValue.unknown, agent=PhaseValue.event)
 
         self.trace.set_phase(task='markt')
         self.parse_markt()
