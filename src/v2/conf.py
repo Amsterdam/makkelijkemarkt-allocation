@@ -78,6 +78,7 @@ class Trace:
 
         self.log_detail_level = 1
         self.logs = []
+        self.parse_logs = []
         self.local = False
 
     @property
@@ -106,8 +107,11 @@ class Trace:
         self.set_phase(task='debug', group=Status.UNKNOWN, agent=PhaseValue.event)
         self.log(message)
 
+    def log_parsing_info(self, message):
+        self.parse_logs.append(message)
+
     def get_logs(self):
-        return self.logs
+        return [*self.logs, *self.parse_logs]
 
     def set_rows(self, rows):
         self.rows = rows
