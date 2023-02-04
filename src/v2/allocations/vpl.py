@@ -37,7 +37,8 @@ class VplAllocation(BaseAllocation):
             cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, peer_prefs=peer_prefs,
                                                     **self.kramen_filter_kwargs)
             cluster.assign(ondernemer)
-        self.markt.report_indeling()
+        if ondernemers:
+            self.markt.report_indeling()
 
     def move_to_prefs(self, vph_status):
         self.trace.set_phase(task='move_to_prefs', group=vph_status)
