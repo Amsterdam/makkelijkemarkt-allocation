@@ -59,17 +59,30 @@ class VplAllocation(BaseAllocation):
 
     def vph_uitbreiding(self, vph_status):
         self.trace.set_phase(task='vph_uitbreiding', group=vph_status)
+        move_instead_of_expand = False
         ondernemers = self.markt.ondernemers.select(status=vph_status, **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
             self.trace.set_phase(agent=ondernemer.rank)
             self.trace.log(f"Uitbreiden van {vph_status} ondernemer {ondernemer}")
             size = self.get_right_size_for_ondernemer(ondernemer)
             current_size = len(ondernemer.kramen)
-            if size <= current_size:
+            if size < current_size:
                 self.trace.log(f"Size {size} not larger than current {current_size}, skip expansion")
                 continue
+            if size == current_size:
+                if ondernemer.prefs and not set(ondernemer.prefs).intersection(ondernemer.kramen):
+                    self.trace.log(f"Current kramen {ondernemer.kramen} not matching with prefs {ondernemer.prefs} "
+                                   f"so trying now to optimize")
+                    move_instead_of_expand = True
+                    pass  # so find alternative cluster
+                else:
+                    self.trace.log(f"Size {size} same as {current_size}, skip expansion")
+                    continue
 
             cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, should_include=ondernemer.own,
                                                     **self.kramen_filter_kwargs)
-            cluster.assign(ondernemer)
+            if move_instead_of_expand:
+                self.move_ondernemer_to_new_cluster(ondernemer, cluster)
+            else:
+                cluster.assign(ondernemer)
             self.markt.report_indeling()
