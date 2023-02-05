@@ -129,8 +129,10 @@ class Trace:
             self.agent = agent
 
     def set_cycle(self, cycle=0):
-        if cycle:
-            self.cycle = cycle
+        self.cycle = cycle
+
+    def set_report_phase(self, story='report', task='report'):
+        self.set_phase(epic='report', story=story, task=task, group=Status.UNKNOWN, agent=PhaseValue.event)
 
     def show(self):
         print(self.content)
