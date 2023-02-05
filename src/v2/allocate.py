@@ -49,6 +49,7 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
     fill_up_strategy_b_list = FillUpStrategyBList(markt, **remaining_query)
     fill_up_strategy_b_list.run()
 
+    markt.report_ondernemers()
     markt.report_branches()
     stop = datetime.datetime.now()
     trace.set_phase(epic='end', story='meta', task='time')
