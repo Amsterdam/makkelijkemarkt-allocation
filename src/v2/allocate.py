@@ -3,14 +3,14 @@ import json
 import sys
 
 from v2.markt import Markt
-from v2.conf import KraamTypes, trace
+from v2.conf import KraamTypes, trace, PhaseValue
 from v2.strategy import ReceiveOwnKramenStrategy, HierarchyStrategy, FillUpStrategyBList
 from v2.validate import ValidateMarkt
 from v2.parse import Parse
 
 
 def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
-    trace.set_phase(epic='initial', story='meta', task='time')
+    trace.set_phase(epic='initial', story='meta', task='time', group=PhaseValue.unknown, agent=PhaseValue.event)
     start = datetime.datetime.now()
     trace.log(f"start {start}")
 
@@ -49,6 +49,8 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
     fill_up_strategy_b_list = FillUpStrategyBList(markt, **remaining_query)
     fill_up_strategy_b_list.run()
 
+    markt.report_ondernemers()
+    markt.report_branches()
     stop = datetime.datetime.now()
     trace.set_phase(epic='end', story='meta', task='time')
     trace.log(f"{stop} - duration {stop - start}")

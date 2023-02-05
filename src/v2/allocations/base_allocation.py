@@ -19,7 +19,16 @@ class BaseAllocation(TraceMixin):
         Returns how many extra kramen the ondernemer is allowed to claim
         """
         branche = ondernemer.branche
-        branche_ondernemers = self.markt.ondernemers.select(branche=branche)
+
+        if ondernemer.is_vph:
+            branche_ondernemers = self.markt.ondernemers.select(branche=branche, status__in=ALL_VPH_STATUS)
+            branche_ondernemers = [o for o in branche_ondernemers if o.rank >= ondernemer.rank]
+            branche_ondernemers = [*branche_ondernemers,
+                                   *self.markt.ondernemers.select(branche=branche, status=Status.SOLL)]
+        else:
+            branche_ondernemers = self.markt.ondernemers.select(branche=branche, status=Status.SOLL)
+            branche_ondernemers = [o for o in branche_ondernemers if o.rank >= ondernemer.rank]
+
         eligible_ondernemers = []
         for branche_ondernemer in branche_ondernemers:
             if branche_ondernemer.status == Status.SOLL and not branche_ondernemer.kramen:
@@ -35,8 +44,8 @@ class BaseAllocation(TraceMixin):
                        f" = available {available}")
         self.trace.log(f"With {ondernemers_count} ondernemers interested")
 
-        limit = 1
-        while limit < self.markt.kramen_per_ondernemer:
+        limit = 0
+        while limit <= self.markt.max_aantal_kramen_per_ondernemer:
             if ondernemers_count * limit <= available:
                 limit += 1
                 continue
@@ -45,30 +54,34 @@ class BaseAllocation(TraceMixin):
                 continue
             else:
                 break
-        return max(limit - 1, 1)
+        return max(limit - 1, 0)
 
     def get_right_size_for_ondernemer(self, ondernemer):
         current_amount_kramen = len(ondernemer.kramen)
         amount_kramen_wanted = ondernemer.max
-        limit = self.markt.kramen_per_ondernemer
-        self.trace.log(f"get_right_size_for_ondernemer {ondernemer.status}")
+        self.trace.log(f"get_right_size_for_ondernemer {ondernemer}")
+
+        entitled_extra_kramen = self.markt.kramen_per_ondernemer
         if ondernemer.branche.max:
-            branche_limit = self.get_limit_for_ondernemer_with_branche_with_max(ondernemer) + current_amount_kramen
-            self.trace.log(f"Branche {ondernemer.branche} limit {branche_limit}")
-            self.trace.log(f"kramen_per_ondernemer limit {limit}")
-            limit = min(limit, branche_limit)
-            self.trace.log(f"Hard limit: {limit}")
+            branche_limit = self.get_limit_for_ondernemer_with_branche_with_max(ondernemer)
+            self.trace.log(f"Branche {ondernemer.branche} limit {branche_limit} extra kramen")
+            entitled_extra_kramen = min(self.markt.kramen_per_ondernemer, branche_limit)
+            self.trace.log(f"entitled_extra_kramen = lowest of {branche_limit}, {self.markt.kramen_per_ondernemer}"
+                           f" = {entitled_extra_kramen}")
 
         if ondernemer.is_vph:
-            entitled = self.markt.kramen_per_ondernemer + current_amount_kramen
-            limit = min(entitled, limit)
-            right_size = clamp(current_amount_kramen, amount_kramen_wanted, limit)
-            self.trace.log(f"(current, wanted, limit) "
-                           f"{current_amount_kramen, amount_kramen_wanted, limit}"
+            entitled_kramen = current_amount_kramen + entitled_extra_kramen
+            self.trace.log(f"entitled_kramen = current {current_amount_kramen}"
+                           f" + entitled extra {entitled_extra_kramen} = {entitled_kramen}")
+            right_size = clamp(current_amount_kramen, amount_kramen_wanted, entitled_kramen)
+            self.trace.log(f"(current, wanted, entitled) "
+                           f"{current_amount_kramen, amount_kramen_wanted, entitled_kramen}"
                            f" = {right_size}")
         else:
-            right_size = min(amount_kramen_wanted, limit)
-            self.trace.log(f"(wanted, limit) {amount_kramen_wanted, limit} = {right_size}")
+            entitled_kramen = entitled_extra_kramen
+            self.trace.log(f"entitled_kramen = {entitled_kramen}")
+            right_size = min(amount_kramen_wanted, entitled_kramen)
+            self.trace.log(f"(wanted, entitled) {amount_kramen_wanted, entitled_kramen} = {right_size}")
         return right_size
 
     def move_ondernemer_to_new_cluster(self, ondernemer, new_cluster):

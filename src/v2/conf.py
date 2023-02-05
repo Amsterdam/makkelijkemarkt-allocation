@@ -73,10 +73,12 @@ class Trace:
         self.story = ''
         self.epic = ''
         self.group = ''
+        self.agent = ''
         self.cycle = 0
 
         self.log_detail_level = 1
         self.logs = []
+        self.parse_logs = []
         self.local = False
 
     @property
@@ -87,18 +89,26 @@ class Trace:
         }
 
     def log(self, message, detail_level=1):
-        phase = f"{self.epic}__{self.story}__{self.task}__{self.group}"
+        phase = f"{self.epic}__{self.story}__{self.task}__{self.group}__{self.agent}"
         if self.cycle:
             phase += f":{self.cycle}"
         if detail_level >= self.log_detail_level:
+            complete_message = f"{phase}: {message}"
             if self.local:
-                print(f"{phase}: {message}")
+                print(complete_message)
 
             log_entry = {
                 'level': detail_level,
-                'message': message,
+                'message': complete_message,
             }
             self.logs.append(log_entry)
+
+    def debug(self, message):
+        self.set_phase(task='debug', group=Status.UNKNOWN, agent=PhaseValue.event)
+        self.log(message)
+
+    def log_parsing_info(self, message):
+        self.parse_logs.append(message)
 
     def get_logs(self):
         return self.logs
@@ -106,7 +116,7 @@ class Trace:
     def set_rows(self, rows):
         self.rows = rows
 
-    def set_phase(self, epic='', story='', task='', group=None):
+    def set_phase(self, epic='', story='', task='', group=None, agent=''):
         if epic:
             self.epic = epic
         if story:
@@ -115,10 +125,14 @@ class Trace:
             self.task = task
         if group:
             self.group = group.value if group else ''
+        if agent:
+            self.agent = agent
 
     def set_cycle(self, cycle=0):
-        if cycle:
-            self.cycle = cycle
+        self.cycle = cycle
+
+    def set_report_phase(self, story='report', task='report'):
+        self.set_phase(epic='report', story=story, task=task, group=Status.UNKNOWN, agent=PhaseValue.event)
 
     def show(self):
         print(self.content)
@@ -153,3 +167,8 @@ trace = Trace()
 
 class TraceMixin:
     trace = trace
+
+
+class PhaseValue:
+    unknown = Status.UNKNOWN
+    event = 'event'

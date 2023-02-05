@@ -34,7 +34,7 @@ class BaseStrategy(TraceMixin):
 
     def kramen_still_available(self):
         available_kramen_count = self.markt.kramen.find_clusters(1, **self.kramen_filter_kwargs)
-        self.trace.log(f"Available kramen: {available_kramen_count}")
+        self.trace.debug(f"Available kramen: {available_kramen_count}")
         return available_kramen_count
 
     def run(self):
@@ -42,7 +42,7 @@ class BaseStrategy(TraceMixin):
 
     def should_allocation_loop_continue(self):
         if self.markt.is_allocation_hash_same_as_previous_round():
-            self.trace.log('SAME HASH')
+            self.trace.debug('SAME HASH')
             return False
 
         if not self.kramen_still_available():
@@ -120,7 +120,7 @@ class HierarchyStrategy(BaseStrategy):
         self.finish()
 
     def finish(self):
-        self.trace.log(f"Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
+        self.trace.debug(f"Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
         super().finish()
 
 
@@ -142,5 +142,5 @@ class FillUpStrategyBList(BaseStrategy):
         self.finish()
 
     def finish(self):
-        self.trace.log(f"Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
+        self.trace.debug(f"Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
         super().finish()
