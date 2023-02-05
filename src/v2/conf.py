@@ -111,7 +111,7 @@ class Trace:
         self.parse_logs.append(message)
 
     def get_logs(self):
-        return [*self.logs, *self.parse_logs]
+        return self.logs
 
     def set_rows(self, rows):
         self.rows = rows
