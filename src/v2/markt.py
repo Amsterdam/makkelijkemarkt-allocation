@@ -104,7 +104,6 @@ class Markt(TraceMixin):
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.SOLL)
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.B_LIST)
             print(pd.DataFrame(ondernemer.__dict__ for ondernemer in ordered_ondernemers), '\n')
-        self.trace.log(f"Rejection log: {self.rejection_log}")
 
     def report_branches(self):
         self.trace.set_report_phase(story='branches', task='max')
@@ -115,6 +114,12 @@ class Markt(TraceMixin):
                 self.trace.log(f"{branche}, max: {branche.max}, assigned: {assigned_count}")
                 for ondernemer in branche_ondernemers:
                     self.trace.log(ondernemer)
+
+    def report_rejections(self):
+        self.trace.set_report_phase(story='rejections', task='log')
+        self.trace.log(f"Rejection log:")
+        for rejection in self.rejection_log:
+            self.trace.log(rejection)
 
     def get_allocation(self):
         allocation = []
