@@ -161,7 +161,7 @@ class Markt(TraceMixin):
                        if not ondernemer.reject_reason == RejectionReason.EXCEEDS_BRANCHE_MAX]
 
         if unallocated:
-            self.trace.log(f"WARNING: Not everybody allocated! Unallocated: {unallocated}")
+            self.trace.debug(f"WARNING: Not everybody allocated! Unallocated: {unallocated}")
             return False
         return True
 
