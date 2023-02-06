@@ -1,4 +1,4 @@
-from v2.conf import Status
+from v2.conf import Status, RejectionReason
 from v2.allocations.base_allocation import BaseAllocation
 
 
@@ -13,6 +13,7 @@ class VplAllocation(BaseAllocation):
                 kraam = self.markt.kramen.get_kraam_by_id(kraam_id=kraam_id)
                 if not kraam:
                     self.trace.log(f"Kraam {kraam_id} does not exist or is blocked")
+                    ondernemer.reject(RejectionReason.KRAAM_DOES_NOT_EXIST)
                 else:
                     kraam.assign(ondernemer)
         if ondernemers:

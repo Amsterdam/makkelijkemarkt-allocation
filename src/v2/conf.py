@@ -42,6 +42,7 @@ class RejectionReason(ComparableEnum):
     NO_KRAMEN = 'No kramen proposed (but anywhere flag off)'
     NO_KRAMEN_WITH_ANYWHERE = 'No kramen proposed even with anywhere flag on'
     EXCEEDS_BRANCHE_MAX = 'Exceeds branche max'
+    KRAAM_DOES_NOT_EXIST = 'Kraam does not exist'
 
     def __hash__(self):
         return hash('RejectionReason')
