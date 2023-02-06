@@ -117,10 +117,3 @@ class Ondernemers:
             if all(results):
                 selected.append(ondernemer)
         return self.sort_by_rank(selected)
-
-    def get_hard_rejected(self):
-        hard_rejected = []
-        for ondernemer in self.ondernemers:
-            if ondernemer.is_hard_rejected:
-                hard_rejected.append(ondernemer)
-        return hard_rejected
