@@ -148,7 +148,15 @@ class Markt(TraceMixin):
         return rejections
 
     def is_allocation_valid(self, **filter_kwargs):
-        return self.are_all_ondernemers_allocated(**filter_kwargs)
+        return (self.are_all_ondernemers_allocated(**filter_kwargs)
+                and self.are_all_vph_proportionally_expanded(**filter_kwargs))
+
+    def are_all_vph_proportionally_expanded(self, **filter_kwargs):
+        non_proportionally_expanded_ondernemers = []
+        for ondernemer in self.ondernemers.select(status__in=ALL_VPH_STATUS, ignored=False, **filter_kwargs):
+            if len(ondernemer.kramen) + 1 < self.kramen_per_ondernemer <= ondernemer.max:
+                non_proportionally_expanded_ondernemers.append(ondernemer)
+        return not any(non_proportionally_expanded_ondernemers)
 
     def are_all_ondernemers_allocated(self, **filter_kwargs):
         unallocated_vph = self.ondernemers.select(status__in=ALL_VPH_STATUS, allocated=False, **filter_kwargs)
@@ -156,6 +164,7 @@ class Markt(TraceMixin):
                                                                  anywhere=True, **filter_kwargs)
         unallocated = [*unallocated_vph, *unallocated_soll_with_anywhere]
         unallocated = [ondernemer for ondernemer in unallocated
+                       if not ondernemer.ignored
                        if not (ondernemer.reject_reason == RejectionReason.LESS_THAN_MIN
                                and self.kramen_per_ondernemer < ondernemer.min)
                        if not ondernemer.reject_reason == RejectionReason.EXCEEDS_BRANCHE_MAX]
