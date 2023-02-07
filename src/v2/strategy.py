@@ -103,6 +103,11 @@ class HierarchyStrategy(BaseStrategy):
             vpl_allocation.move_to_prefs(Status.TVPL)
             vpl_allocation.move_to_prefs(Status.EXP)
             vpl_allocation.move_to_prefs(Status.EXPF)
+            # try to move again, because move of others can make move now possible
+            vpl_allocation.move_to_prefs(Status.VPL)
+            vpl_allocation.move_to_prefs(Status.TVPL)
+            vpl_allocation.move_to_prefs(Status.EXP)
+            vpl_allocation.move_to_prefs(Status.EXPF)
             # After other vphs have moved, expansion could be possible, so try again
             vpl_allocation.vph_uitbreiding(vph_status=Status.EB)
             vpl_allocation.vph_uitbreiding(vph_status=Status.VPL)
