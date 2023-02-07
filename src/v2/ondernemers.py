@@ -23,7 +23,6 @@ class Ondernemer(TraceMixin):
         self.kraam_type = KraamType(bak, bak_licht, evi)
         self.is_rejected = False
         self.reject_reason = ''
-        self.ignored = False
 
     def __str__(self):
         return f"Ondernemer {self.rank}, {self.status.value}, b={self.branche.shortname}, min={self.min}, max={self.max}, " \
@@ -44,9 +43,6 @@ class Ondernemer(TraceMixin):
     def unassign_kraam(self, kraam):
         self.branche.assigned_count -= 1
         self.kramen.remove(kraam)
-
-    def ignore(self):
-        self.ignored = True
 
     def reject(self, reason):
         self.trace.log(f"Rejecting: {reason.value} => {self}")
@@ -99,7 +95,7 @@ class Ondernemers:
         filters = []
         selected = []
         prop_names = ['status', 'branche', 'kraam_type']
-        bool_prop_names = ['anywhere', 'is_soft_rejected', 'ignored']
+        bool_prop_names = ['anywhere', 'is_soft_rejected']
         for kwarg in filter_kwargs:
             if kwarg in [*prop_names, *bool_prop_names]:
                 filters.append(lambda ondernemer, kwarg=kwarg: getattr(ondernemer, kwarg) == filter_kwargs[kwarg])
