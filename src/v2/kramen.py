@@ -250,7 +250,7 @@ class Kramen(TraceMixin):
 
     def remove_verplichte_branche(self, branche):
         for kraam in self.kramen_map.values():
-            if not kraam.ondernemer and kraam.branche and kraam.branche.verplicht and kraam.branche == branche:
+            if kraam.branche and kraam.branche.verplicht and kraam.branche == branche:
                 kraam.remove_verplichte_branche(branche)
 
     def remove_kraam_type(self, kraam_type):
