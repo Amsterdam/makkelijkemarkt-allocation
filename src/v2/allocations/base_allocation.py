@@ -21,7 +21,8 @@ class BaseAllocation(TraceMixin):
         branche = ondernemer.branche
 
         if ondernemer.is_vph:
-            branche_ondernemers = self.markt.ondernemers.select(branche=branche, status__in=ALL_VPH_STATUS)
+            branche_ondernemers = self.markt.ondernemers.select(branche=branche, status__in=ALL_VPH_STATUS,
+                                                                ignored=False)
             branche_ondernemers = [o for o in branche_ondernemers if o.rank >= ondernemer.rank]
             branche_ondernemers = [*branche_ondernemers,
                                    *self.markt.ondernemers.select(branche=branche, status=Status.SOLL)]
@@ -61,25 +62,21 @@ class BaseAllocation(TraceMixin):
         amount_kramen_wanted = ondernemer.max
         self.trace.log(f"get_right_size_for_ondernemer {ondernemer}")
 
-        entitled_extra_kramen = self.markt.kramen_per_ondernemer
+        entitled_kramen = self.markt.kramen_per_ondernemer
         if ondernemer.branche.max:
             branche_limit = self.get_limit_for_ondernemer_with_branche_with_max(ondernemer)
             self.trace.log(f"Branche {ondernemer.branche} limit {branche_limit} extra kramen")
-            entitled_extra_kramen = min(self.markt.kramen_per_ondernemer, branche_limit)
-            self.trace.log(f"entitled_extra_kramen = lowest of {branche_limit}, {self.markt.kramen_per_ondernemer}"
-                           f" = {entitled_extra_kramen}")
+            entitled_kramen = min(self.markt.kramen_per_ondernemer, branche_limit)
+            self.trace.log(f"entitled_kramen = lowest of {branche_limit}, {self.markt.kramen_per_ondernemer}"
+                           f" = {entitled_kramen}")
 
+        self.trace.log(f"entitled_kramen = {entitled_kramen}")
         if ondernemer.is_vph:
-            entitled_kramen = current_amount_kramen + entitled_extra_kramen
-            self.trace.log(f"entitled_kramen = current {current_amount_kramen}"
-                           f" + entitled extra {entitled_extra_kramen} = {entitled_kramen}")
             right_size = clamp(current_amount_kramen, amount_kramen_wanted, entitled_kramen)
             self.trace.log(f"(current, wanted, entitled) "
                            f"{current_amount_kramen, amount_kramen_wanted, entitled_kramen}"
                            f" = {right_size}")
         else:
-            entitled_kramen = entitled_extra_kramen
-            self.trace.log(f"entitled_kramen = {entitled_kramen}")
             right_size = min(amount_kramen_wanted, entitled_kramen)
             self.trace.log(f"(wanted, entitled) {amount_kramen_wanted, entitled_kramen} = {right_size}")
         return right_size
