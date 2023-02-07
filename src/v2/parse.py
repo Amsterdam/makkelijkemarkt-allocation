@@ -5,7 +5,7 @@ from collections import defaultdict
 from v2.branche import Branche
 from v2.kramen import Kraam
 from v2.ondernemers import Ondernemer
-from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS, PhaseValue
+from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS, ALL_VPH_STATUS
 
 
 class Parse(TraceMixin):
@@ -145,6 +145,14 @@ class Parse(TraceMixin):
             else:
                 status = Status(ondernemer_data['status'])
 
+            anywhere = voorkeur.get('anywhere')
+            if anywhere is None:
+                anywhere = False
+                self.trace.log_parsing_info(f"ondernemer['erkenningsNummer'] has NO anywhere value in profile,"
+                                            f"so defaulting to False")
+            if status in ALL_VPH_STATUS:
+                anywhere = False
+
             ondernemer = Ondernemer(
                 rank=ondernemer_data['sollicitatieNummer'],
                 erkenningsnummer=erkenningsnummer,
@@ -155,7 +163,7 @@ class Parse(TraceMixin):
                 own=ondernemer_data['plaatsen'],
                 min=voorkeur.get('minimum', 1),
                 max=voorkeur.get('maximum', 10),
-                anywhere=voorkeur.get('anywhere'),
+                anywhere=anywhere,
                 **ondernemer_props,
             )
             self.ondernemers.append(ondernemer)
