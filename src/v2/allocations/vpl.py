@@ -1,4 +1,4 @@
-from v2.conf import Status, RejectionReason
+from v2.conf import Status, RejectionReason, ALL_VPH_STATUS
 from v2.allocations.base_allocation import BaseAllocation
 
 
@@ -58,13 +58,32 @@ class VplAllocation(BaseAllocation):
                 self.move_ondernemer_to_new_cluster(ondernemer, new_cluster)
                 self.markt.report_indeling()
 
+    def maximize_vph(self):
+        ondernemers = self.markt.ondernemers.select(status__in=ALL_VPH_STATUS, **self.ondernemer_filter_kwargs)
+        for ondernemer in ondernemers:
+            self.trace.set_phase(task='maximize_vph', group=ondernemer.status)
+            current_amount_kramen = len(ondernemer.kramen)
+            if current_amount_kramen < ondernemer.max:
+                self.trace.log(f"VPH maximize expansion {ondernemer}")
+                size = ondernemer.max
+                branche = ondernemer.branche
+                if branche.max:
+                    available = branche.max - branche.assigned_count
+                    size = min(size, available + current_amount_kramen)
+                cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
+                                                        should_include=ondernemer.own,
+                                                        **self.kramen_filter_kwargs)
+                cluster.assign(ondernemer)
+                if cluster:
+                    self.markt.report_indeling()
+
     def vph_uitbreiding(self, vph_status):
         self.trace.set_phase(task='vph_uitbreiding', group=vph_status)
-        move_instead_of_expand = False
         ondernemers = self.markt.ondernemers.select(status=vph_status, **self.ondernemer_filter_kwargs)
         for ondernemer in ondernemers:
             self.trace.set_phase(agent=ondernemer.rank)
             self.trace.log(f"Uitbreiden van {vph_status} ondernemer {ondernemer}")
+            move_instead_of_expand = False
             size = self.get_right_size_for_ondernemer(ondernemer)
             current_size = len(ondernemer.kramen)
             if size < current_size:

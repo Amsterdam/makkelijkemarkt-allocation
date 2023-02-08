@@ -149,3 +149,37 @@ class FillUpStrategyBList(BaseStrategy):
     def finish(self):
         self.trace.debug(f"Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
         super().finish()
+
+
+class OptimizationStrategy(BaseStrategy):
+    def run(self):
+        vpl_allocation = VplAllocation(self.markt)
+        vpl_allocation.maximize_vph()
+        self.finish()
+
+    def swap_ondernemers(self):
+        # TODO: only if same branche
+        # TODO: swappers need to be unique
+        swappers = []
+        ondernemers = self.markt.ondernemers.select(allocated=True)
+        for ondernemer in ondernemers:
+            for partner in ondernemers:
+                if (ondernemer.rank != partner.rank
+                        and ondernemer.status == partner.status
+                        and set(ondernemer.prefs) == partner.kramen
+                        and set(partner.prefs) == ondernemer.kramen):
+                    swappers.append([ondernemer, partner])
+
+        for ondernemer, partner in swappers:
+            for kraam_id in [*ondernemer.kramen]:
+                kraam = self.markt.kramen.kramen_map[kraam_id]
+                kraam.unassign(ondernemer)
+            for kraam_id in [*partner.kramen]:
+                kraam = self.markt.kramen.kramen_map[kraam_id]
+                kraam.unassign(partner)
+            for pref in ondernemer.prefs:
+                kraam = self.markt.kramen.kramen_map[pref]
+                kraam.assign(ondernemer)
+            for pref in partner.prefs:
+                kraam = self.markt.kramen.kramen_map[pref]
+                kraam.assign(partner)
