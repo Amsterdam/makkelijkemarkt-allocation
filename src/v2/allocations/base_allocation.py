@@ -88,9 +88,7 @@ class BaseAllocation(TraceMixin):
             self.trace.log(f"Not moving, new cluster {new_cluster} same as current kramen for {ondernemer}")
             return
 
-        current_size = len(ondernemer.kramen)
-        offset = -abs(current_size)
-        is_to_exceed_branche_max = new_cluster.does_exceed_branche_max(ondernemer.branche, offset=offset)
+        is_to_exceed_branche_max = new_cluster.does_exceed_branche_max(ondernemer)
         if not is_to_exceed_branche_max:
             self.markt.kramen.unassign_ondernemer(ondernemer)
             new_cluster.assign(ondernemer)

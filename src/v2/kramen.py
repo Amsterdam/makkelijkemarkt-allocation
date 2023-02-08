@@ -171,15 +171,19 @@ class Cluster(TraceMixin):
     def is_allowed(self, ondernemer):
         return all(kraam.does_allow(ondernemer) for kraam in self.kramen)
 
-    def does_exceed_branche_max(self, branche, offset=0):
-        if branche.max and branche.assigned_count + len(self.kramen) + offset > branche.max:
-            self.trace.log(f"WARNING: Amount of kramen {len(self.kramen)} plus {branche.assigned_count} exceeds "
-                           f"branche '{branche}' max of {branche.max}")
-            return True
+    def does_exceed_branche_max(self, ondernemer):
+        branche = ondernemer.branche
+        if branche.max:
+            current_size = len(ondernemer.kramen)
+            offset = -abs(current_size)
+            if branche.assigned_count + len(self.kramen) + offset > branche.max:
+                self.trace.log(f"WARNING: Amount of kramen {len(self.kramen) - offset} plus {branche.assigned_count} "
+                               f"exceeds branche '{branche}' max of {branche.max}")
+                return True
         return False
 
     def validate_assignment(self, ondernemer):
-        if self.does_exceed_branche_max(ondernemer.branche):
+        if self.does_exceed_branche_max(ondernemer):
             ondernemer.reject(RejectionReason.EXCEEDS_BRANCHE_MAX)
             return False
         if not ondernemer.likes_proposed_kramen(self.kramen):
