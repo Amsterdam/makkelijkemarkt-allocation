@@ -4,7 +4,7 @@ import sys
 
 from v2.markt import Markt
 from v2.conf import KraamTypes, trace, PhaseValue
-from v2.strategy import ReceiveOwnKramenStrategy, HierarchyStrategy, FillUpStrategyBList
+from v2.strategy import ReceiveOwnKramenStrategy, HierarchyStrategy, FillUpStrategyBList, OptimizationStrategy
 from v2.validate import ValidateMarkt
 from v2.parse import Parse
 
@@ -46,6 +46,11 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
     remaining_query = dict(kraam_type__not__in=[*KraamTypes], branche__not__in=markt.verplichte_branches)
     remaining_strategy = HierarchyStrategy(markt, **remaining_query)
     remaining_strategy.run()
+
+    trace.set_phase(epic='optimization', story='optimization')
+    optimization_strategy = OptimizationStrategy(markt)
+    optimization_strategy.run()
+
     fill_up_strategy_b_list = FillUpStrategyBList(markt, **remaining_query)
     fill_up_strategy_b_list.run()
 
