@@ -83,26 +83,24 @@ class VplAllocation(BaseAllocation):
         for ondernemer in ondernemers:
             self.trace.set_phase(agent=ondernemer.rank)
             self.trace.log(f"Uitbreiden van {vph_status} ondernemer {ondernemer}")
-            move_instead_of_expand = False
             size = self.get_right_size_for_ondernemer(ondernemer)
             current_size = len(ondernemer.kramen)
+
             if size < current_size:
-                self.trace.log(f"Size {size} not larger than current {current_size}, skip expansion")
+                self.trace.log(f"Current kramen size {size} smaller than current {current_size}, skip expansion")
                 continue
             if size == current_size:
-                if ondernemer.prefs and not set(ondernemer.prefs).intersection(ondernemer.kramen):
-                    self.trace.log(f"Current kramen {ondernemer.kramen} not matching with prefs {ondernemer.prefs} "
-                                   f"so trying now to optimize")
-                    move_instead_of_expand = True
-                    pass  # so find alternative cluster
-                else:
-                    self.trace.log(f"Size {size} same as {current_size}, skip expansion")
+                self.trace.log(f"Size {size} same as {current_size}")
+                if not ondernemer.prefs:
+                    self.trace.log(f"No prefs, skip expansion")
                     continue
-
-            cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, should_include=ondernemer.own,
-                                                    **self.kramen_filter_kwargs)
-            if move_instead_of_expand:
-                self.move_ondernemer_to_new_cluster(ondernemer, cluster)
-            else:
-                cluster.assign(ondernemer)
-            self.markt.report_indeling()
+                elif ondernemer.prefs and set(ondernemer.prefs).intersection(ondernemer.kramen):
+                    self.trace.log(f"Current kramen matching with prefs, skip expansion")
+                    continue
+                else:
+                    self.trace.log(f"Current kramen {ondernemer.kramen} not matching with prefs {ondernemer.prefs}")
+            cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
+                                                    should_include=ondernemer.kramen, **self.kramen_filter_kwargs)
+            cluster.assign(ondernemer)
+            if cluster:
+                self.markt.report_indeling()
