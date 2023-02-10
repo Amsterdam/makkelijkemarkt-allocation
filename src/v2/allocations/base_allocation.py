@@ -74,12 +74,12 @@ class BaseAllocation(TraceMixin):
         entitled_kramen = self.markt.kramen_per_ondernemer
         if ondernemer.branche.max:
             branche_limit = self.get_limit_for_ondernemer_with_branche_with_max(ondernemer)
-            self.trace.log(f"Branche {ondernemer.branche} limit {branche_limit} extra kramen")
+            self.trace.log(f"Branche {ondernemer.branche} limit {branche_limit} kramen")
             entitled_kramen = min(self.markt.kramen_per_ondernemer, branche_limit)
             self.trace.log(f"entitled_kramen = lowest of {branche_limit}, {self.markt.kramen_per_ondernemer}"
                            f" = {entitled_kramen}")
 
-        self.trace.log(f"entitled_kramen = {entitled_kramen}")
+        self.trace.log(f"entitled_kramen = kramen_per_ondernemer = {entitled_kramen}")
         if ondernemer.is_vph:
             right_size = clamp(current_amount_kramen, amount_kramen_wanted, entitled_kramen)
             self.trace.log(f"(current, wanted, entitled) "
