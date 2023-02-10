@@ -71,7 +71,7 @@ class VplAllocation(BaseAllocation):
                     available = branche.max - branche.assigned_count
                     size = min(size, available + current_amount_kramen)
                 cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
-                                                        should_include=ondernemer.own,
+                                                        should_include=ondernemer.kramen,
                                                         **self.kramen_filter_kwargs)
                 cluster.assign(ondernemer)
                 if cluster:
