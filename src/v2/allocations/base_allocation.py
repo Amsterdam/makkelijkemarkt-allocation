@@ -19,38 +19,47 @@ class BaseAllocation(TraceMixin):
         Returns how many extra kramen the ondernemer is allowed to claim
         """
         branche = ondernemer.branche
+        demand = 0
+        limit = self.markt.kramen_per_ondernemer
 
-        if ondernemer.is_vph:
-            branche_ondernemers = self.markt.ondernemers.select(branche=branche, status__in=ALL_VPH_STATUS,
-                                                                ignored=False)
-            branche_ondernemers = [o for o in branche_ondernemers if o.rank >= ondernemer.rank]
-            branche_ondernemers = [*branche_ondernemers,
-                                   *self.markt.ondernemers.select(branche=branche, status=Status.SOLL)]
-        else:
-            branche_ondernemers = self.markt.ondernemers.select(branche=branche, status=Status.SOLL)
-            branche_ondernemers = [o for o in branche_ondernemers if o.rank >= ondernemer.rank]
-
-        eligible_ondernemers = []
+        branche_ondernemers = self.markt.ondernemers.select(branche=branche)
         for branche_ondernemer in branche_ondernemers:
-            if branche_ondernemer.status == Status.SOLL and not branche_ondernemer.kramen:
-                eligible_ondernemers.append(branche_ondernemer)
-            if branche_ondernemer.status in ALL_VPH_STATUS:
-                if len(branche_ondernemer.kramen) < branche_ondernemer.max:
-                    eligible_ondernemers.append(branche_ondernemer)
+            if ondernemer.is_vph:
+                if branche_ondernemer.is_vph:
+                    if branche_ondernemer.rank <= ondernemer.rank:
+                        continue
+                else:
+                    pass
+            elif ondernemer.status == Status.SOLL:
+                if branche_ondernemer.is_vph:
+                    continue
+            else:
+                # B-list soll, so ignore
+                continue
 
-        ondernemers_count = len(eligible_ondernemers)
-        ondernemers_count_minus_one = max(ondernemers_count - 1, 0)
+            current = len(branche_ondernemer.kramen)
+            desired = branche_ondernemer.max
+            limited_desired = min(desired, limit)
+            needed = max(limited_desired - current, 0)
+            demand += needed
+            self.trace.log(ondernemer)
+            self.trace.log(branche_ondernemer)
+            self.trace.log(f"current: {current}, desired: {desired}, limited_desired: {limited_desired}, "
+                           f"needed: {needed}, demand: {demand}")
+
+        self.trace.log(f"Calculated demand: {demand}")
+        demand_minus_one = max(demand - 1, 0)
         available = branche.max - branche.assigned_count
         self.trace.log(f"Branche {branche} max {branche.max} - assigned {branche.assigned_count}"
                        f" = available {available}")
-        self.trace.log(f"With {ondernemers_count} ondernemers interested")
+        self.trace.log(f"With {demand} demand")
 
         limit = 0
         while limit <= self.markt.max_aantal_kramen_per_ondernemer:
-            if ondernemers_count * limit <= available:
+            if demand * limit <= available:
                 limit += 1
                 continue
-            if limit + ondernemers_count_minus_one * (limit - 1) <= available:
+            if limit + demand_minus_one * (limit - 1) <= available:
                 limit += 1
                 continue
             else:
