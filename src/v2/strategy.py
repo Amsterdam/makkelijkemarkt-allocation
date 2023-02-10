@@ -126,6 +126,7 @@ class HierarchyStrategy(BaseStrategy):
 
     def finish(self):
         self.trace.debug(f"Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
+        self.markt.kramen_per_ondernemer = self.markt.max_aantal_kramen_per_ondernemer
         super().finish()
 
 
