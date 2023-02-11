@@ -112,7 +112,7 @@ class Kraam(TraceMixin):
 
     def unassign(self, ondernemer):
         if self.ondernemer == ondernemer.rank:
-            self.trace.log(f"Unassigning kraam {self.id} to ondernemer {ondernemer}")
+            self.trace.log(f"Unassigning kraam {self.id} from ondernemer {ondernemer}")
             self.ondernemer = None
             self.trace.unassign_kraam(self.id)
             ondernemer.unassign_kraam(self.id)
