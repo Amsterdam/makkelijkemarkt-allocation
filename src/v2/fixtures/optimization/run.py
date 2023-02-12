@@ -8,7 +8,7 @@ from v2.conf import KraamTypes, trace, PhaseValue, Status
 from v2.strategy import ReceiveOwnKramenStrategy, HierarchyStrategy, FillUpStrategyBList, OptimizationStrategy
 from v2.validate import ValidateMarkt
 
-from v2.fixtures.optimization.kramen import rows
+from v2.fixtures.optimization.kramen import rows, branche_3, kraam_type_bak
 from v2.fixtures.optimization.branches import branches
 from v2.fixtures.optimization.ondernemers import ondernemers, soll_103, soll_104, soll_105
 from v2.fixtures.optimization.markt import markt_meta
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     trace.set_phase(epic='optimization', story='optimization')
     optimization_strategy = OptimizationStrategy(markt)
-    optimization_strategy.run()
+    optimization_strategy.maximize_all_vph_expansion()
 
     assert markt.kramen.kramen_map[2].ondernemer == 2
     assert markt.kramen.kramen_map[3].ondernemer == 2
@@ -49,3 +49,14 @@ if __name__ == '__main__':
     assert markt.kramen.kramen_map[5].ondernemer == 3
     assert markt.kramen.kramen_map[6].ondernemer == 4
     assert markt.kramen.kramen_map[7].ondernemer == 4
+
+    # markt.kramen.kramen_map[4].branche = branche_3
+    # markt.kramen.kramen_map[5].branche = branche_3
+    # markt.kramen.kramen_map[7].branche = branche_3
+    # markt.kramen.kramen_map[7].kraam_type = kraam_type_bak
+
+    optimization_strategy.swap_ondernemers()
+    assert markt.kramen.kramen_map[4].ondernemer == 4
+    assert markt.kramen.kramen_map[5].ondernemer == 4
+    assert markt.kramen.kramen_map[6].ondernemer == 3
+    assert markt.kramen.kramen_map[7].ondernemer == 3
