@@ -42,3 +42,10 @@ if __name__ == '__main__':
     trace.set_phase(epic='optimization', story='optimization')
     optimization_strategy = OptimizationStrategy(markt)
     optimization_strategy.run()
+
+    assert markt.kramen.kramen_map[2].ondernemer == 2
+    assert markt.kramen.kramen_map[3].ondernemer == 2
+    assert markt.kramen.kramen_map[4].ondernemer == 3
+    assert markt.kramen.kramen_map[5].ondernemer == 3
+    assert markt.kramen.kramen_map[6].ondernemer == 4
+    assert markt.kramen.kramen_map[7].ondernemer == 4
