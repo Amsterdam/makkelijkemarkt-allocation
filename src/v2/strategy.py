@@ -1,4 +1,5 @@
 from collections import deque
+from operator import attrgetter
 
 from v2.conf import TraceMixin, Status, ALL_VPH_STATUS
 from v2.allocations.vpl import VplAllocation
@@ -225,28 +226,37 @@ class OptimizationStrategy(BaseStrategy):
                 self.markt.report_indeling()
 
     def swap_ondernemers(self):
-        # TODO: only if same branche
-        # TODO: swappers need to be unique
-        swappers = []
+        swappers = set()
         ondernemers = self.markt.ondernemers.select(allocated=True)
         for ondernemer in ondernemers:
             for partner in ondernemers:
                 if (ondernemer.rank != partner.rank
+                        and ondernemer.kramen and len(ondernemer.kramen) == len(partner.kramen)
                         and ondernemer.status == partner.status
                         and set(ondernemer.prefs) == partner.kramen
                         and set(partner.prefs) == ondernemer.kramen):
-                    swappers.append([ondernemer, partner])
+                    swap = sorted([ondernemer, partner], key=attrgetter('rank'))
+                    swap = tuple(swap)
+                    swappers.add(swap)
+        if swappers:
+            self.markt.report_indeling()
 
         for ondernemer, partner in swappers:
-            for kraam_id in [*ondernemer.kramen]:
-                kraam = self.markt.kramen.kramen_map[kraam_id]
-                kraam.unassign(ondernemer)
-            for kraam_id in [*partner.kramen]:
-                kraam = self.markt.kramen.kramen_map[kraam_id]
-                kraam.unassign(partner)
+            self.trace.log(f"Swapping kramen from {ondernemer} and {partner}")
+            all_kramen = [self.markt.kramen.kramen_map[kraam_id] for kraam_id in [*ondernemer.kramen, *partner.kramen]]
+            verplichte_branche_diversity = set([kraam.has_verplichte_branche for kraam in all_kramen])
+            kraam_type_diversity = set([kraam.kraam_type.get_active() for kraam in all_kramen])
+            if not (len(verplichte_branche_diversity) == 1 and len(kraam_type_diversity) == 1):
+                continue
+
+            self.markt.unassign_all_kramen_from_ondernemer(ondernemer)
+            self.markt.unassign_all_kramen_from_ondernemer(partner)
             for pref in ondernemer.prefs:
                 kraam = self.markt.kramen.kramen_map[pref]
                 kraam.assign(ondernemer)
             for pref in partner.prefs:
                 kraam = self.markt.kramen.kramen_map[pref]
                 kraam.assign(partner)
+
+        if swappers:
+            self.markt.report_indeling()
