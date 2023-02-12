@@ -1,7 +1,8 @@
-from v2.kramen import Kraam
+from v2.kramen import Kraam, KraamType
 from v2.fixtures.optimization.branches import branches
 
 branche_1, branche_2, branche_3, branche_4 = branches
+kraam_type_bak = KraamType(bak=True)
 
 rows = [
     [
