@@ -21,7 +21,7 @@ class KraamType:
         return str(self)
 
     def __eq__(self, other):
-        return other in self.props
+        return other in self.props if other else len(self.props) == 0
 
     def __bool__(self):
         return bool(self.props)
