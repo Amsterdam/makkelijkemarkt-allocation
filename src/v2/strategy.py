@@ -1,4 +1,4 @@
-from v2.conf import TraceMixin, Status
+from v2.conf import TraceMixin, Status, ALL_VPH_STATUS
 
 from v2.allocations.vpl import VplAllocation
 from v2.allocations.soll import SollAllocation
@@ -154,9 +154,66 @@ class FillUpStrategyBList(BaseStrategy):
 
 class OptimizationStrategy(BaseStrategy):
     def run(self):
-        vpl_allocation = VplAllocation(self.markt)
-        vpl_allocation.maximize_vph()
+        # vpl_allocation = VplAllocation(self.markt)
+        # vpl_allocation.maximize_vph()
+        self.put_into_fridge()
         self.finish()
+
+    def put_into_fridge(self):
+        working_copies = []
+        fridge = []
+
+        ondernemers = self.markt.ondernemers.select(status__in=ALL_VPH_STATUS, kraam_type=None)
+        for ondernemer in ondernemers:
+            self.trace.set_phase(task='maximize_vph', group=ondernemer.status, agent=ondernemer.rank)
+            if ondernemer.has_verplichte_branche:
+                continue
+            working_copies.append(self.markt.get_working_copy())
+
+            if not fridge:
+                self.trace.log(f"Fridge empty, now filling")
+                for soll in self.markt.ondernemers.select(status=Status.SOLL, anywhere=True, kraam_type=None):
+                    if soll.has_verplichte_branche:
+                        continue
+                    kramen_count = len(soll.kramen)
+                    self.markt.unassign_all_kramen_from_ondernemer(soll)
+                    fridge.append([soll, kramen_count])
+                    self.trace.log(f"Put soll {soll} with {kramen_count} kramen in fridge")
+            self.trace.log(f"Fridge filled ({len(fridge)}: {fridge}")
+
+            current_amount_kramen = len(ondernemer.kramen)
+            if current_amount_kramen >= ondernemer.max:
+                self.trace.log(f"VPH already at max {ondernemer}")
+            else:
+                self.trace.log(f"VPH maximize expansion {ondernemer}")
+                size = ondernemer.max
+                branche = ondernemer.branche
+                if branche.max:
+                    available = branche.max - branche.assigned_count
+                    size = min(size, available + current_amount_kramen)
+                cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
+                                                        should_include=ondernemer.kramen,
+                                                        **self.kramen_filter_kwargs)
+                cluster.assign(ondernemer)
+                if cluster:
+                    self.markt.report_indeling()
+
+                error = False
+                while fridge:
+                    soll, kramen_count = fridge.pop()
+                    cluster = self.markt.kramen.get_cluster(size=kramen_count, ondernemer=soll)
+                    if cluster:
+                        cluster.assign(soll)
+                    else:
+                        error = True
+
+                if error:
+                    self.trace.log(f"Failure with {ondernemer}, fallback to previous markt state")
+                    self.markt.restore_working_copy(working_copies[-1])
+                    self.markt.report_indeling()
+                    continue
+                else:
+                    self.markt.report_indeling()
 
     def swap_ondernemers(self):
         # TODO: only if same branche
