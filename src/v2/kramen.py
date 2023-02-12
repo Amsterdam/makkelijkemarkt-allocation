@@ -79,6 +79,10 @@ class Kraam(TraceMixin):
     def __repr__(self):
         return str(self)
 
+    @property
+    def has_verplichte_branche(self):
+        return bool(self.branche and self.branche.verplicht)
+
     def does_allow_ondernemer_branche(self, ondernemer):
         if not (self.branche and self.branche.verplicht):
             return True
