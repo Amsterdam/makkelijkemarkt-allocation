@@ -1,7 +1,7 @@
 from collections import deque
 from operator import attrgetter
 
-from v2.conf import TraceMixin, Status, ALL_VPH_STATUS
+from v2.conf import TraceMixin, Status, ALL_VPH_STATUS, PhaseValue
 from v2.allocations.vpl import VplAllocation
 from v2.allocations.soll import SollAllocation
 
@@ -160,10 +160,12 @@ class OptimizationStrategy(BaseStrategy):
         self.fridge = deque()
 
     def run(self):
+        self.trace.set_phase(story='maximize_vph')
         self.maximize_all_vph_expansion()
         self.finish()
 
     def fill_fridge_with_soll_with_anywhere(self):
+        self.trace.set_phase(task='fill_fridge', group=Status.SOLL, agent=PhaseValue.event)
         if not self.fridge:
             self.trace.log(f"Fridge empty, now filling")
             for soll in self.markt.ondernemers.select(status=Status.SOLL, anywhere=True, kraam_type=None):
@@ -176,18 +178,22 @@ class OptimizationStrategy(BaseStrategy):
         self.trace.log(f"Fridge filled ({len(self.fridge)}: {self.fridge}")
 
     def reassign_ondernemers_from_the_fridge(self):
+        self.trace.set_phase(task='reassign_from_fridge', group=Status.SOLL, agent=PhaseValue.event)
         all_allocated = True
         while self.fridge:
             soll, kramen_count = self.fridge.popleft()
             cluster = self.markt.kramen.get_cluster(size=kramen_count, ondernemer=soll)
             if cluster:
                 cluster.assign(soll)
+                if soll.is_rejected:
+                    all_allocated = False
             else:
                 all_allocated = False
                 self.trace.log(f"Could not reassign ondernemer from fridge: {soll}")
         return all_allocated
 
     def maximize_vph_expansion(self, ondernemer):
+        self.trace.set_phase(task='maximize_vph', group=ondernemer.status, agent=ondernemer.rank)
         current_amount_kramen = len(ondernemer.kramen)
         if current_amount_kramen >= ondernemer.max:
             self.trace.log(f"VPH already at max {ondernemer}")
@@ -221,7 +227,6 @@ class OptimizationStrategy(BaseStrategy):
                 self.trace.log(f"Could not maximize vph {ondernemer}, fallback to previous markt state")
                 self.markt.restore_working_copy(working_copies[-1])
                 self.markt.report_indeling()
-                continue
             else:
                 self.markt.report_indeling()
 
