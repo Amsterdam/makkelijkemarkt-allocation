@@ -36,6 +36,10 @@ class Ondernemer(TraceMixin):
     def is_vph(self):
         return self.status in ALL_VPH_STATUS
 
+    @property
+    def has_verplichte_branche(self):
+        return self.branche and self.branche.verplicht
+
     def assign_kraam(self, kraam):
         self.kramen.add(kraam)
         self.branche.assigned_count += 1
