@@ -256,6 +256,18 @@ class Kramen(TraceMixin):
             if kraam.ondernemer == ondernemer.rank:
                 kraam.unassign(ondernemer)
 
+    def move_ondernemer_to_new_cluster(self, ondernemer, new_cluster):
+        if not new_cluster:
+            return
+        if new_cluster.kramen_list == ondernemer.kramen:
+            self.trace.log(f"Not moving, new cluster {new_cluster} same as current kramen for {ondernemer}")
+            return
+
+        is_to_exceed_branche_max = new_cluster.does_exceed_branche_max(ondernemer)
+        if not is_to_exceed_branche_max:
+            self.unassign_ondernemer(ondernemer)
+            new_cluster.assign(ondernemer)
+
     def remove_verplichte_branche(self, branche):
         for kraam in self.kramen_map.values():
             if kraam.branche and kraam.branche.verplicht and kraam.branche == branche:

@@ -89,15 +89,3 @@ class BaseAllocation(TraceMixin):
             right_size = min(amount_kramen_wanted, entitled_kramen)
             self.trace.log(f"(wanted, entitled) {amount_kramen_wanted, entitled_kramen} = {right_size}")
         return right_size
-
-    def move_ondernemer_to_new_cluster(self, ondernemer, new_cluster):
-        if not new_cluster:
-            return
-        if new_cluster.kramen_list == ondernemer.kramen:
-            self.trace.log(f"Not moving, new cluster {new_cluster} same as current kramen for {ondernemer}")
-            return
-
-        is_to_exceed_branche_max = new_cluster.does_exceed_branche_max(ondernemer)
-        if not is_to_exceed_branche_max:
-            self.markt.kramen.unassign_ondernemer(ondernemer)
-            new_cluster.assign(ondernemer)

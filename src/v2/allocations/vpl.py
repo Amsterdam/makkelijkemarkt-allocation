@@ -55,7 +55,7 @@ class VplAllocation(BaseAllocation):
                     continue
                 new_cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
                                                             **self.kramen_filter_kwargs)
-                self.move_ondernemer_to_new_cluster(ondernemer, new_cluster)
+                self.markt.kramen.move_ondernemer_to_new_cluster(ondernemer, new_cluster)
                 self.markt.report_indeling()
 
     def maximize_vph(self):
