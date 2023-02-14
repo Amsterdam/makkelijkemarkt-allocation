@@ -1,4 +1,4 @@
-from v2.conf import Status, RejectionReason, ALL_VPH_STATUS
+from v2.conf import Status, RejectionReason, Status,  ALL_VPH_STATUS
 from v2.allocations.base_allocation import BaseAllocation
 
 
@@ -101,6 +101,12 @@ class VplAllocation(BaseAllocation):
                     self.trace.log(f"Current kramen {ondernemer.kramen} not matching with prefs {ondernemer.prefs}")
             cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
                                                     should_include=ondernemer.kramen, **self.kramen_filter_kwargs)
+            if ondernemer.status == Status.EB:
+                contains_own_kramen = set(ondernemer.own).intersection(cluster.kramen_list)
+                contains_prefs = set(ondernemer.prefs).intersection(cluster.kramen_list)
+                if not contains_own_kramen or not contains_prefs:
+                    return
+
             cluster.assign(ondernemer)
             if cluster:
                 self.markt.report_indeling()
