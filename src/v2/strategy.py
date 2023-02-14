@@ -1,5 +1,7 @@
-from v2.conf import TraceMixin, Status
+from collections import deque
+from operator import attrgetter
 
+from v2.conf import TraceMixin, Status, ALL_VPH_STATUS, PhaseValue
 from v2.allocations.vpl import VplAllocation
 from v2.allocations.soll import SollAllocation
 
@@ -126,6 +128,7 @@ class HierarchyStrategy(BaseStrategy):
 
     def finish(self):
         self.trace.debug(f"Finished with kramen_per_ondernemer: {(self.markt.kramen_per_ondernemer - 1) or 1}")
+        self.markt.kramen_per_ondernemer = self.markt.max_aantal_kramen_per_ondernemer
         super().finish()
 
 
@@ -152,34 +155,113 @@ class FillUpStrategyBList(BaseStrategy):
 
 
 class OptimizationStrategy(BaseStrategy):
+    def __init__(self, markt, **filter_kwargs):
+        super().__init__(markt, **filter_kwargs)
+        self.fridge = deque()
+
     def run(self):
-        vpl_allocation = VplAllocation(self.markt)
-        vpl_allocation.maximize_vph()
+        self.trace.set_phase(story='maximize_vph')
+        self.maximize_all_vph_expansion()
         self.finish()
 
+    def fill_fridge_with_soll_with_anywhere(self):
+        self.trace.set_phase(task='fill_fridge', group=Status.SOLL, agent=PhaseValue.event)
+        if not self.fridge:
+            self.trace.log(f"Fridge empty, now filling")
+            for soll in self.markt.ondernemers.select(status=Status.SOLL, anywhere=True, kraam_type=None):
+                if soll.has_verplichte_branche:
+                    continue
+                kramen_count = len(soll.kramen)
+                self.markt.unassign_all_kramen_from_ondernemer(soll)
+                self.fridge.append([soll, kramen_count])
+                self.trace.log(f"Put soll {soll} with {kramen_count} kramen in fridge")
+        self.trace.log(f"Fridge filled ({len(self.fridge)}: {self.fridge}")
+
+    def reassign_ondernemers_from_the_fridge(self):
+        self.trace.set_phase(task='reassign_from_fridge', group=Status.SOLL, agent=PhaseValue.event)
+        all_allocated = True
+        while self.fridge:
+            soll, kramen_count = self.fridge.popleft()
+            cluster = self.markt.kramen.get_cluster(size=kramen_count, ondernemer=soll)
+            if cluster:
+                cluster.assign(soll)
+                if soll.is_rejected:
+                    all_allocated = False
+            else:
+                all_allocated = False
+                self.trace.log(f"Could not reassign ondernemer from fridge: {soll}")
+        return all_allocated
+
+    def maximize_vph_expansion(self, ondernemer):
+        self.trace.set_phase(task='maximize_vph', group=ondernemer.status, agent=ondernemer.rank)
+        current_amount_kramen = len(ondernemer.kramen)
+        self.trace.log(f"VPH maximize expansion {ondernemer}")
+        size = ondernemer.max
+        branche = ondernemer.branche
+        if branche.max:
+            available = branche.max - branche.assigned_count
+            size = min(size, available + current_amount_kramen)
+        cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
+                                                should_include=ondernemer.kramen,
+                                                **self.kramen_filter_kwargs)
+        cluster.assign(ondernemer)
+        if cluster:
+            self.markt.report_indeling()
+
+    def maximize_all_vph_expansion(self):
+        working_copies = []
+        ondernemers = self.markt.ondernemers.select(status__in=ALL_VPH_STATUS, kraam_type=None)
+        for ondernemer in ondernemers:
+            self.trace.set_phase(task='maximize_vph', group=ondernemer.status, agent=ondernemer.rank)
+            if ondernemer.has_verplichte_branche:
+                continue
+            if len(ondernemer.kramen) >= ondernemer.max:
+                self.trace.log(f"VPH already at max {ondernemer}")
+                continue
+            working_copies.append(self.markt.get_working_copy())
+            self.fill_fridge_with_soll_with_anywhere()
+            self.maximize_vph_expansion(ondernemer)
+            all_allocated = self.reassign_ondernemers_from_the_fridge()
+            if not all_allocated:
+                self.markt.report_indeling()
+                self.trace.log(f"Could not maximize vph {ondernemer}, fallback to previous markt state")
+                self.markt.restore_working_copy(working_copies[-1])
+                self.markt.report_indeling()
+            else:
+                self.markt.report_indeling()
+
     def swap_ondernemers(self):
-        # TODO: only if same branche
-        # TODO: swappers need to be unique
-        swappers = []
+        swappers = set()
         ondernemers = self.markt.ondernemers.select(allocated=True)
         for ondernemer in ondernemers:
             for partner in ondernemers:
                 if (ondernemer.rank != partner.rank
+                        and ondernemer.kramen and len(ondernemer.kramen) == len(partner.kramen)
                         and ondernemer.status == partner.status
                         and set(ondernemer.prefs) == partner.kramen
                         and set(partner.prefs) == ondernemer.kramen):
-                    swappers.append([ondernemer, partner])
+                    swap = sorted([ondernemer, partner], key=attrgetter('rank'))
+                    swap = tuple(swap)
+                    swappers.add(swap)
+        if swappers:
+            self.markt.report_indeling()
 
         for ondernemer, partner in swappers:
-            for kraam_id in [*ondernemer.kramen]:
-                kraam = self.markt.kramen.kramen_map[kraam_id]
-                kraam.unassign(ondernemer)
-            for kraam_id in [*partner.kramen]:
-                kraam = self.markt.kramen.kramen_map[kraam_id]
-                kraam.unassign(partner)
+            self.trace.log(f"Swapping kramen from {ondernemer} and {partner}")
+            all_kramen = [self.markt.kramen.kramen_map[kraam_id] for kraam_id in [*ondernemer.kramen, *partner.kramen]]
+            verplichte_branche_diversity = set([kraam.has_verplichte_branche for kraam in all_kramen])
+            kraam_type_diversity = set([kraam.kraam_type.get_active() for kraam in all_kramen])
+            if not (len(verplichte_branche_diversity) == 1 and len(kraam_type_diversity) == 1):
+                continue
+
+            self.markt.unassign_all_kramen_from_ondernemer(ondernemer)
+            self.markt.unassign_all_kramen_from_ondernemer(partner)
             for pref in ondernemer.prefs:
                 kraam = self.markt.kramen.kramen_map[pref]
                 kraam.assign(ondernemer)
             for pref in partner.prefs:
                 kraam = self.markt.kramen.kramen_map[pref]
                 kraam.assign(partner)
+
+        if swappers:
+            self.markt.report_indeling()

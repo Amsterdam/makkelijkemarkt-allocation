@@ -187,3 +187,8 @@ class Markt(TraceMixin):
         self.trace.log(f"Verplichte branches: {verplichte_branches}")
         self.trace.log(f"Ignoring branches: {BAK_TYPE_BRANCHE_IDS}")
         return verplichte_branches
+
+    def unassign_all_kramen_from_ondernemer(self, ondernemer):
+        for kraam_id in [*ondernemer.kramen]:
+            kraam = self.kramen.kramen_map[kraam_id]
+            kraam.unassign(ondernemer)

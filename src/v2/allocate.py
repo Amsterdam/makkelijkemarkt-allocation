@@ -47,7 +47,9 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
     remaining_strategy = HierarchyStrategy(markt, **remaining_query)
     remaining_strategy.run()
 
-    trace.set_phase(epic='optimization', story='optimization')
+    markt.report_ondernemers()
+    markt.report_branches()
+    trace.set_phase(epic='optimization')
     optimization_strategy = OptimizationStrategy(markt)
     optimization_strategy.run()
 

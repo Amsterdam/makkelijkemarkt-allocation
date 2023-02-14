@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from v2.conf import KraamTypes, RejectionReason, TraceMixin
+from v2.conf import KraamTypes, RejectionReason, TraceMixin, Status
 
 
 class KraamType:
@@ -21,7 +21,7 @@ class KraamType:
         return str(self)
 
     def __eq__(self, other):
-        return other in self.props
+        return other in self.props if other else len(self.props) == 0
 
     def __bool__(self):
         return bool(self.props)
@@ -79,6 +79,10 @@ class Kraam(TraceMixin):
     def __repr__(self):
         return str(self)
 
+    @property
+    def has_verplichte_branche(self):
+        return bool(self.branche and self.branche.verplicht)
+
     def does_allow_ondernemer_branche(self, ondernemer):
         if not (self.branche and self.branche.verplicht):
             return True
@@ -112,7 +116,7 @@ class Kraam(TraceMixin):
 
     def unassign(self, ondernemer):
         if self.ondernemer == ondernemer.rank:
-            self.trace.log(f"Unassigning kraam {self.id} to ondernemer {ondernemer}")
+            self.trace.log(f"Unassigning kraam {self.id} from ondernemer {ondernemer}")
             self.ondernemer = None
             self.trace.unassign_kraam(self.id)
             ondernemer.unassign_kraam(self.id)
@@ -171,6 +175,15 @@ class Cluster(TraceMixin):
     def is_allowed(self, ondernemer):
         return all(kraam.does_allow(ondernemer) for kraam in self.kramen)
 
+    def suits_ondernemer_type(self, ondernemer):
+        if ondernemer.status == Status.EB:
+            contains_own_kramen = set(ondernemer.own).intersection(self.kramen_list)
+            contains_prefs = set(ondernemer.prefs).intersection(self.kramen_list)
+            is_suitable = contains_own_kramen and contains_prefs
+            self.trace.log(f"Suits ondernemer status {ondernemer.status}: {is_suitable}")
+            return is_suitable
+        return True
+
     def does_exceed_branche_max(self, ondernemer):
         branche = ondernemer.branche
         if branche.max:
@@ -183,6 +196,8 @@ class Cluster(TraceMixin):
         return False
 
     def validate_assignment(self, ondernemer):
+        if not self.suits_ondernemer_type(ondernemer):
+            return False
         if self.does_exceed_branche_max(ondernemer):
             ondernemer.reject(RejectionReason.EXCEEDS_BRANCHE_MAX)
             return False
@@ -251,6 +266,18 @@ class Kramen(TraceMixin):
         for kraam in self.kramen_map.values():
             if kraam.ondernemer == ondernemer.rank:
                 kraam.unassign(ondernemer)
+
+    def move_ondernemer_to_new_cluster(self, ondernemer, new_cluster):
+        if not new_cluster:
+            return
+        if new_cluster.kramen_list == ondernemer.kramen:
+            self.trace.log(f"Not moving, new cluster {new_cluster} same as current kramen for {ondernemer}")
+            return
+
+        is_to_exceed_branche_max = new_cluster.does_exceed_branche_max(ondernemer)
+        if not is_to_exceed_branche_max:
+            self.unassign_ondernemer(ondernemer)
+            new_cluster.assign(ondernemer)
 
     def remove_verplichte_branche(self, branche):
         for kraam in self.kramen_map.values():
