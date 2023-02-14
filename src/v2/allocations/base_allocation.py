@@ -18,6 +18,7 @@ class BaseAllocation(TraceMixin):
         """
         Returns how many extra kramen the ondernemer is allowed to claim
         """
+        self.trace.log(ondernemer)
         branche = ondernemer.branche
         demand = 0
         limit = self.markt.kramen_per_ondernemer
@@ -42,7 +43,6 @@ class BaseAllocation(TraceMixin):
             limited_desired = min(desired, limit)
             needed = max(limited_desired - current, 0)
             demand += needed
-            self.trace.log(ondernemer)
             self.trace.log(branche_ondernemer)
             self.trace.log(f"current: {current}, desired: {desired}, limited_desired: {limited_desired}, "
                            f"needed: {needed}, demand: {demand}")
