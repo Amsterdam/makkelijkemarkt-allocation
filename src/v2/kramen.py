@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from v2.conf import KraamTypes, RejectionReason, TraceMixin
+from v2.conf import KraamTypes, RejectionReason, TraceMixin, Status
 
 
 class KraamType:
@@ -175,6 +175,15 @@ class Cluster(TraceMixin):
     def is_allowed(self, ondernemer):
         return all(kraam.does_allow(ondernemer) for kraam in self.kramen)
 
+    def suits_ondernemer_type(self, ondernemer):
+        if ondernemer.status == Status.EB:
+            contains_own_kramen = set(ondernemer.own).intersection(self.kramen_list)
+            contains_prefs = set(ondernemer.prefs).intersection(self.kramen_list)
+            is_suitable = contains_own_kramen and contains_prefs
+            self.trace.log(f"Suits ondernemer status {ondernemer.status}: {is_suitable}")
+            return is_suitable
+        return True
+
     def does_exceed_branche_max(self, ondernemer):
         branche = ondernemer.branche
         if branche.max:
@@ -187,6 +196,8 @@ class Cluster(TraceMixin):
         return False
 
     def validate_assignment(self, ondernemer):
+        if not self.suits_ondernemer_type(ondernemer):
+            return False
         if self.does_exceed_branche_max(ondernemer):
             ondernemer.reject(RejectionReason.EXCEEDS_BRANCHE_MAX)
             return False
