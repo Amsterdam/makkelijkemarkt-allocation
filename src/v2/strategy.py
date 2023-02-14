@@ -195,21 +195,18 @@ class OptimizationStrategy(BaseStrategy):
     def maximize_vph_expansion(self, ondernemer):
         self.trace.set_phase(task='maximize_vph', group=ondernemer.status, agent=ondernemer.rank)
         current_amount_kramen = len(ondernemer.kramen)
-        if current_amount_kramen >= ondernemer.max:
-            self.trace.log(f"VPH already at max {ondernemer}")
-        else:
-            self.trace.log(f"VPH maximize expansion {ondernemer}")
-            size = ondernemer.max
-            branche = ondernemer.branche
-            if branche.max:
-                available = branche.max - branche.assigned_count
-                size = min(size, available + current_amount_kramen)
-            cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
-                                                    should_include=ondernemer.kramen,
-                                                    **self.kramen_filter_kwargs)
-            cluster.assign(ondernemer)
-            if cluster:
-                self.markt.report_indeling()
+        self.trace.log(f"VPH maximize expansion {ondernemer}")
+        size = ondernemer.max
+        branche = ondernemer.branche
+        if branche.max:
+            available = branche.max - branche.assigned_count
+            size = min(size, available + current_amount_kramen)
+        cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
+                                                should_include=ondernemer.kramen,
+                                                **self.kramen_filter_kwargs)
+        cluster.assign(ondernemer)
+        if cluster:
+            self.markt.report_indeling()
 
     def maximize_all_vph_expansion(self):
         working_copies = []
@@ -217,6 +214,9 @@ class OptimizationStrategy(BaseStrategy):
         for ondernemer in ondernemers:
             self.trace.set_phase(task='maximize_vph', group=ondernemer.status, agent=ondernemer.rank)
             if ondernemer.has_verplichte_branche:
+                continue
+            if len(ondernemer.kramen) >= ondernemer.max:
+                self.trace.log(f"VPH already at max {ondernemer}")
                 continue
             working_copies.append(self.markt.get_working_copy())
             self.fill_fridge_with_soll_with_anywhere()
