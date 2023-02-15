@@ -21,7 +21,7 @@ class KraamType:
         return str(self)
 
     def __eq__(self, other):
-        return other in self.props if other else len(self.props) == 0
+        return other == self.get_active() if other else len(self.props) == 0
 
     def __bool__(self):
         return bool(self.props)
@@ -37,7 +37,7 @@ class KraamType:
         try:
             return self.props[-1]
         except (KeyError, IndexError):
-            pass
+            return None
 
     def remove_active(self):
         try:
@@ -47,12 +47,8 @@ class KraamType:
 
     def does_allow(self, kraam_type):
         active_prop = self.get_active()
-        if not active_prop:
+        if not active_prop and not kraam_type:
             return True
-        if not kraam_type:
-            return False
-        if active_prop == KraamTypes.BAK:
-            return kraam_type in [KraamTypes.BAK, KraamTypes.BAK_LICHT]
         else:
             return kraam_type == active_prop
 
