@@ -162,6 +162,7 @@ class OptimizationStrategy(BaseStrategy):
     def run(self):
         self.trace.set_phase(story='maximize_vph')
         self.maximize_all_vph_expansion()
+        self.swap_ondernemers()
         self.finish()
 
     def fill_fridge_with_soll_with_anywhere(self):
