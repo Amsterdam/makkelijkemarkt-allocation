@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 from v2.conf import TraceMixin, ALL_VPH_STATUS, Status
 from v2.helpers import clamp
 
@@ -15,56 +17,39 @@ class BaseAllocation(TraceMixin):
         self.kramen_filter_kwargs = filter_kwargs
 
     def get_limit_for_ondernemer_with_branche_with_max(self, ondernemer):
-        """
-        Returns how many extra kramen the ondernemer is allowed to claim
-        """
-        self.trace.log(ondernemer)
         branche = ondernemer.branche
-        demand = 0
+        self.trace.log(f"Calculate branche limit for {branche}")
         limit = self.markt.kramen_per_ondernemer
+        self.trace.log(f"Hard limit = kramen_per_ondernemer = {limit}")
 
-        branche_ondernemers = self.markt.ondernemers.select(branche=branche)
+        queue = {}
+        branche_ondernemers = self.markt.ondernemers.select(branche=branche, status__in=[*ALL_VPH_STATUS, Status.SOLL])
         for branche_ondernemer in branche_ondernemers:
-            if ondernemer.is_vph:
-                if branche_ondernemer.is_vph:
-                    if branche_ondernemer.rank <= ondernemer.rank:
-                        continue
-                else:
-                    pass
-            elif ondernemer.status == Status.SOLL:
-                if branche_ondernemer.is_vph:
-                    continue
-            else:
-                # B-list soll, so ignore
-                continue
+            queue[branche_ondernemer] = len(branche_ondernemer.kramen)
+        self.trace.log(f"initial queue: {queue}")
 
-            current = len(branche_ondernemer.kramen)
-            desired = branche_ondernemer.max
-            limited_desired = min(desired, limit)
-            needed = max(limited_desired - current, 0)
-            demand += needed
-            self.trace.log(branche_ondernemer)
-            self.trace.log(f"current: {current}, desired: {desired}, limited_desired: {limited_desired}, "
-                           f"needed: {needed}, demand: {demand}")
-
-        self.trace.log(f"Calculated demand: {demand}")
-        demand_minus_one = max(demand - 1, 0)
         available = branche.max - branche.assigned_count
         self.trace.log(f"Branche {branche} max {branche.max} - assigned {branche.assigned_count}"
                        f" = available {available}")
-        self.trace.log(f"With {demand} demand")
 
-        limit = 0
-        while limit <= self.markt.max_aantal_kramen_per_ondernemer:
-            if demand * limit <= available:
-                limit += 1
-                continue
-            if limit + demand_minus_one * (limit - 1) <= available:
-                limit += 1
-                continue
-            else:
-                break
-        return max(limit - 1, 0)
+        if not queue:
+            self.trace.log(f"No queue: use all {available} available")
+            return available
+
+        previous_available = available + 1
+        while available and available != previous_available:
+            lowest = min(queue.values())
+            self.trace.log(f"lowest: {lowest}")
+            previous_available = available
+            for branche_ondernemer in sorted(queue, key=attrgetter('rank')):
+                self.trace.log(f"checking branche_ondernemer: {branche_ondernemer}")
+                if queue[branche_ondernemer] == lowest < branche_ondernemer.max and available:
+                    self.trace.log(f"upgrading branche_ondernemer: {branche_ondernemer}")
+                    queue[branche_ondernemer] += 1
+                    available -= 1
+
+        self.trace.log(f"optimized queue: {queue}")
+        return queue[ondernemer]
 
     def get_right_size_for_ondernemer(self, ondernemer):
         current_amount_kramen = len(ondernemer.kramen)
@@ -78,8 +63,8 @@ class BaseAllocation(TraceMixin):
             entitled_kramen = min(self.markt.kramen_per_ondernemer, branche_limit)
             self.trace.log(f"entitled_kramen = lowest of {branche_limit}, {self.markt.kramen_per_ondernemer}"
                            f" = {entitled_kramen}")
-
-        self.trace.log(f"entitled_kramen = kramen_per_ondernemer = {entitled_kramen}")
+        else:
+            self.trace.log(f"entitled_kramen = kramen_per_ondernemer = {entitled_kramen}")
         if ondernemer.is_vph:
             right_size = clamp(current_amount_kramen, amount_kramen_wanted, entitled_kramen)
             self.trace.log(f"(current, wanted, entitled) "
