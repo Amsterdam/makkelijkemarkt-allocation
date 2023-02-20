@@ -10,6 +10,8 @@ from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS, ALL_VPH_STATUS
 
 class Parse(TraceMixin):
     def __init__(self, input_data=None, json_file=None):
+        self.trace.set_phase(epic='parse', story='parse')
+        self.trace.set_event_phase()
         self.branches = []
         self.branches_map = {}
         self.rows = []
@@ -19,10 +21,13 @@ class Parse(TraceMixin):
         self.blocked_dates = []
 
         if json_file:
+            self.trace.set_phase(task='read_input_data')
+            self.trace.log(f"Use json file: {json_file}")
             input_data = self.load_json_file(json_file)
             input_data = input_data.get('data', {})
         self.input_data = input_data or {}
         self.markt_date = input_data['marktDate']
+        self.trace.log(f"Markt date: {self.markt_date}")
         self.parse_data()
 
     def load_json_file(self, json_file):
@@ -87,6 +92,7 @@ class Parse(TraceMixin):
         self.blocked_dates = blocked_dates.split(',') if blocked_dates else []
 
     def parse_ondernemers(self):
+        self.trace.set_phase(epic='parse', story='ondernemers')
         plaatsvoorkeuren_map = defaultdict(list)
         for voorkeur in self.input_data['voorkeuren']:
             plaatsvoorkeuren_map[voorkeur['erkenningsNummer']].append(voorkeur['plaatsId'])
@@ -99,19 +105,17 @@ class Parse(TraceMixin):
         for ondernemer_data in self.input_data['ondernemers']:
             voorkeur = ondernemer_data.get('voorkeur', {})
             erkenningsnummer = ondernemer_data['erkenningsNummer']
+            rank = ondernemer_data['sollicitatieNummer']
+            log_entry = f"Ondernemer {rank} - {ondernemer_data['status']} - {erkenningsnummer}"
 
+            self.trace.set_phase(epic='parse', story='ondernemers', task='check_presence')
             if erkenningsnummer in not_present:
-                # logger.log(f"Ondernemer {erkenningsnummer} not present today")
                 continue
-
             if erkenningsnummer not in present:
                 if ondernemer_data['status'] in ['vpl', 'eb', 'tvpl', 'tvplz', 'exp', 'expf']:
-                    self.trace.log_parsing_info(f"VPH {ondernemer_data['sollicitatieNummer']} not in presence list "
-                                                f"so implicitly present")
-                    pass
+                    self.trace.log(f"{log_entry} not in presence list so implicitly present")
                 else:
-                    self.trace.log_parsing_info(f"SOLL {ondernemer_data['sollicitatieNummer']} not in presence list "
-                                                f"so implicitly absent")
+                    self.trace.log(f"{log_entry} not in presence list so implicitly absent")
                     continue
 
             absent_from = voorkeur.get('absentFrom')
@@ -121,9 +125,7 @@ class Parse(TraceMixin):
                 absent_from_date = datetime.date.fromisoformat(absent_from)
                 absent_until_date = datetime.date.fromisoformat(absent_until)
                 if absent_from_date <= markt_date < absent_until_date:
-                    self.trace.log_parsing_info(f"Ondernemer {erkenningsnummer} - "
-                                                f"{ondernemer_data['sollicitatieNummer']} "
-                                                f"langdurig afwezig)")
+                    self.trace.log(f"{log_entry} langdurig afwezig)")
                     continue
 
             branche_id = next(iter(voorkeur.get('branches', [])), None)
