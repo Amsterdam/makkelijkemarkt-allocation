@@ -149,16 +149,26 @@ class Parse(TraceMixin):
             else:
                 status = Status(ondernemer_data['status'])
 
+            self.trace.set_phase(task='check_anywhere')
             anywhere = voorkeur.get('anywhere')
             if anywhere is None:
                 anywhere = False
-                self.trace.log_parsing_info(f"ondernemer['erkenningsNummer'] has NO anywhere value in profile,"
-                                            f"so defaulting to False")
-            if status in ALL_VPH_STATUS:
+                self.trace.log(f"{log_entry} is missing anywhere value in profile, so defaulting to False")
+            if status == Status.TVPLZ and not anywhere:
+                self.trace.log(f"{log_entry} is {status.value} but anywhere not True, so skipping ondernemer")
+                continue
+
+            if status in ALL_VPH_STATUS and anywhere:
+                self.trace.log(f"{log_entry} is {status.value} with anywhere True, setting to False")
                 anywhere = False
 
+            self.trace.set_phase(task='check_vph_has_kramen')
+            if status in ALL_VPH_STATUS and not ondernemer_data['plaatsen']:
+                self.trace.log(f"{log_entry} is {status.value} but no own kramen, so skipping ondernemer")
+                continue
+
             ondernemer = Ondernemer(
-                rank=ondernemer_data['sollicitatieNummer'],
+                rank=rank,
                 erkenningsnummer=erkenningsnummer,
                 description=ondernemer_data['description'],
                 branche=branche,
