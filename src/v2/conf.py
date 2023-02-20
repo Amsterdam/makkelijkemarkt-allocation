@@ -18,7 +18,7 @@ class Status(ComparableEnum):
     EXPF = 'expf'
     SOLL = 'soll'
     B_LIST = 'b_list'
-    UNKNOWN = 'unknown'
+    UNKNOWN = 'unknown_group'
 
     def __hash__(self):
         return hash('Status')
