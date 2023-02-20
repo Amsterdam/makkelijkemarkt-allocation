@@ -18,7 +18,7 @@ class Status(ComparableEnum):
     EXPF = 'expf'
     SOLL = 'soll'
     B_LIST = 'b_list'
-    UNKNOWN = 'unknown'
+    UNKNOWN = 'unknown_group'
 
     def __hash__(self):
         return hash('Status')
@@ -79,7 +79,6 @@ class Trace:
 
         self.log_detail_level = 1
         self.logs = []
-        self.parse_logs = []
         self.local = False
 
     @property
@@ -108,9 +107,6 @@ class Trace:
         self.set_phase(task='debug', group=Status.UNKNOWN, agent=PhaseValue.event)
         self.log(message)
 
-    def log_parsing_info(self, message):
-        self.parse_logs.append(message)
-
     def get_logs(self):
         return self.logs
 
@@ -133,10 +129,11 @@ class Trace:
         self.cycle = cycle
 
     def set_report_phase(self, story='report', task='report'):
-        self.set_phase(epic='report', story=story, task=task, group=Status.UNKNOWN, agent=PhaseValue.event)
+        self.set_phase(epic='report', story=story, task=task)
+        self.set_event_phase()
 
-    def show(self):
-        print(self.content)
+    def set_event_phase(self):
+        self.set_phase(group=Status.UNKNOWN, agent=PhaseValue.event)
 
     def save(self, path):
         with open(path, 'w') as f:
