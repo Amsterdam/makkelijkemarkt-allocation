@@ -117,7 +117,7 @@ class Parse(TraceMixin):
                 if ondernemer_data['status'] in ALL_VPH_STATUS_AS_STR:
                     self.trace.log(f"{log_entry} not in presence list so implicitly present")
                 else:
-                    self.trace.log(f"{log_entry} not in presence list so implicitly absent")
+                    # self.trace.log(f"{log_entry} not in presence list so implicitly absent")
                     continue
 
             absent_from = voorkeur.get('absentFrom')
