@@ -7,6 +7,8 @@ from v2.kramen import Kraam
 from v2.ondernemers import Ondernemer
 from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS, ALL_VPH_STATUS
 
+ALL_VPH_STATUS_AS_STR = [status.value for status in ALL_VPH_STATUS]
+
 
 class Parse(TraceMixin):
     def __init__(self, input_data=None, json_file=None):
@@ -112,7 +114,7 @@ class Parse(TraceMixin):
             if erkenningsnummer in not_present:
                 continue
             if erkenningsnummer not in present:
-                if ondernemer_data['status'] in ['vpl', 'eb', 'tvpl', 'tvplz', 'exp', 'expf']:
+                if ondernemer_data['status'] in ALL_VPH_STATUS_AS_STR:
                     self.trace.log(f"{log_entry} not in presence list so implicitly present")
                 else:
                     self.trace.log(f"{log_entry} not in presence list so implicitly absent")
