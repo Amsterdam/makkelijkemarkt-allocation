@@ -126,7 +126,7 @@ class Parse(TraceMixin):
                 markt_date = datetime.date.fromisoformat(self.markt_date)
                 absent_from_date = datetime.date.fromisoformat(absent_from)
                 absent_until_date = datetime.date.fromisoformat(absent_until)
-                if absent_from_date <= markt_date < absent_until_date:
+                if absent_from_date <= markt_date <= absent_until_date:
                     self.trace.log(f"{log_entry} langdurig afwezig)")
                     continue
 
