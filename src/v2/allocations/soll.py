@@ -1,5 +1,6 @@
 from v2.conf import Status
 from v2.allocations.base_allocation import BaseAllocation
+from v2.kramen import Cluster
 
 
 class SollAllocation(BaseAllocation):
@@ -12,9 +13,11 @@ class SollAllocation(BaseAllocation):
         cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, peer_prefs=peer_prefs,
                                                 **self.kramen_filter_kwargs)
         if not cluster and size > 1:
-            lowered_size = size - 1
-            cluster = self.markt.kramen.get_cluster(size=lowered_size, ondernemer=ondernemer, peer_prefs=peer_prefs,
+            size -= 1
+            cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, peer_prefs=peer_prefs,
                                                     **self.kramen_filter_kwargs)
+        if not cluster and not ondernemer.anywhere:
+            cluster = self.allocate_soll_without_anywhere(ondernemer, size, peer_prefs)
         cluster.assign(ondernemer)
         self.markt.report_indeling()
 
@@ -33,3 +36,16 @@ class SollAllocation(BaseAllocation):
         for ondernemer in ondernemers:
             self.trace.set_phase(agent=ondernemer.rank)
             self.find_and_assign_kramen_to_ondernemer(ondernemer)
+
+    def allocate_soll_without_anywhere(self, ondernemer, size, peer_prefs):
+        cluster = Cluster()
+        while size >= 1:
+            self.trace.log(f"Trying to find cluster with size {size} because anywhere is False for "
+                           f"ondernemer {ondernemer}")
+            cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, peer_prefs=peer_prefs,
+                                                    **self.kramen_filter_kwargs)
+            if cluster:
+                break
+            else:
+                size -= 1
+        return cluster
