@@ -126,7 +126,7 @@ class Parse(TraceMixin):
                 markt_date = datetime.date.fromisoformat(self.markt_date)
                 absent_from_date = datetime.date.fromisoformat(absent_from)
                 absent_until_date = datetime.date.fromisoformat(absent_until)
-                if absent_from_date <= markt_date < absent_until_date:
+                if absent_from_date <= markt_date <= absent_until_date:
                     self.trace.log(f"{log_entry} langdurig afwezig)")
                     continue
 
@@ -157,8 +157,8 @@ class Parse(TraceMixin):
                 anywhere = False
                 self.trace.log(f"{log_entry} is missing anywhere value in profile, so defaulting to False")
             if status == Status.TVPLZ and not anywhere:
-                self.trace.log(f"{log_entry} is {status.value} but anywhere not True, so skipping ondernemer")
-                continue
+                self.trace.log(f"{log_entry} is {status.value} but anywhere not True, setting to True")
+                anywhere = True
 
             if status in ALL_VPH_STATUS and anywhere:
                 self.trace.log(f"{log_entry} is {status.value} with anywhere True, setting to False")

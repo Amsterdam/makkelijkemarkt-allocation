@@ -80,6 +80,7 @@ class Ondernemer(TraceMixin):
 class Ondernemers:
     def __init__(self, ondernemers=None):
         self.ondernemers = ondernemers or []
+        self.ondernemers_map = {ondernemer.rank: ondernemer for ondernemer in ondernemers}
 
     def __repr__(self):
         return f'{len(self.ondernemers)} ondernemers'
