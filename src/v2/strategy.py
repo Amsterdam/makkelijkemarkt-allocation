@@ -183,6 +183,8 @@ class OptimizationStrategy(BaseStrategy):
         all_allocated = True
         while self.fridge:
             soll, kramen_count = self.fridge.popleft()
+            if not kramen_count:
+                continue
             cluster = self.markt.kramen.get_cluster(size=kramen_count, ondernemer=soll)
             if cluster:
                 cluster.assign(soll)

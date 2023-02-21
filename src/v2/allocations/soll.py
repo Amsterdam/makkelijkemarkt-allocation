@@ -17,7 +17,7 @@ class SollAllocation(BaseAllocation):
             cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, peer_prefs=peer_prefs,
                                                     **self.kramen_filter_kwargs)
         if not cluster and not ondernemer.anywhere:
-            cluster = self.allocate_soll_without_anywhere(ondernemer, size, peer_prefs)
+            cluster = self.keep_on_lowering_size_to_find_cluster(size, ondernemer, peer_prefs)
         cluster.assign(ondernemer)
         self.markt.report_indeling()
 
@@ -37,7 +37,7 @@ class SollAllocation(BaseAllocation):
             self.trace.set_phase(agent=ondernemer.rank)
             self.find_and_assign_kramen_to_ondernemer(ondernemer)
 
-    def allocate_soll_without_anywhere(self, ondernemer, size, peer_prefs):
+    def keep_on_lowering_size_to_find_cluster(self, size, ondernemer, peer_prefs):
         cluster = Cluster()
         while size >= 1:
             self.trace.log(f"Trying to find cluster with size {size} because anywhere is False for "
