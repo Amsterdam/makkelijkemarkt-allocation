@@ -74,13 +74,15 @@ class JobDispatcher:
             json.dump(data, f, indent=4)
             f.close()
 
-        if data.get("version") == '2':
+        version = data.get("version", '1')
+        if version == '2':
             output, logs = allocate_v2(data)
             log_result = json.dumps(logs)
         else:
             dp = RedisDataprovider(job["data"])
             a = Allocator(dp)
             output = a.get_allocation()
+            output['version'] = version
             log_result = json.dumps(clog.get_logs())
 
         # store results in REDIS for 10 min

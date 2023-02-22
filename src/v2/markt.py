@@ -138,6 +138,7 @@ class Markt(TraceMixin):
                 rejections.append({
                     'ondernemer': {
                         'description': ondernemer.description,
+                        'erkenningsNummer': ondernemer.erkenningsnummer,
                         'sollicitatieNummer': ondernemer.rank,
                         'status': ondernemer.status.value,
                     },

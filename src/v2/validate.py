@@ -16,8 +16,8 @@ class ValidateMarkt(TraceMixin):
                 try:
                     kraam = self.markt.kramen.kramen_map[kraam_id]
                 except KeyError:
-                    print(f"VALIDATION WARNING: kraam {kraam_id} not found in markt config")
+                    self.trace.log(f"VALIDATION WARNING: kraam {kraam_id} not found in markt config")
                 else:
                     if kraam.branche and kraam.branche.verplicht and kraam.branche != ondernemer.branche:
-                        print(f"VALIDATION WARNING: kraam {kraam} branche {kraam.branche} different branche as "
-                              f"owner {ondernemer}")
+                        self.trace.log(f"VALIDATION WARNING: kraam {kraam} branche {kraam.branche} different branche as "
+                                       f"owner {ondernemer}")
