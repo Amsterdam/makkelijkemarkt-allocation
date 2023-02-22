@@ -71,6 +71,7 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
 
 
 def parse_and_allocate(input_data):
+    trace.clear()
     parsed = Parse(input_data)
     output = allocate(**parsed.__dict__)
     enriched_output = {

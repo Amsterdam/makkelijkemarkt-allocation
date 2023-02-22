@@ -18,7 +18,7 @@ class Status(ComparableEnum):
     EXPF = 'expf'
     SOLL = 'soll'
     B_LIST = 'b_list'
-    UNKNOWN = 'unknown_group'
+    UNKNOWN = 'n/a'
 
     def __hash__(self):
         return hash('Status')
@@ -87,6 +87,9 @@ class Trace:
             'steps': self.steps,
             'rows': self.rows,
         }
+
+    def clear(self):
+        self.logs = []
 
     def log(self, message, detail_level=1):
         phase = f"{self.epic}__{self.story}__{self.task}__{self.group}__{self.agent}"

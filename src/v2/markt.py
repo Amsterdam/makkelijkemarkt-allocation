@@ -183,7 +183,7 @@ class Markt(TraceMixin):
             if branche.id not in BAK_TYPE_BRANCHE_IDS  # better handled as KraamTypes, not as verplichte branche
         ]
         # verplichte branche should also include "Experimentele zone" for EXP
-        self.trace.set_phase(epic='verplichte_branches', story='meta', task='defining',
+        self.trace.set_phase(epic='parse', story='verplichte_branches', task='defining',
                              group=PhaseValue.unknown, agent=PhaseValue.event)
         self.trace.log(f"Verplichte branches: {verplichte_branches}")
         self.trace.log(f"Ignoring branches: {BAK_TYPE_BRANCHE_IDS}")
