@@ -75,6 +75,7 @@ class JobDispatcher:
             f.close()
 
         version = data.get("version", '1')
+        print(f"Allocation version: {version}")
         if version == '2':
             output, logs = allocate_v2(data)
             log_result = json.dumps(logs)
@@ -82,10 +83,10 @@ class JobDispatcher:
             dp = RedisDataprovider(job["data"])
             a = Allocator(dp)
             output = a.get_allocation()
-            output['version'] = version
             log_result = json.dumps(clog.get_logs())
 
         # store results in REDIS for 10 min
+        output['version'] = version
         json_result = json.dumps(output)
         self.r.set(f"RESULT_{job_id}", json_result)
         self.r.expire(f"RESULT_{job_id}", 10 * 60)
