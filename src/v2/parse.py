@@ -85,6 +85,7 @@ class Parse(TraceMixin):
         self.parse_branches()
         self.parse_rows()
         self.parse_ondernemers()
+        self.report_ondernemers()
 
     def parse_markt(self):
         self.markt_meta = self.input_data['markt']
@@ -186,3 +187,8 @@ class Parse(TraceMixin):
                 **ondernemer_props,
             )
             self.ondernemers.append(ondernemer)
+
+    def report_ondernemers(self):
+        self.trace.set_phase(task='report_ondernemers')
+        for ondernemer in self.ondernemers:
+            self.trace.log(ondernemer)
