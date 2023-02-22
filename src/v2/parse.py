@@ -99,7 +99,10 @@ class Parse(TraceMixin):
         for voorkeur in self.input_data['voorkeuren']:
             plaatsvoorkeuren_map[voorkeur['erkenningsNummer']].append(voorkeur['plaatsId'])
 
+        self.trace.set_phase(epic='parse', story='ondernemers', task='determine_a_b')
         a_list = {ondernemer['erkenningsNummer'] for ondernemer in self.input_data['aLijst']}
+        has_active_a_b_indeling = self.markt_meta['indelingstype'] == 'a/b-lijst' and a_list
+        self.trace.log(f"has_active_ab_indeling: {has_active_a_b_indeling}")
 
         not_present = {rsvp['erkenningsNummer'] for rsvp in self.input_data['aanwezigheid'] if not rsvp['attending']}
         present = {rsvp['erkenningsNummer'] for rsvp in self.input_data['aanwezigheid'] if rsvp['attending']}
@@ -143,7 +146,7 @@ class Parse(TraceMixin):
             if 'eigen-materieel' in voorkeur.get('verkoopinrichting', []):
                 ondernemer_props['evi'] = True
 
-            if a_list and ondernemer_data['status'] == Status.SOLL.value:
+            if has_active_a_b_indeling and ondernemer_data['status'] == Status.SOLL.value:
                 if erkenningsnummer in a_list:
                     status = Status.SOLL
                 else:
