@@ -88,6 +88,9 @@ class Trace:
             'rows': self.rows,
         }
 
+    def clear(self):
+        self.logs = []
+
     def log(self, message, detail_level=1):
         phase = f"{self.epic}__{self.story}__{self.task}__{self.group}__{self.agent}"
         if self.cycle:
