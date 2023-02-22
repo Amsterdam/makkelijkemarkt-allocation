@@ -49,7 +49,7 @@ class BaseAllocation(TraceMixin):
                     available -= 1
 
         self.trace.log(f"optimized queue: {queue}")
-        return queue[ondernemer]
+        return queue.get(ondernemer, 1)  # grant 1 kraam if ondernemer is not in queue (e.g. b_list)
 
     def get_right_size_for_ondernemer(self, ondernemer):
         current_amount_kramen = len(ondernemer.kramen)
