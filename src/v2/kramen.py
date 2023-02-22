@@ -344,7 +344,7 @@ class Kramen(TraceMixin):
             self.trace.log(f"Should include {should_include}: {clusters}")
         pref_clusters = self.order_clusters_by_ondernemer_prefs(clusters, ondernemer)
 
-        self.trace.log(f"Anywhere {anywhere}")
+        self.trace.log(f"Anywhere: {anywhere}, peer_prefs: {peer_prefs}")
         if anywhere or should_include:
             pref_clusters.extend(self.exclude_clusters_preferred_by_peers(clusters, peer_prefs))
             pref_clusters.extend(clusters)
