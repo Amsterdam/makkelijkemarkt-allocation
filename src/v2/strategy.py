@@ -199,7 +199,7 @@ class OptimizationStrategy(BaseStrategy):
         self.trace.set_phase(task='maximize_vph', group=ondernemer.status, agent=ondernemer.rank)
         current_amount_kramen = len(ondernemer.kramen)
         self.trace.log(f"VPH maximize expansion {ondernemer}")
-        size = ondernemer.max
+        size = min(ondernemer.max, self.markt.kramen_per_ondernemer)
         branche = ondernemer.branche
         if branche.max:
             available = branche.max - branche.assigned_count
