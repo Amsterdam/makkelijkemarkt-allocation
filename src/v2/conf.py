@@ -38,11 +38,11 @@ class KraamTypes(ComparableEnum):
 
 
 class RejectionReason(ComparableEnum):
-    LESS_THAN_MIN = 'Less kramen than minimum'
-    NO_KRAMEN = 'No kramen proposed (but anywhere flag off)'
-    NO_KRAMEN_WITH_ANYWHERE = 'No kramen proposed even with anywhere flag on'
-    EXCEEDS_BRANCHE_MAX = 'Exceeds branche max'
-    KRAAM_DOES_NOT_EXIST = 'Kraam does not exist'
+    LESS_THAN_MIN = 'Minimum aantal plaatsen niet beschikbaar.'
+    NO_KRAMEN = 'Geen geschikte locatie gevonden met huidige voorkeuren (en anywhere uit).'
+    NO_KRAMEN_WITH_ANYWHERE = 'Geen geschikte locatie gevonden met huidige voorkeuren (en anywhere aan).'
+    EXCEEDS_BRANCHE_MAX = 'Alle marktplaatsen voor deze branche zijn reeds ingedeeld.'
+    KRAAM_DOES_NOT_EXIST = 'Kraam bestaat niet.'
 
     def __hash__(self):
         return hash('RejectionReason')
