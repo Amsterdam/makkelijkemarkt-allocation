@@ -28,8 +28,11 @@ class Parse(TraceMixin):
             input_data = self.load_json_file(json_file)
             input_data = input_data.get('data', {})
         self.input_data = input_data or {}
-        self.markt_date = input_data['marktDate']
-        self.trace.log(f"Markt date: {self.markt_date}")
+
+        markt_date = input_data['marktDate']
+        self.trace.log(f"Markt date: {markt_date}")
+        self.markt_date = datetime.date.fromisoformat(markt_date)
+        self.weekday = self.markt_date.isoweekday()
         self.parse_data()
 
     def load_json_file(self, json_file):
@@ -127,10 +130,9 @@ class Parse(TraceMixin):
             absent_from = voorkeur.get('absentFrom')
             absent_until = voorkeur.get('absentUntil')
             if absent_from and absent_until:
-                markt_date = datetime.date.fromisoformat(self.markt_date)
                 absent_from_date = datetime.date.fromisoformat(absent_from)
                 absent_until_date = datetime.date.fromisoformat(absent_until)
-                if absent_from_date <= markt_date <= absent_until_date:
+                if absent_from_date <= self.markt_date <= absent_until_date:
                     self.trace.log(f"{log_entry} langdurig afwezig)")
                     continue
 
