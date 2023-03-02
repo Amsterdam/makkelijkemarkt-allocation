@@ -6,6 +6,7 @@ from v2.branche import Branche
 from v2.kramen import Kraam
 from v2.ondernemers import Ondernemer
 from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS, ALL_VPH_STATUS
+from v2.special_conf import weekday_specific_ondernemer_conf
 
 ALL_VPH_STATUS_AS_STR = [status.value for status in ALL_VPH_STATUS]
 
@@ -101,6 +102,24 @@ class Parse(TraceMixin):
         self.blocked_dates = blocked_dates.split(',') if blocked_dates else []
         self.trace.log(f"Geblokkeerde datums {self.blocked_dates}")
 
+    def update_ondernemer_data_for_weekday(self, ondernemer_data):
+        self.trace.set_phase(epic='parse', story='special_ondernemers', task='set_status_per_day')
+        for weekday_specific_ondernemer_props in weekday_specific_ondernemer_conf:
+            if self.markt_meta['afkorting'] != weekday_specific_ondernemer_props['markt_afkorting']:
+                continue
+            if ondernemer_data['erkenningsNummer'] == weekday_specific_ondernemer_props['erkenningsnummer']:
+                self.trace.log(f"Set special ondernemer properties for {ondernemer_data['erkenningsNummer']}")
+
+                weekdays = weekday_specific_ondernemer_props.get('weekdays', None)
+                weekdays = weekdays.split(',') if weekdays else []
+                if str(self.weekday) in weekdays:
+                    plaatsen = weekday_specific_ondernemer_props.get('plaatsen', None)
+                    plaatsen = plaatsen.split(',') if plaatsen else []
+                    ondernemer_data['plaatsen'] = plaatsen
+                    for key, value in weekday_specific_ondernemer_props.items():
+                        if key in ['status']:
+                            ondernemer_data[key] = value
+
     def parse_ondernemers(self):
         self.trace.set_phase(epic='parse', story='ondernemers')
         plaatsvoorkeuren_map = defaultdict(list)
@@ -122,6 +141,7 @@ class Parse(TraceMixin):
             log_entry = f"Ondernemer {rank} - {ondernemer_data['status']} - {erkenningsnummer}"
 
             self.trace.set_phase(epic='parse', story='ondernemers', task='check_presence')
+            self.update_ondernemer_data_for_weekday(ondernemer_data)
             if erkenningsnummer in not_present:
                 continue
             if erkenningsnummer not in present:
