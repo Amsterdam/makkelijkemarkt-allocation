@@ -6,6 +6,7 @@ from v2.branche import Branche
 from v2.kramen import Kraam
 from v2.ondernemers import Ondernemer
 from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS, ALL_VPH_STATUS
+from v2.special_conf import weekday_specific_ondernemer_conf
 
 ALL_VPH_STATUS_AS_STR = [status.value for status in ALL_VPH_STATUS]
 
@@ -28,8 +29,12 @@ class Parse(TraceMixin):
             input_data = self.load_json_file(json_file)
             input_data = input_data.get('data', {})
         self.input_data = input_data or {}
-        self.markt_date = input_data['marktDate']
-        self.trace.log(f"Markt date: {self.markt_date}")
+
+        markt_date = input_data['marktDate']
+        self.trace.log(f"Markt date: {markt_date}")
+        self.markt_date = datetime.date.fromisoformat(markt_date)
+        self.weekday = self.markt_date.isoweekday()
+        self.trace.log(f"Weekday: {self.weekday}")
         self.parse_data()
 
     def load_json_file(self, json_file):
@@ -89,10 +94,31 @@ class Parse(TraceMixin):
 
     def parse_markt(self):
         self.markt_meta = self.input_data['markt']
+        self.trace.log(f"Markt {self.markt_meta['naam']} - {self.markt_meta['afkorting']}")
         blocked_kramen = self.markt_meta.get('kiesJeKraamGeblokkeerdePlaatsen')
         self.blocked_kramen = blocked_kramen.split(',') if blocked_kramen else []
+        self.trace.log(f"Geblokkeerde kramen {self.blocked_kramen}")
         blocked_dates = self.markt_meta.get('kiesJeKraamGeblokkeerdeData', '')
         self.blocked_dates = blocked_dates.split(',') if blocked_dates else []
+        self.trace.log(f"Geblokkeerde datums {self.blocked_dates}")
+
+    def update_ondernemer_data_for_weekday(self, ondernemer_data):
+        self.trace.set_phase(epic='parse', story='special_ondernemers', task='set_status_per_day')
+        for weekday_specific_ondernemer_props in weekday_specific_ondernemer_conf:
+            if self.markt_meta['afkorting'] != weekday_specific_ondernemer_props['markt_afkorting']:
+                continue
+            if ondernemer_data['erkenningsNummer'] == weekday_specific_ondernemer_props['erkenningsnummer']:
+                self.trace.log(f"Set special ondernemer properties for {ondernemer_data['erkenningsNummer']}")
+
+                weekdays = weekday_specific_ondernemer_props.get('weekdays', None)
+                weekdays = weekdays.split(',') if weekdays else []
+                if str(self.weekday) in weekdays:
+                    plaatsen = weekday_specific_ondernemer_props.get('plaatsen', None)
+                    plaatsen = plaatsen.split(',') if plaatsen else []
+                    ondernemer_data['plaatsen'] = plaatsen
+                    for key, value in weekday_specific_ondernemer_props.items():
+                        if key in ['status']:
+                            ondernemer_data[key] = value
 
     def parse_ondernemers(self):
         self.trace.set_phase(epic='parse', story='ondernemers')
@@ -102,7 +128,7 @@ class Parse(TraceMixin):
 
         self.trace.set_phase(epic='parse', story='ondernemers', task='determine_a_b')
         a_list = {ondernemer['erkenningsNummer'] for ondernemer in self.input_data['aLijst']}
-        has_active_a_b_indeling = self.markt_meta['indelingstype'] == 'a/b-lijst' and a_list
+        has_active_a_b_indeling = self.markt_meta['indelingstype'] == 'a/b-lijst' and bool(a_list)
         self.trace.log(f"has_active_ab_indeling: {has_active_a_b_indeling}")
 
         not_present = {rsvp['erkenningsNummer'] for rsvp in self.input_data['aanwezigheid'] if not rsvp['attending']}
@@ -115,6 +141,7 @@ class Parse(TraceMixin):
             log_entry = f"Ondernemer {rank} - {ondernemer_data['status']} - {erkenningsnummer}"
 
             self.trace.set_phase(epic='parse', story='ondernemers', task='check_presence')
+            self.update_ondernemer_data_for_weekday(ondernemer_data)
             if erkenningsnummer in not_present:
                 continue
             if erkenningsnummer not in present:
@@ -127,10 +154,9 @@ class Parse(TraceMixin):
             absent_from = voorkeur.get('absentFrom')
             absent_until = voorkeur.get('absentUntil')
             if absent_from and absent_until:
-                markt_date = datetime.date.fromisoformat(self.markt_date)
                 absent_from_date = datetime.date.fromisoformat(absent_from)
                 absent_until_date = datetime.date.fromisoformat(absent_until)
-                if absent_from_date <= markt_date <= absent_until_date:
+                if absent_from_date <= self.markt_date <= absent_until_date:
                     self.trace.log(f"{log_entry} langdurig afwezig)")
                     continue
 
