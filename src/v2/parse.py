@@ -105,7 +105,7 @@ class Parse(TraceMixin):
 
         self.trace.set_phase(epic='parse', story='ondernemers', task='determine_a_b')
         a_list = {ondernemer['erkenningsNummer'] for ondernemer in self.input_data['aLijst']}
-        has_active_a_b_indeling = self.markt_meta['indelingstype'] == 'a/b-lijst' and a_list
+        has_active_a_b_indeling = self.markt_meta['indelingstype'] == 'a/b-lijst' and bool(a_list)
         self.trace.log(f"has_active_ab_indeling: {has_active_a_b_indeling}")
 
         not_present = {rsvp['erkenningsNummer'] for rsvp in self.input_data['aanwezigheid'] if not rsvp['attending']}
