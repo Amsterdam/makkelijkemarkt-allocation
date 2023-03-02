@@ -93,10 +93,13 @@ class Parse(TraceMixin):
 
     def parse_markt(self):
         self.markt_meta = self.input_data['markt']
+        self.trace.log(f"Markt {self.markt_meta['naam']} - {self.markt_meta['afkorting']}")
         blocked_kramen = self.markt_meta.get('kiesJeKraamGeblokkeerdePlaatsen')
         self.blocked_kramen = blocked_kramen.split(',') if blocked_kramen else []
+        self.trace.log(f"Geblokkeerde kramen {self.blocked_kramen}")
         blocked_dates = self.markt_meta.get('kiesJeKraamGeblokkeerdeData', '')
         self.blocked_dates = blocked_dates.split(',') if blocked_dates else []
+        self.trace.log(f"Geblokkeerde datums {self.blocked_dates}")
 
     def parse_ondernemers(self):
         self.trace.set_phase(epic='parse', story='ondernemers')
