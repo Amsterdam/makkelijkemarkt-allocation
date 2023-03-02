@@ -33,6 +33,7 @@ class Parse(TraceMixin):
         self.trace.log(f"Markt date: {markt_date}")
         self.markt_date = datetime.date.fromisoformat(markt_date)
         self.weekday = self.markt_date.isoweekday()
+        self.trace.log(f"Weekday: {self.weekday}")
         self.parse_data()
 
     def load_json_file(self, json_file):
