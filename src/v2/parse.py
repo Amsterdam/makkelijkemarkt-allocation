@@ -5,7 +5,7 @@ from collections import defaultdict
 from v2.branche import Branche
 from v2.kramen import Kraam
 from v2.ondernemers import Ondernemer
-from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS, ALL_VPH_STATUS
+from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS, ALL_VPH_STATUS, EXP_BRANCHE
 from v2.special_conf import weekday_specific_ondernemer_conf
 
 ALL_VPH_STATUS_AS_STR = [status.value for status in ALL_VPH_STATUS]
@@ -161,6 +161,9 @@ class Parse(TraceMixin):
                     continue
 
             branche_id = next(iter(voorkeur.get('branches', [])), None)
+            if ondernemer_data['status'] in [Status.EXP.value, Status.EXPF.value]:
+                self.trace.log(f"Explicitly setting branche for {log_entry} to {EXP_BRANCHE}")
+                branche_id = EXP_BRANCHE
             branche = self.branches_map.get(branche_id, Branche()) if branche_id else Branche()
 
             ondernemer_props = {}

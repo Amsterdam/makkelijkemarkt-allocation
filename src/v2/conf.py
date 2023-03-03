@@ -2,7 +2,7 @@ from enum import Enum
 import json
 
 BAK_TYPE_BRANCHE_IDS = ['bak', 'bak-licht']
-
+EXP_BRANCHE = '401 -  Overig markt - Experimentele zone'
 
 class ComparableEnum(Enum):
     def __eq__(self, other):
