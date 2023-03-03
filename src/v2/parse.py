@@ -107,13 +107,13 @@ class Parse(TraceMixin):
         for weekday_specific_ondernemer_props in weekday_specific_ondernemer_conf:
             if self.markt_meta['afkorting'] != weekday_specific_ondernemer_props['markt_afkorting']:
                 continue
-            if ondernemer_data['erkenningsNummer'] == weekday_specific_ondernemer_props['erkenningsnummer']:
-                self.trace.log(f"Set special ondernemer properties for {ondernemer_data['erkenningsNummer']}")
+            if ondernemer_data['sollicitatieNummer'] == weekday_specific_ondernemer_props['sollicitatie_nummer']:
+                self.trace.log(f"Set special ondernemer properties for {ondernemer_data['sollicitatieNummer']}")
 
-                weekdays = weekday_specific_ondernemer_props.get('weekdays', None)
+                weekdays = weekday_specific_ondernemer_props.get('weekdays', '')
                 weekdays = weekdays.split(',') if weekdays else []
                 if str(self.weekday) in weekdays:
-                    plaatsen = weekday_specific_ondernemer_props.get('plaatsen', None)
+                    plaatsen = weekday_specific_ondernemer_props.get('plaatsen', '')
                     plaatsen = plaatsen.split(',') if plaatsen else []
                     ondernemer_data['plaatsen'] = plaatsen
                     for key, value in weekday_specific_ondernemer_props.items():
