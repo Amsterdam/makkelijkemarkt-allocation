@@ -109,6 +109,7 @@ class Parse(TraceMixin):
                 continue
             if ondernemer_data['sollicitatieNummer'] == weekday_specific_ondernemer_props['sollicitatie_nummer']:
                 self.trace.log(f"Set special ondernemer properties for {ondernemer_data['sollicitatieNummer']}")
+                self.trace.log(weekday_specific_ondernemer_props)
 
                 weekdays = weekday_specific_ondernemer_props.get('weekdays', '')
                 weekdays = weekdays.split(',') if weekdays else []
