@@ -105,7 +105,9 @@ class Markt(TraceMixin):
                                                                                                          Status.EXPF])
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.SOLL)
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.B_LIST)
-            print(pd.DataFrame(ondernemer.__dict__ for ondernemer in ordered_ondernemers), '\n')
+            df = pd.DataFrame(ondernemer.__dict__ for ondernemer in ordered_ondernemers)
+            df = df.drop(['raw'], axis=1, errors='ignore')
+            print(df, '\n')
 
     def report_branches(self):
         self.trace.set_report_phase(story='branches', task='max')
