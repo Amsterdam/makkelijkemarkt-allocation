@@ -37,6 +37,7 @@ class Ondernemer(TraceMixin):
         return {
             **self.raw,
             'status': self.status.value,
+            'plaatsvoorkeuren': self.prefs,
         }
 
     @property
