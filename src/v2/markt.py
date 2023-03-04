@@ -123,32 +123,32 @@ class Markt(TraceMixin):
         for rejection in self.rejection_log:
             self.trace.log(rejection)
 
-    def get_allocation(self):
-        allocation = []
-        for ondernemer in self.ondernemers.all():
-            if ondernemer.kramen:
-                allocation.append({
-                    'plaatsen': list(ondernemer.kramen),
-                    'erkenningsNummer': ondernemer.erkenningsnummer,
-                })
-        return allocation
+    def get_allocation(self, ondernemer):
+        return {
+            'marktId': self.id,
+            'marktDate': self.markt_date,
+            'ondernemer': ondernemer.get_allocation(),
+            'plaatsen': list(ondernemer.kramen),
+            'erkenningsNummer': ondernemer.erkenningsnummer,
+        }
 
-    def get_rejections(self):
+    def get_allocations(self):
+        allocations = []
         rejections = []
         for ondernemer in self.ondernemers.all():
+            allocation = self.get_allocation(ondernemer)
+            if ondernemer.kramen:
+                allocations.append(allocation)
             if ondernemer.is_rejected:
-                rejections.append({
-                    'ondernemer': {
-                        'description': ondernemer.description,
-                        'erkenningsNummer': ondernemer.erkenningsnummer,
-                        'sollicitatieNummer': ondernemer.rank,
-                        'status': ondernemer.status.value,
-                    },
+                rejection = {
+                    **allocation,
                     'reason': {
-                        "message": ondernemer.reject_reason.value,
-                    },
-                })
-        return rejections
+                        'message': ondernemer.reject_reason.value,
+                        'code': 0,
+                    }
+                }
+                rejections.append(rejection)
+        return allocations, rejections
 
     def is_allocation_valid(self, **filter_kwargs):
         return (self.are_all_ondernemers_allocated(**filter_kwargs)
