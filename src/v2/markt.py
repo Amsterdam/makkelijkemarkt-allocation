@@ -150,6 +150,7 @@ class Markt(TraceMixin):
                         'code': ondernemer.reject_reason.value,
                     }
                 }
+                rejection.pop('plaatsen')
                 rejections.append(rejection)
         return allocations, rejections
 
