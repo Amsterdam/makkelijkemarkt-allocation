@@ -94,6 +94,7 @@ class Parse(TraceMixin):
 
     def parse_markt(self):
         self.markt_meta = self.input_data['markt']
+        self.markt_meta['markt_date'] = self.input_data['marktDate']
         self.trace.log(f"Markt {self.markt_meta['naam']} - {self.markt_meta['afkorting']}")
         blocked_kramen = self.markt_meta.get('kiesJeKraamGeblokkeerdePlaatsen')
         self.blocked_kramen = blocked_kramen.split(',') if blocked_kramen else []
@@ -214,6 +215,7 @@ class Parse(TraceMixin):
                 min=voorkeur.get('minimum', 1),
                 max=voorkeur.get('maximum', 10),
                 anywhere=anywhere,
+                raw=ondernemer_data,
                 **ondernemer_props,
             )
             self.ondernemers.append(ondernemer)

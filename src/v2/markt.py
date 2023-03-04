@@ -14,9 +14,11 @@ pd.set_option('display.width', 1000)
 
 class Markt(TraceMixin):
     def __init__(self, meta, rows, branches, ondernemers):
-        self.afkorting = '4045'
-        self.naam = "Plein '40 - '45"
-        self.soort = 'dag'
+        self.id = meta['id']
+        self.afkorting = meta['afkorting']
+        self.naam = meta['naam']
+        self.markt_date = meta['markt_date']
+        self.soort = meta['soort']
         self.max_aantal_kramen_per_ondernemer = meta.get('maxAantalKramenPerOndernemer') or 1
         self.kramen_per_ondernemer = 1
 
