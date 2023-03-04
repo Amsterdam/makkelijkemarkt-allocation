@@ -4,7 +4,8 @@ import pandas as pd
 
 from v2.kramen import Kramen
 from v2.ondernemers import Ondernemers
-from v2.conf import Status, RejectionReason, TraceMixin, ALL_VPH_STATUS, BAK_TYPE_BRANCHE_IDS, PhaseValue
+from v2.conf import (Status, RejectionReason, TraceMixin, PhaseValue,
+                     ALL_VPH_STATUS, BAK_TYPE_BRANCHE_IDS, REJECTION_REASON_NL)
 
 pd.set_option('display.max_colwidth', None)  # so auto truncate of broad columns is turned off
 pd.set_option('display.max_columns', None)  # so auto truncate of columns is turned off
@@ -145,8 +146,8 @@ class Markt(TraceMixin):
                 rejection = {
                     **allocation,
                     'reason': {
-                        'message': ondernemer.reject_reason.value,
-                        'code': 0,
+                        'message': REJECTION_REASON_NL[ondernemer.reject_reason.name],
+                        'code': ondernemer.reject_reason.value,
                     }
                 }
                 rejections.append(rejection)
