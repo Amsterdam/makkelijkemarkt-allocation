@@ -195,7 +195,7 @@ class Cluster(TraceMixin):
         if not self.suits_ondernemer_type(ondernemer):
             return False
         if self.does_exceed_branche_max(ondernemer):
-            ondernemer.reject(RejectionReason.EXCEEDS_BRANCHE_MAX)
+            ondernemer.reject(RejectionReason.BRANCHE_FULL)
             return False
         if not ondernemer.likes_proposed_kramen(self.kramen):
             return False

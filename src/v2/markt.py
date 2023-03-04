@@ -171,9 +171,9 @@ class Markt(TraceMixin):
         unallocated = [*unallocated_vph, *unallocated_soll_with_anywhere]
         unallocated = [ondernemer for ondernemer in unallocated
                        if not ondernemer.reject_reason == RejectionReason.KRAAM_DOES_NOT_EXIST
-                       if not (ondernemer.reject_reason == RejectionReason.LESS_THAN_MIN
+                       if not (ondernemer.reject_reason == RejectionReason.MINIMUM_UNAVAILABLE
                                and self.kramen_per_ondernemer < ondernemer.min)
-                       if not ondernemer.reject_reason == RejectionReason.EXCEEDS_BRANCHE_MAX]
+                       if not ondernemer.reject_reason == RejectionReason.BRANCHE_FULL]
 
         if unallocated:
             self.trace.debug(f"WARNING: Not everybody allocated! Unallocated: {unallocated}")

@@ -74,12 +74,12 @@ class Ondernemer(TraceMixin):
         amount_proposed_kramen = len(proposed_kramen)
         if not proposed_kramen:
             if self.anywhere:
-                self.reject(RejectionReason.NO_KRAMEN_WITH_ANYWHERE)
+                self.reject(RejectionReason.PREF_NOT_AVAILABLE_ANYWHERE)
             else:
-                self.reject(RejectionReason.NO_KRAMEN)
+                self.reject(RejectionReason.PREF_NOT_AVAILABLE)
             return False
         if amount_proposed_kramen < self.min:
-            self.reject(RejectionReason.LESS_THAN_MIN)
+            self.reject(RejectionReason.MINIMUM_UNAVAILABLE)
             return False
         return True
 
