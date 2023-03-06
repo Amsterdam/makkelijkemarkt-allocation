@@ -2,6 +2,7 @@ from enum import Enum
 import json
 
 BAK_TYPE_BRANCHE_IDS = ['bak', 'bak-licht']
+EXP_BRANCHE = '401 -  Overig markt - Experimentele zone'
 
 
 class ComparableEnum(Enum):
@@ -38,14 +39,31 @@ class KraamTypes(ComparableEnum):
 
 
 class RejectionReason(ComparableEnum):
-    LESS_THAN_MIN = 'Minimum aantal plaatsen niet beschikbaar.'
-    NO_KRAMEN = 'Geen geschikte locatie gevonden met huidige voorkeuren (en anywhere uit).'
-    NO_KRAMEN_WITH_ANYWHERE = 'Geen geschikte locatie gevonden met huidige voorkeuren (en anywhere aan).'
-    EXCEEDS_BRANCHE_MAX = 'Alle marktplaatsen voor deze branche zijn reeds ingedeeld.'
-    KRAAM_DOES_NOT_EXIST = 'Kraam bestaat niet.'
+    UNKNOWN = 0
+    BRANCHE_FULL = 1
+    ADJACENT_UNAVAILABLE = 2
+    MINIMUM_UNAVAILABLE = 3
+    MARKET_FULL = 4
+    VPL_POSITION_NOT_AVAILABLE = 5
+    PREF_NOT_AVAILABLE = 6
+    PREF_NOT_AVAILABLE_ANYWHERE = 7
+    KRAAM_DOES_NOT_EXIST = 8
 
     def __hash__(self):
         return hash('RejectionReason')
+
+
+REJECTION_REASON_NL = {
+    'UNKNOWN': 'Onbekend.',
+    'BRANCHE_FULL': 'Alle marktplaatsen voor deze branche zijn reeds ingedeeld.',
+    'ADJACENT_UNAVAILABLE': 'Geen aansluitende locatie gevonden met huidige voorkeuren.',
+    'MINIMUM_UNAVAILABLE': 'Minimum aantal plaatsen niet beschikbaar.',
+    'MARKET_FULL': 'Alle marktplaatsen zijn reeds ingedeeld.',
+    'VPL_POSITION_NOT_AVAILABLE': 'De vaste plaatsen voor de vpl zijn niet beschikbaar.',
+    'PREF_NOT_AVAILABLE': 'Geen geschikte locatie gevonden met huidige voorkeuren (en anywhere uit).',
+    'PREF_NOT_AVAILABLE_ANYWHERE': 'Geen geschikte locatie gevonden met huidige voorkeuren (en anywhere aan).',
+    'KRAAM_DOES_NOT_EXIST': 'Kraam bestaat niet.',
+}
 
 
 class Action(ComparableEnum):

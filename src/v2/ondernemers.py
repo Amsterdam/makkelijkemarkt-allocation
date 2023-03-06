@@ -7,7 +7,7 @@ from v2.kramen import KraamType
 
 class Ondernemer(TraceMixin):
     def __init__(self, rank, erkenningsnummer='', description='', branche=None, prefs=None, min=0, max=0, anywhere=False,
-                 kramen=None, own=None, status=None, bak=False, bak_licht=False, evi=False):
+                 kramen=None, own=None, status=None, raw=None, bak=False, bak_licht=False, evi=False):
         self.rank = rank
         self.erkenningsnummer = erkenningsnummer or rank
         self.description = description or rank
@@ -20,6 +20,7 @@ class Ondernemer(TraceMixin):
         self.kramen = set(kramen if kramen else [])
         self.own = set(own if own else [])
         self.status = status
+        self.raw = raw
         self.kraam_type = KraamType(bak, bak_licht, evi)
         self.is_rejected = False
         self.reject_reason = ''
@@ -31,6 +32,13 @@ class Ondernemer(TraceMixin):
 
     def __repr__(self):
         return str(self)
+
+    def get_allocation(self):
+        return {
+            **self.raw,
+            'status': self.status.value,
+            'plaatsvoorkeuren': self.prefs,
+        }
 
     @property
     def is_vph(self):
@@ -67,12 +75,12 @@ class Ondernemer(TraceMixin):
         amount_proposed_kramen = len(proposed_kramen)
         if not proposed_kramen:
             if self.anywhere:
-                self.reject(RejectionReason.NO_KRAMEN_WITH_ANYWHERE)
+                self.reject(RejectionReason.PREF_NOT_AVAILABLE_ANYWHERE)
             else:
-                self.reject(RejectionReason.NO_KRAMEN)
+                self.reject(RejectionReason.PREF_NOT_AVAILABLE)
             return False
         if amount_proposed_kramen < self.min:
-            self.reject(RejectionReason.LESS_THAN_MIN)
+            self.reject(RejectionReason.MINIMUM_UNAVAILABLE)
             return False
         return True
 

@@ -5,7 +5,7 @@ from collections import defaultdict
 from v2.branche import Branche
 from v2.kramen import Kraam
 from v2.ondernemers import Ondernemer
-from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS, ALL_VPH_STATUS
+from v2.conf import TraceMixin, Status, BAK_TYPE_BRANCHE_IDS, ALL_VPH_STATUS, EXP_BRANCHE
 from v2.special_conf import weekday_specific_ondernemer_conf
 
 ALL_VPH_STATUS_AS_STR = [status.value for status in ALL_VPH_STATUS]
@@ -94,6 +94,7 @@ class Parse(TraceMixin):
 
     def parse_markt(self):
         self.markt_meta = self.input_data['markt']
+        self.markt_meta['markt_date'] = self.input_data['marktDate']
         self.trace.log(f"Markt {self.markt_meta['naam']} - {self.markt_meta['afkorting']}")
         blocked_kramen = self.markt_meta.get('kiesJeKraamGeblokkeerdePlaatsen')
         self.blocked_kramen = blocked_kramen.split(',') if blocked_kramen else []
@@ -109,6 +110,7 @@ class Parse(TraceMixin):
                 continue
             if ondernemer_data['sollicitatieNummer'] == weekday_specific_ondernemer_props['sollicitatie_nummer']:
                 self.trace.log(f"Set special ondernemer properties for {ondernemer_data['sollicitatieNummer']}")
+                self.trace.log(weekday_specific_ondernemer_props)
 
                 weekdays = weekday_specific_ondernemer_props.get('weekdays', '')
                 weekdays = weekdays.split(',') if weekdays else []
@@ -161,6 +163,9 @@ class Parse(TraceMixin):
                     continue
 
             branche_id = next(iter(voorkeur.get('branches', [])), None)
+            if ondernemer_data['status'] in [Status.EXP.value, Status.EXPF.value]:
+                self.trace.log(f"Explicitly setting branche for {log_entry} to {EXP_BRANCHE}")
+                branche_id = EXP_BRANCHE
             branche = self.branches_map.get(branche_id, Branche()) if branche_id else Branche()
 
             ondernemer_props = {}
@@ -210,6 +215,7 @@ class Parse(TraceMixin):
                 min=voorkeur.get('minimum', 1),
                 max=voorkeur.get('maximum', 10),
                 anywhere=anywhere,
+                raw=ondernemer_data,
                 **ondernemer_props,
             )
             self.ondernemers.append(ondernemer)

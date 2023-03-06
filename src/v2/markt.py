@@ -4,7 +4,8 @@ import pandas as pd
 
 from v2.kramen import Kramen
 from v2.ondernemers import Ondernemers
-from v2.conf import Status, RejectionReason, TraceMixin, ALL_VPH_STATUS, BAK_TYPE_BRANCHE_IDS, PhaseValue
+from v2.conf import (Status, RejectionReason, TraceMixin, PhaseValue,
+                     ALL_VPH_STATUS, BAK_TYPE_BRANCHE_IDS, REJECTION_REASON_NL)
 
 pd.set_option('display.max_colwidth', None)  # so auto truncate of broad columns is turned off
 pd.set_option('display.max_columns', None)  # so auto truncate of columns is turned off
@@ -14,9 +15,11 @@ pd.set_option('display.width', 1000)
 
 class Markt(TraceMixin):
     def __init__(self, meta, rows, branches, ondernemers):
-        self.afkorting = '4045'
-        self.naam = "Plein '40 - '45"
-        self.soort = 'dag'
+        self.id = meta['id']
+        self.afkorting = meta['afkorting']
+        self.naam = meta['naam']
+        self.markt_date = meta['markt_date']
+        self.soort = meta['soort']
         self.max_aantal_kramen_per_ondernemer = meta.get('maxAantalKramenPerOndernemer') or 1
         self.kramen_per_ondernemer = 1
 
@@ -103,7 +106,9 @@ class Markt(TraceMixin):
                                                                                                          Status.EXPF])
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.SOLL)
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.B_LIST)
-            print(pd.DataFrame(ondernemer.__dict__ for ondernemer in ordered_ondernemers), '\n')
+            df = pd.DataFrame(ondernemer.__dict__ for ondernemer in ordered_ondernemers)
+            df = df.drop(['raw'], axis=1, errors='ignore')
+            print(df, '\n')
 
     def report_branches(self):
         self.trace.set_report_phase(story='branches', task='max')
@@ -121,32 +126,33 @@ class Markt(TraceMixin):
         for rejection in self.rejection_log:
             self.trace.log(rejection)
 
-    def get_allocation(self):
-        allocation = []
-        for ondernemer in self.ondernemers.all():
-            if ondernemer.kramen:
-                allocation.append({
-                    'plaatsen': list(ondernemer.kramen),
-                    'erkenningsNummer': ondernemer.erkenningsnummer,
-                })
-        return allocation
+    def get_allocation(self, ondernemer):
+        return {
+            'marktId': self.id,
+            'marktDate': self.markt_date,
+            'ondernemer': ondernemer.get_allocation(),
+            'plaatsen': list(ondernemer.kramen),
+            'erkenningsNummer': ondernemer.erkenningsnummer,
+        }
 
-    def get_rejections(self):
+    def get_allocations(self):
+        allocations = []
         rejections = []
         for ondernemer in self.ondernemers.all():
+            allocation = self.get_allocation(ondernemer)
+            if ondernemer.kramen:
+                allocations.append(allocation)
             if ondernemer.is_rejected:
-                rejections.append({
-                    'ondernemer': {
-                        'description': ondernemer.description,
-                        'erkenningsNummer': ondernemer.erkenningsnummer,
-                        'sollicitatieNummer': ondernemer.rank,
-                        'status': ondernemer.status.value,
-                    },
+                rejection = {
+                    **allocation,
                     'reason': {
-                        "message": ondernemer.reject_reason.value,
-                    },
-                })
-        return rejections
+                        'message': REJECTION_REASON_NL[ondernemer.reject_reason.name],
+                        'code': ondernemer.reject_reason.value,
+                    }
+                }
+                rejection.pop('plaatsen')
+                rejections.append(rejection)
+        return allocations, rejections
 
     def is_allocation_valid(self, **filter_kwargs):
         return (self.are_all_ondernemers_allocated(**filter_kwargs)
@@ -167,9 +173,9 @@ class Markt(TraceMixin):
         unallocated = [*unallocated_vph, *unallocated_soll_with_anywhere]
         unallocated = [ondernemer for ondernemer in unallocated
                        if not ondernemer.reject_reason == RejectionReason.KRAAM_DOES_NOT_EXIST
-                       if not (ondernemer.reject_reason == RejectionReason.LESS_THAN_MIN
+                       if not (ondernemer.reject_reason == RejectionReason.MINIMUM_UNAVAILABLE
                                and self.kramen_per_ondernemer < ondernemer.min)
-                       if not ondernemer.reject_reason == RejectionReason.EXCEEDS_BRANCHE_MAX]
+                       if not ondernemer.reject_reason == RejectionReason.BRANCHE_FULL]
 
         if unallocated:
             self.trace.debug(f"WARNING: Not everybody allocated! Unallocated: {unallocated}")

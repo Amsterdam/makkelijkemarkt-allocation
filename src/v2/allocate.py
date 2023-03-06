@@ -63,9 +63,10 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
     trace.set_phase(epic='end', story='meta', task='time')
     trace.log(f"{stop} - duration {stop - start}")
 
+    allocations, rejections = markt.get_allocations()
     output = {
-        'toewijzingen': markt.get_allocation(),
-        'afwijzingen': markt.get_rejections(),
+        'toewijzingen': allocations,
+        'afwijzingen': rejections,
     }
     return output
 
