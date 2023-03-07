@@ -5,5 +5,6 @@ weekday_specific_ondernemer_conf = [
         'plaatsen': '',
         'status': 'soll',
         'markt_afkorting': '4045',
+        'anywhere': True,
     },
 ]
