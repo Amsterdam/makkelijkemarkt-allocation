@@ -142,7 +142,9 @@ class Markt(TraceMixin):
             allocation = self.get_allocation(ondernemer)
             if ondernemer.kramen:
                 allocations.append(allocation)
-            if ondernemer.is_rejected:
+            else:
+                if not ondernemer.is_rejected:
+                    ondernemer.reject(RejectionReason.UNKNOWN)
                 rejection = {
                     **allocation,
                     'reason': {

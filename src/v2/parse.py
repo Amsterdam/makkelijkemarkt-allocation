@@ -121,6 +121,9 @@ class Parse(TraceMixin):
                     for key, value in weekday_specific_ondernemer_props.items():
                         if key in ['status']:
                             ondernemer_data[key] = value
+                        if key in ['anywhere']:
+                            voorkeur = ondernemer_data['voorkeur']
+                            voorkeur[key] = value
 
     def parse_ondernemers(self):
         self.trace.set_phase(epic='parse', story='ondernemers')
