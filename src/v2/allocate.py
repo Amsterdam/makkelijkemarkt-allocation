@@ -53,6 +53,7 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
     optimization_strategy = OptimizationStrategy(markt)
     optimization_strategy.run()
 
+    trace.set_phase(epic='fill_up_b_list')
     fill_up_strategy_b_list = FillUpStrategyBList(markt, **remaining_query)
     fill_up_strategy_b_list.run()
 

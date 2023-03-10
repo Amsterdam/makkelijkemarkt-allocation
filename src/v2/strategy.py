@@ -134,15 +134,18 @@ class HierarchyStrategy(BaseStrategy):
 
 class FillUpStrategyBList(BaseStrategy):
     def run(self):
+        self.trace.set_phase(story='allocate_b_list')
         self.working_copies.append(self.markt.get_working_copy())
         self.markt.kramen_per_ondernemer = 1
 
         while self.markt.kramen_per_ondernemer < self.markt.max_aantal_kramen_per_ondernemer:
+            self.trace.set_cycle(self.markt.kramen_per_ondernemer)
             self.markt.restore_working_copy(self.working_copies[0])  # fallback to the initial state
 
             soll_allocation = SollAllocation(self.markt)
             soll_allocation.set_ondernemer_filter_kwargs(**self.ondernemer_filter_kwargs)
             soll_allocation.set_kramen_filter_kwargs(**self.kramen_filter_kwargs)
+            soll_allocation.allocate()
             soll_allocation.allocate_b_list()
 
             if not self.should_allocation_loop_continue():
