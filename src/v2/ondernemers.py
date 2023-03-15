@@ -51,6 +51,8 @@ class Ondernemer(TraceMixin):
     def assign_kraam(self, kraam):
         self.kramen.add(kraam)
         self.branche.assigned_count += 1
+        if self.is_rejected:
+            self.unreject()
 
     def unassign_kraam(self, kraam):
         self.branche.assigned_count -= 1
@@ -60,6 +62,11 @@ class Ondernemer(TraceMixin):
         self.trace.log(f"Rejecting: {reason.value} => {self}")
         self.is_rejected = True
         self.reject_reason = reason
+
+    def unreject(self):
+        self.trace.log(f"Unrejecting: {self}")
+        self.reject_reason = ''
+        self.is_rejected = False
 
     def likes_proposed_kramen(self, proposed_kramen):
         if self.status in ALL_VPH_STATUS:
