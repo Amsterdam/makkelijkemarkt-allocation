@@ -167,6 +167,7 @@ class Markt(TraceMixin):
             if len(ondernemer.kramen) + 1 < self.kramen_per_ondernemer <= ondernemer.max:
                 if not ondernemer.is_rejected:
                     non_proportionally_expanded_ondernemers.append(ondernemer)
+                    self.trace.debug(f"WARNING: vph {ondernemer} not proportionally expanded")
         return not any(non_proportionally_expanded_ondernemers)
 
     def are_all_ondernemers_allocated(self, **filter_kwargs):
