@@ -106,7 +106,8 @@ class Markt(TraceMixin):
                                                                                                          Status.EXPF])
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.SOLL)
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.B_LIST)
-            df = pd.DataFrame(ondernemer.__dict__ for ondernemer in ordered_ondernemers)
+            df = pd.DataFrame({**ondernemer.__dict__, 'branche': ondernemer.branche.shortname}
+                              for ondernemer in ordered_ondernemers)
             df = df.drop(['raw'], axis=1, errors='ignore')
             print(df, '\n')
 
