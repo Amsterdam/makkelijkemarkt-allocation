@@ -177,8 +177,6 @@ class Markt(TraceMixin):
         unallocated = [ondernemer for ondernemer in unallocated
                        if not ondernemer.reject_reason == RejectionReason.KRAAM_DOES_NOT_EXIST
                        if not (ondernemer.reject_reason == RejectionReason.MINIMUM_UNAVAILABLE
-                               and not ondernemer.anywhere)
-                       if not (ondernemer.reject_reason == RejectionReason.MINIMUM_UNAVAILABLE
                                and self.kramen_per_ondernemer - 1 < ondernemer.min)
                        if not ondernemer.reject_reason == RejectionReason.BRANCHE_FULL]
 
