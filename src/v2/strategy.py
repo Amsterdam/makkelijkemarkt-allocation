@@ -47,12 +47,12 @@ class BaseStrategy(TraceMixin):
             self.trace.debug('SAME HASH')
             return False
 
-        if not self.kramen_still_available():
-            return False
-
         if not self.is_allocation_valid():
             if self.markt.kramen_per_ondernemer > 1:
                 self.markt.restore_working_copy(self.working_copies[-1])  # fallback to the previous state
+            return False
+
+        if not self.kramen_still_available():
             return False
 
         self.working_copies.append(self.markt.get_working_copy())
