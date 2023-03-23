@@ -80,14 +80,14 @@ class Ondernemer(TraceMixin):
 
     def likes_proposed_kramen_as_soll(self, proposed_kramen):
         amount_proposed_kramen = len(proposed_kramen)
+        if amount_proposed_kramen < self.min:
+            self.reject(RejectionReason.MINIMUM_UNAVAILABLE)
+            return False
         if not proposed_kramen:
             if self.anywhere:
                 self.reject(RejectionReason.PREF_NOT_AVAILABLE_ANYWHERE)
             else:
                 self.reject(RejectionReason.PREF_NOT_AVAILABLE)
-            return False
-        if amount_proposed_kramen < self.min:
-            self.reject(RejectionReason.MINIMUM_UNAVAILABLE)
             return False
         return True
 

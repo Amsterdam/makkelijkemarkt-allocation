@@ -106,7 +106,8 @@ class Markt(TraceMixin):
                                                                                                          Status.EXPF])
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.SOLL)
             ordered_ondernemers.extend(ondernemer for ondernemer in ondernemers if ondernemer.status == Status.B_LIST)
-            df = pd.DataFrame(ondernemer.__dict__ for ondernemer in ordered_ondernemers)
+            df = pd.DataFrame({**ondernemer.__dict__, 'branche': ondernemer.branche.shortname}
+                              for ondernemer in ordered_ondernemers)
             df = df.drop(['raw'], axis=1, errors='ignore')
             print(df, '\n')
 
@@ -166,6 +167,7 @@ class Markt(TraceMixin):
             if len(ondernemer.kramen) + 1 < self.kramen_per_ondernemer <= ondernemer.max:
                 if not ondernemer.is_rejected:
                     non_proportionally_expanded_ondernemers.append(ondernemer)
+                    self.trace.debug(f"WARNING: vph {ondernemer} not proportionally expanded")
         return not any(non_proportionally_expanded_ondernemers)
 
     def are_all_ondernemers_allocated(self, **filter_kwargs):
@@ -175,8 +177,6 @@ class Markt(TraceMixin):
         unallocated = [*unallocated_vph, *unallocated_soll_with_anywhere]
         unallocated = [ondernemer for ondernemer in unallocated
                        if not ondernemer.reject_reason == RejectionReason.KRAAM_DOES_NOT_EXIST
-                       if not (ondernemer.reject_reason == RejectionReason.MINIMUM_UNAVAILABLE
-                               and not ondernemer.anywhere)
                        if not (ondernemer.reject_reason == RejectionReason.MINIMUM_UNAVAILABLE
                                and self.kramen_per_ondernemer - 1 < ondernemer.min)
                        if not ondernemer.reject_reason == RejectionReason.BRANCHE_FULL]
