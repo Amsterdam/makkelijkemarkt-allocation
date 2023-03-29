@@ -50,11 +50,13 @@ class VplAllocation(BaseAllocation):
                 self.trace.log(f"Trying to move Ondernemer {ondernemer}")
                 size = self.get_right_size_for_ondernemer(ondernemer)
                 current_size = len(ondernemer.kramen)
-                if size < current_size:
-                    self.trace.log(f"Size {size} smaller than current {current_size}, skip moving")
-                    continue
-                new_cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
-                                                            **self.kramen_filter_kwargs)
+
+                new_cluster = None
+                while not new_cluster and size >= current_size:
+                    new_cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
+                                                                **self.kramen_filter_kwargs)
+                    size -= 1
+
                 self.markt.kramen.move_ondernemer_to_new_cluster(ondernemer, new_cluster)
                 self.markt.report_indeling()
 
