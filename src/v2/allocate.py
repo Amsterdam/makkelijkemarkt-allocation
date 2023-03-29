@@ -74,8 +74,11 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
 
 def parse_and_allocate(input_data):
     trace.clear()
-    parsed = Parse(input_data)
-    output = allocate(**parsed.__dict__)
+    try:
+        parsed = Parse(input_data)
+        output = allocate(**parsed.__dict__)
+    except Exception as e:
+        output = {'error': str(e)}
     enriched_output = {
         **input_data,
         **output,
