@@ -1,5 +1,5 @@
 from collections import deque
-from operator import attrgetter
+from operator import attrgetter, sub
 
 from v2.conf import TraceMixin, Status, ALL_VPH_STATUS, PhaseValue
 from v2.allocations.vpl import VplAllocation
@@ -31,8 +31,25 @@ class BaseStrategy(TraceMixin):
     def set_kramen_filter_kwargs(self, **filter_kwargs):
         self.kramen_filter_kwargs = filter_kwargs
 
+    def is_iteration_better_than_previous(self):
+        if self.working_copies:
+            previous = self.working_copies[-1]
+            _, previous_ondernemers, *_ = previous
+            ondernemers_kramen_count = [len(ondernemer.kramen) for ondernemer
+                                        in self.markt.ondernemers.ondernemers]
+            previous_ondernemers_kramen_count = [len(ondernemer.kramen) for ondernemer
+                                                 in previous_ondernemers.ondernemers]
+            combined_kramen_count = list(zip(ondernemers_kramen_count, previous_ondernemers_kramen_count))
+            deltas = [sub(*count) for count in combined_kramen_count]
+            if any(delta < 0 for delta in deltas):
+                self.trace.debug(f"Current iteration is not better than previous, "
+                                 f"kramen count (current, previous) {combined_kramen_count}")
+                return False
+        return True
+
     def is_allocation_valid(self):
-        return self.markt.is_allocation_valid(**self.ondernemer_filter_kwargs)
+        return (self.is_iteration_better_than_previous() and
+                self.markt.is_allocation_valid(**self.ondernemer_filter_kwargs))
 
     def kramen_still_available(self):
         available_kramen_count = self.markt.kramen.find_clusters(1, **self.kramen_filter_kwargs)
