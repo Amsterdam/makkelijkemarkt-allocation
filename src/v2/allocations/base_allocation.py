@@ -39,16 +39,26 @@ class BaseAllocation(TraceMixin):
         previous_available = available + 1
         while available and available != previous_available:
             lowest = min(queue.values())
-            self.trace.log(f"lowest: {lowest}")
+            self.trace.log(f"lowest entitlement in queue: {lowest}")
             previous_available = available
+            self.trace.log(f"Queue: {[(key.rank, value) for key,value in queue.items()]}")
+            self.trace.log(f"Available: {available}")
             for branche_ondernemer in sorted(queue, key=attrgetter('rank')):
                 self.trace.log(f"checking branche_ondernemer: {branche_ondernemer}")
                 if queue[branche_ondernemer] == lowest < branche_ondernemer.max and available:
-                    self.trace.log(f"upgrading branche_ondernemer: {branche_ondernemer}")
+                    # if this ondernemer has lowest amount of kramen of all ondernemers in the queue
+                    # and if the ondernemer max has not been reached
+                    # and the branche max allows to assign more kramen (available)
+                    # then raise the entitlement of this ondernemer in the queue
+                    if branche_ondernemer.has_better_seniority_than(ondernemer):
+                        continue
+
+                    self.trace.log(f"raising entitlement of branche_ondernemer: {branche_ondernemer}")
                     queue[branche_ondernemer] += 1
                     available -= 1
 
-        self.trace.log(f"optimized queue: {queue}")
+        self.trace.log(f"optimized queue: {[(key.rank, value) for key,value in queue.items()]}")
+        self.trace.log(f"optimized queue total: {sum(queue.values())}")
         return queue.get(ondernemer, 1)  # grant 1 kraam if ondernemer is not in queue (e.g. b_list)
 
     def get_right_size_for_ondernemer(self, ondernemer):
