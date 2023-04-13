@@ -44,7 +44,7 @@ class BaseAllocation(TraceMixin):
             self.trace.log(f"Queue: {[(key.rank, value) for key,value in queue.items()]}")
             self.trace.log(f"Available: {available}")
             for branche_ondernemer in sorted(queue, key=attrgetter('seniority')):
-                self.trace.log(f"checking branche_ondernemer: {branche_ondernemer}")
+                # self.trace.log(f"checking branche_ondernemer: {branche_ondernemer}")
                 if queue[branche_ondernemer] == lowest < branche_ondernemer.max and available:
                     # if this ondernemer has lowest amount of kramen of all ondernemers in the queue
                     # and if the ondernemer max has not been reached
