@@ -35,17 +35,25 @@ class BaseStrategy(TraceMixin):
         if self.working_copies:
             previous = self.working_copies[-1]
             _, previous_ondernemers, *_ = previous
-            ondernemers_kramen_count = [len(ondernemer.kramen) for ondernemer
-                                        in self.markt.ondernemers.ondernemers]
-            previous_ondernemers_kramen_count = [len(ondernemer.kramen) for ondernemer
-                                                 in previous_ondernemers.ondernemers]
-            combined_kramen_count = list(zip(ondernemers_kramen_count, previous_ondernemers_kramen_count))
-            deltas = [sub(*count) for count in combined_kramen_count]
-            if any(delta < 0 for delta in deltas):
-                self.trace.debug(f"Current iteration is not better than previous, "
-                                 f"kramen count (current, previous) {combined_kramen_count}")
+            combined_ondernemers = list(zip(self.markt.ondernemers.ondernemers, previous_ondernemers.ondernemers))
+            less_kramen = []
+            for current, previous in combined_ondernemers:
+                delta = len(current.kramen) - len(previous.kramen)
+                if delta < 0:
+                    if current.status == Status.SOLL:
+                        if not current.anywhere:
+                            continue
+                        if len(current.kramen) + 1 >= self.markt.kramen_per_ondernemer:
+                            continue
+                    if current.status == Status.B_LIST:
+                        continue
+                    self.trace.debug(f"Ondernemer has less kramen in current iteration than previous")
+                    self.trace.debug(f"current: {current}")
+                    self.trace.debug(f"previous: {previous}")
+                    less_kramen.append([current, previous])
+            if less_kramen:
                 return False
-        return True
+            return True
 
     def is_allocation_valid(self):
         return (self.is_iteration_better_than_previous() and
