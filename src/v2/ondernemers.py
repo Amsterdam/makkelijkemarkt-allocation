@@ -34,6 +34,12 @@ class Ondernemer(TraceMixin):
     def __repr__(self):
         return str(self)
 
+    def __eq__(self, other):
+        return self.rank == getattr(other, 'rank', None)
+
+    def __hash__(self):
+        return self.rank
+
     def get_seniority(self):
         seniority = self.rank
         if self.status in ALL_VPH_STATUS:
