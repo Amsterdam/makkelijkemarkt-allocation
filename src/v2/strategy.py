@@ -188,16 +188,18 @@ class OptimizationStrategy(BaseStrategy):
         self.fridge = deque()
 
     def run(self):
-        self.trace.set_phase(story='maximize_vph')
-        self.maximize_all_vph_expansion()
+        self.trace.set_phase(story='optimize_all')
+        self.optimize_all_expansion()
         self.swap_ondernemers()
         self.finish()
 
-    def fill_fridge_with_soll_with_anywhere(self):
+    def fill_fridge_with_soll_with_anywhere(self, exclude_ondernemer=None):
         self.trace.set_phase(task='fill_fridge', group=Status.SOLL, agent=PhaseValue.event)
         if not self.fridge:
             self.trace.log(f"Fridge empty, now filling")
             for soll in self.markt.ondernemers.select(status=Status.SOLL, anywhere=True, kraam_type=None):
+                if soll == exclude_ondernemer:
+                    continue
                 if soll.has_verplichte_branche:
                     continue
                 kramen_count = len(soll.kramen)
@@ -223,10 +225,10 @@ class OptimizationStrategy(BaseStrategy):
                 self.trace.log(f"Could not reassign ondernemer from fridge: {soll}")
         return all_allocated
 
-    def maximize_vph_expansion(self, ondernemer):
-        self.trace.set_phase(task='maximize_vph', group=ondernemer.status, agent=ondernemer.rank)
+    def optimize_expansion(self, ondernemer):
+        self.trace.set_phase(task='optimize_expansion', group=ondernemer.status, agent=ondernemer.rank)
         current_amount_kramen = len(ondernemer.kramen)
-        self.trace.log(f"VPH maximize expansion {ondernemer}")
+        self.trace.log(f"Optimize expansion {ondernemer}")
         size = min(ondernemer.max, self.markt.kramen_per_ondernemer)
         branche = ondernemer.branche
         if branche.max:
@@ -239,23 +241,24 @@ class OptimizationStrategy(BaseStrategy):
         if cluster:
             self.markt.report_indeling()
 
-    def maximize_all_vph_expansion(self):
+    def optimize_all_expansion(self):
         working_copies = []
-        ondernemers = self.markt.ondernemers.select(status__in=ALL_VPH_STATUS, kraam_type=None)
+        ondernemers = sorted(self.markt.ondernemers.select(status__in=[*ALL_VPH_STATUS, Status.SOLL], kraam_type=None),
+                             key=attrgetter('kramen_count', 'seniority'))
         for ondernemer in ondernemers:
-            self.trace.set_phase(task='maximize_vph', group=ondernemer.status, agent=ondernemer.rank)
+            self.trace.set_phase(task='optimize_expansion', group=ondernemer.status, agent=ondernemer.rank)
             if ondernemer.has_verplichte_branche:
                 continue
             if len(ondernemer.kramen) >= ondernemer.max:
-                self.trace.log(f"VPH already at max {ondernemer}")
+                self.trace.log(f"Ondernemer already at max {ondernemer}")
                 continue
             working_copies.append(self.markt.get_working_copy())
-            self.fill_fridge_with_soll_with_anywhere()
-            self.maximize_vph_expansion(ondernemer)
+            self.fill_fridge_with_soll_with_anywhere(exclude_ondernemer=ondernemer)
+            self.optimize_expansion(ondernemer)
             all_allocated = self.reassign_ondernemers_from_the_fridge()
             if not all_allocated:
                 self.markt.report_indeling()
-                self.trace.log(f"Could not maximize vph {ondernemer}, fallback to previous markt state")
+                self.trace.log(f"Could not optimize expansion for {ondernemer}, fallback to previous markt state")
                 self.markt.restore_working_copy(working_copies[-1])
                 self.markt.report_indeling()
             else:
