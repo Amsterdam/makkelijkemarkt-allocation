@@ -65,6 +65,10 @@ class Ondernemer(TraceMixin):
     def has_verplichte_branche(self):
         return self.branche and self.branche.verplicht
 
+    @property
+    def kramen_count(self):
+        return len(self.kramen)
+
     def assign_kraam(self, kraam):
         self.kramen.add(kraam)
         self.branche.assigned_count += 1
