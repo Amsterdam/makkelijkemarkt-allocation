@@ -125,8 +125,10 @@ class Trace:
             self.logs.append(log_entry)
 
     def debug(self, message):
+        task, group, agent = self.task, self.group, self.agent
         self.set_phase(task='debug', group=Status.UNKNOWN, agent=PhaseValue.event)
         self.log(message)
+        self.set_phase(task=task, group=Status(group), agent=agent)
 
     def get_logs(self):
         return self.logs

@@ -158,17 +158,7 @@ class Markt(TraceMixin):
         return allocations, rejections
 
     def is_allocation_valid(self, **filter_kwargs):
-        return (self.are_all_ondernemers_allocated(**filter_kwargs)
-                and self.are_all_vph_proportionally_expanded(**filter_kwargs))
-
-    def are_all_vph_proportionally_expanded(self, **filter_kwargs):
-        non_proportionally_expanded_ondernemers = []
-        for ondernemer in self.ondernemers.select(status__in=ALL_VPH_STATUS, **filter_kwargs):
-            if len(ondernemer.kramen) + 1 < self.kramen_per_ondernemer <= ondernemer.max:
-                if not ondernemer.is_rejected:
-                    non_proportionally_expanded_ondernemers.append(ondernemer)
-                    self.trace.debug(f"WARNING: vph {ondernemer} not proportionally expanded")
-        return not any(non_proportionally_expanded_ondernemers)
+        return self.are_all_ondernemers_allocated(**filter_kwargs)
 
     def are_all_ondernemers_allocated(self, **filter_kwargs):
         unallocated_vph = self.ondernemers.select(status__in=ALL_VPH_STATUS, allocated=False, **filter_kwargs)

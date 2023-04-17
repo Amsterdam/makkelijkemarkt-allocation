@@ -1,6 +1,6 @@
 import itertools
 
-from v2.conf import TraceMixin, RejectionReason, ALL_VPH_STATUS, ALL_SOLL_STATUS
+from v2.conf import TraceMixin, RejectionReason, Status, ALL_VPH_STATUS, ALL_SOLL_STATUS
 from v2.branche import Branche
 from v2.kramen import KraamType
 
@@ -24,6 +24,7 @@ class Ondernemer(TraceMixin):
         self.kraam_type = KraamType(bak, bak_licht, evi)
         self.is_rejected = False
         self.reject_reason = ''
+        self.seniority = self.get_seniority()
 
     def __str__(self):
         return f"Ondernemer {self.rank}, {self.status.value}, b={self.branche.shortname}, min={self.min}, max={self.max}, " \
@@ -32,6 +33,22 @@ class Ondernemer(TraceMixin):
 
     def __repr__(self):
         return str(self)
+
+    def __eq__(self, other):
+        return self.rank == getattr(other, 'rank', None)
+
+    def __hash__(self):
+        return self.rank
+
+    def get_seniority(self):
+        seniority = self.rank
+        if self.status in ALL_VPH_STATUS:
+            pass
+        elif self.status == Status.SOLL:
+            seniority += 100000
+        elif self.status == Status.B_LIST:
+            seniority += 1000000
+        return seniority
 
     def get_allocation(self):
         return {
@@ -47,6 +64,10 @@ class Ondernemer(TraceMixin):
     @property
     def has_verplichte_branche(self):
         return self.branche and self.branche.verplicht
+
+    @property
+    def kramen_count(self):
+        return len(self.kramen)
 
     def assign_kraam(self, kraam):
         self.kramen.add(kraam)
@@ -90,6 +111,9 @@ class Ondernemer(TraceMixin):
                 self.reject(RejectionReason.PREF_NOT_AVAILABLE)
             return False
         return True
+
+    def has_better_seniority_than(self, ondernemer):
+        return self.seniority < ondernemer.seniority
 
 
 class Ondernemers:
