@@ -13,6 +13,7 @@ class KraamType:
             self.props.append(KraamTypes.BAK_LICHT)
         if bak:
             self.props.append(KraamTypes.BAK)
+        self.org_props = [*self.props]
 
     def __str__(self):
         return ''.join(prop.value for prop in self.props)
@@ -51,6 +52,9 @@ class KraamType:
             return True
         else:
             return kraam_type == active_prop
+
+    def restore_original(self):
+        self.props = [*self.org_props]
 
 
 class Kraam(TraceMixin):
@@ -122,9 +126,9 @@ class Kraam(TraceMixin):
     def remove_verplichte_branche(self, branche):
         if self.branche == branche and self.branche.verplicht:
             self.branche = None
-            self.trace.log(f"Removed verplichte branche {branche} from {self}")
+            self.trace.debug(f"Removed verplichte branche {branche} from {self}")
         else:
-            self.trace.log(f"WARNING: kraam {self} does not have verplichte branche {branche}")
+            self.trace.debug(f"WARNING: kraam {self} does not have verplichte branche {branche}")
 
 
 class Cluster(TraceMixin):
@@ -287,7 +291,12 @@ class Kramen(TraceMixin):
                 continue
             if kraam.kraam_type == kraam_type:
                 active_prop = kraam.kraam_type.remove_active()
-                self.trace.log(f"Removed active prop {active_prop} from kraam {kraam}")
+                self.trace.debug(f"Removed active prop {active_prop} from kraam {kraam}")
+
+    def restore_original_kraamtype(self):
+        for kraam in self.kramen_map.values():
+            self.trace.debug(f"Restoring original kraam type for {kraam}")
+            kraam.kraam_type.restore_original()
 
     def order_clusters_by_ondernemer_prefs(self, clusters, ondernemer):
         prefs = ondernemer.prefs

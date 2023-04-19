@@ -190,6 +190,8 @@ class OptimizationStrategy(BaseStrategy):
     def run(self):
         self.trace.set_phase(story='optimize_all')
         self.optimize_all_expansion()
+        self.optimize_all_expansion()
+        # This could be rewritten to a loop, but for now running it twice is more than good enough
         self.swap_ondernemers()
         self.finish()
 

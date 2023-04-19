@@ -37,6 +37,16 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
         trace.set_phase(story=kraam_type.value)
         bak_strategy = HierarchyStrategy(markt, kraam_type=kraam_type)
         bak_strategy.run()
+        markt.kramen.remove_kraam_type(kraam_type=kraam_type)
+        markt.report_indeling()
+
+    trace.set_phase(epic='kraamtypes_reprise')
+    markt.kramen.restore_original_kraamtype()
+    markt.report_indeling()
+    for kraam_type in KraamTypes.BAK, KraamTypes.BAK_LICHT, KraamTypes.EVI:
+        trace.set_phase(story=kraam_type.value)
+        bak_strategy = HierarchyStrategy(markt, kraam_type=kraam_type)
+        bak_strategy.run()
         fill_up_strategy_b_list = FillUpStrategyBList(markt, kraam_type=kraam_type)
         fill_up_strategy_b_list.run()
         markt.kramen.remove_kraam_type(kraam_type=kraam_type)
