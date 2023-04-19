@@ -13,6 +13,7 @@ class KraamType:
             self.props.append(KraamTypes.BAK_LICHT)
         if bak:
             self.props.append(KraamTypes.BAK)
+        self.org_props = [*self.props]
 
     def __str__(self):
         return ''.join(prop.value for prop in self.props)
@@ -51,6 +52,9 @@ class KraamType:
             return True
         else:
             return kraam_type == active_prop
+
+    def restore_original(self):
+        self.props = [*self.org_props]
 
 
 class Kraam(TraceMixin):
