@@ -204,6 +204,8 @@ class OptimizationStrategy(BaseStrategy):
                     continue
                 if soll.has_verplichte_branche:
                     continue
+                if exclude_ondernemer and not exclude_ondernemer.is_vph and soll.rank < exclude_ondernemer.rank:
+                    continue
                 kramen_count = len(soll.kramen)
                 self.markt.unassign_all_kramen_from_ondernemer(soll)
                 self.fridge.append([soll, kramen_count])
