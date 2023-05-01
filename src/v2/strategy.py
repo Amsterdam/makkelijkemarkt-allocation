@@ -217,7 +217,8 @@ class OptimizationStrategy(BaseStrategy):
             soll, kramen_count = self.fridge.popleft()
             if not kramen_count:
                 continue
-            cluster = self.markt.kramen.get_cluster(size=kramen_count, ondernemer=soll)
+            peer_prefs = self.markt.ondernemers.get_prefs_from_unallocated_peers(peer_status=soll.status)
+            cluster = self.markt.kramen.get_cluster(size=kramen_count, ondernemer=soll, peer_prefs=peer_prefs)
             if cluster:
                 cluster.assign(soll)
                 if soll.is_rejected:
