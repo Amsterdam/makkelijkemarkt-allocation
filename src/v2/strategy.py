@@ -200,6 +200,7 @@ class OptimizationStrategy(BaseStrategy):
         if not self.fridge:
             self.trace.log(f"Fridge empty, now filling")
             for soll in self.markt.ondernemers.select(status=Status.SOLL, anywhere=True, kraam_type=None):
+                self.trace.set_phase(task='fill_fridge', group=soll.status, agent=soll.rank)
                 if soll == exclude_ondernemer:
                     continue
                 if soll.has_verplichte_branche:
@@ -209,14 +210,14 @@ class OptimizationStrategy(BaseStrategy):
                 kramen_count = len(soll.kramen)
                 self.markt.unassign_all_kramen_from_ondernemer(soll)
                 self.fridge.append([soll, kramen_count])
-                self.trace.log(f"Put soll {soll} with {kramen_count} kramen in fridge")
+        self.trace.set_phase(task='fill_fridge', group=Status.SOLL, agent=PhaseValue.event)
         self.trace.log(f"Fridge filled ({len(self.fridge)}: {self.fridge}")
 
     def reassign_ondernemers_from_the_fridge(self):
-        self.trace.set_phase(task='reassign_from_fridge', group=Status.SOLL, agent=PhaseValue.event)
         all_allocated = True
         while self.fridge:
             soll, kramen_count = self.fridge.popleft()
+            self.trace.set_phase(task='reassign_from_fridge', group=soll.status, agent=soll.rank)
             if not kramen_count:
                 continue
             peer_prefs = self.markt.ondernemers.get_prefs_from_unallocated_peers(peer_status=soll.status)
@@ -231,9 +232,9 @@ class OptimizationStrategy(BaseStrategy):
         return all_allocated
 
     def optimize_assignment(self, ondernemer):
-        self.trace.set_phase(task='optimize_expansion', group=ondernemer.status, agent=ondernemer.rank)
+        self.trace.set_phase(task='optimize_assignment', group=ondernemer.status, agent=ondernemer.rank)
         current_amount_kramen = len(ondernemer.kramen)
-        self.trace.log(f"Optimize expansion {ondernemer}")
+        self.trace.log(f"Optimize assignment {ondernemer}")
         self.markt.report_indeling()
         size = min(current_amount_kramen + 1, self.markt.kramen_per_ondernemer)
         branche = ondernemer.branche
