@@ -243,11 +243,14 @@ class OptimizationStrategy(BaseStrategy):
             size = min(size, available + current_amount_kramen)
 
         cluster = []
+        peer_prefs = self.markt.ondernemers.get_prefs_from_unallocated_peers(peer_status=ondernemer.status)
         if ondernemer.can_move:
-            cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, **self.kramen_filter_kwargs)
+            cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, **self.kramen_filter_kwargs,
+                                                    peer_prefs=peer_prefs)
         if not cluster:
             cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
                                                     should_include=ondernemer.kramen,
+                                                    peer_prefs=peer_prefs,
                                                     **self.kramen_filter_kwargs)
         self.markt.kramen.move_ondernemer_to_new_cluster(ondernemer, cluster)
 
