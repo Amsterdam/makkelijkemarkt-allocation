@@ -241,17 +241,15 @@ class OptimizationStrategy(BaseStrategy):
         if branche.max:
             available = branche.max - branche.assigned_count
             size = min(size, available + current_amount_kramen)
+
+        cluster = []
         if ondernemer.can_move:
             cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, **self.kramen_filter_kwargs)
-            if not cluster:
-                cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
-                                                        should_include=ondernemer.kramen,
-                                                        **self.kramen_filter_kwargs)
-            self.markt.kramen.move_ondernemer_to_new_cluster(ondernemer, cluster)
-        else:
-            cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, should_include=ondernemer.kramen,
+        if not cluster:
+            cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
+                                                    should_include=ondernemer.kramen,
                                                     **self.kramen_filter_kwargs)
-            cluster.assign(ondernemer)
+        self.markt.kramen.move_ondernemer_to_new_cluster(ondernemer, cluster)
 
         if cluster:
             self.markt.report_indeling()
