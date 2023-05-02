@@ -25,6 +25,7 @@ class Ondernemer(TraceMixin):
         self.is_rejected = False
         self.reject_reason = ''
         self.seniority = self.get_seniority()
+        self.can_move = self.status not in [Status.EB]
 
     def __str__(self):
         return f"Ondernemer {self.rank}, {self.status.value}, b={self.branche.shortname}, min={self.min}, max={self.max}, " \
