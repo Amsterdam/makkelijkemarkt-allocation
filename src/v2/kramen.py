@@ -1,4 +1,5 @@
 from collections import defaultdict
+from operator import mul
 
 from v2.conf import KraamTypes, RejectionReason, TraceMixin, Status
 
@@ -262,6 +263,12 @@ class Kramen(TraceMixin):
             allocation.append((kraam.id, kraam.ondernemer))
         frozen = frozenset(allocation)
         return hash(frozen)
+
+    def calculate_custom_allocation_hash(self):
+        allocation = []
+        for kraam in self.kramen_map.values():
+            allocation.append((kraam.id, kraam.ondernemer))
+        return sum(mul(index + 1, ondernemer or 0) for index, (_, ondernemer) in enumerate(allocation))
 
     def unassign_ondernemer(self, ondernemer):
         for kraam in self.kramen_map.values():

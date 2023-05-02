@@ -189,8 +189,8 @@ class OptimizationStrategy(BaseStrategy):
 
     def run(self):
         self.trace.set_phase(story='optimize_all')
-        self.optimize_all_expansion()
-        self.optimize_all_expansion()
+        self.optimize_all_assignments()
+        self.optimize_all_assignments()
         # This could be rewritten to a loop, but for now running it twice is more than good enough
         self.swap_ondernemers()
         self.finish()
@@ -200,24 +200,28 @@ class OptimizationStrategy(BaseStrategy):
         if not self.fridge:
             self.trace.log(f"Fridge empty, now filling")
             for soll in self.markt.ondernemers.select(status=Status.SOLL, anywhere=True, kraam_type=None):
+                self.trace.set_phase(task='fill_fridge', group=soll.status, agent=soll.rank)
                 if soll == exclude_ondernemer:
                     continue
                 if soll.has_verplichte_branche:
                     continue
+                if exclude_ondernemer and soll.seniority < exclude_ondernemer.seniority:
+                    continue
                 kramen_count = len(soll.kramen)
                 self.markt.unassign_all_kramen_from_ondernemer(soll)
                 self.fridge.append([soll, kramen_count])
-                self.trace.log(f"Put soll {soll} with {kramen_count} kramen in fridge")
+        self.trace.set_phase(task='fill_fridge', group=Status.SOLL, agent=PhaseValue.event)
         self.trace.log(f"Fridge filled ({len(self.fridge)}: {self.fridge}")
 
     def reassign_ondernemers_from_the_fridge(self):
-        self.trace.set_phase(task='reassign_from_fridge', group=Status.SOLL, agent=PhaseValue.event)
         all_allocated = True
         while self.fridge:
             soll, kramen_count = self.fridge.popleft()
+            self.trace.set_phase(task='reassign_from_fridge', group=soll.status, agent=soll.rank)
             if not kramen_count:
                 continue
-            cluster = self.markt.kramen.get_cluster(size=kramen_count, ondernemer=soll)
+            peer_prefs = self.markt.ondernemers.get_prefs_from_unallocated_peers(peer_status=soll.status)
+            cluster = self.markt.kramen.get_cluster(size=kramen_count, ondernemer=soll, peer_prefs=peer_prefs)
             if cluster:
                 cluster.assign(soll)
                 if soll.is_rejected:
@@ -227,27 +231,37 @@ class OptimizationStrategy(BaseStrategy):
                 self.trace.log(f"Could not reassign ondernemer from fridge: {soll}")
         return all_allocated
 
-    def optimize_expansion(self, ondernemer):
-        self.trace.set_phase(task='optimize_expansion', group=ondernemer.status, agent=ondernemer.rank)
+    def optimize_assignment(self, ondernemer):
+        self.trace.set_phase(task='optimize_assignment', group=ondernemer.status, agent=ondernemer.rank)
         current_amount_kramen = len(ondernemer.kramen)
-        self.trace.log(f"Optimize expansion {ondernemer}")
+        self.trace.log(f"Optimize assignment {ondernemer}")
+        self.markt.report_indeling()
         size = min(current_amount_kramen + 1, self.markt.kramen_per_ondernemer)
         branche = ondernemer.branche
         if branche.max:
             available = branche.max - branche.assigned_count
             size = min(size, available + current_amount_kramen)
-        cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
-                                                should_include=ondernemer.kramen,
-                                                **self.kramen_filter_kwargs)
-        cluster.assign(ondernemer)
+
+        cluster = []
+        peer_prefs = self.markt.ondernemers.get_prefs_from_unallocated_peers(peer_status=ondernemer.status)
+        if ondernemer.can_move:
+            cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, **self.kramen_filter_kwargs,
+                                                    peer_prefs=peer_prefs)
+        if not cluster:
+            cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer,
+                                                    should_include=ondernemer.kramen,
+                                                    peer_prefs=peer_prefs,
+                                                    **self.kramen_filter_kwargs)
+        self.markt.kramen.move_ondernemer_to_new_cluster(ondernemer, cluster)
+
         if cluster:
             self.markt.report_indeling()
 
-    def optimize_all_expansion(self):
+    def optimize_all_assignments(self):
         working_copies = []
-        ondernemers = sorted(self.markt.ondernemers.select(status__in=[*ALL_VPH_STATUS, Status.SOLL], kraam_type=None),
-                             key=attrgetter('kramen_count', 'seniority'))
-        for ondernemer in ondernemers:
+        ondernemers = self.markt.ondernemers.select(status__in=[*ALL_VPH_STATUS, Status.SOLL], kraam_type=None)
+        for _ondernemer in sorted(ondernemers, key=attrgetter('kramen_count', 'seniority')):
+            ondernemer = self.markt.ondernemers.ondernemers_map[_ondernemer.rank]
             self.trace.set_phase(task='optimize_expansion', group=ondernemer.status, agent=ondernemer.rank)
             if ondernemer.has_verplichte_branche:
                 continue
@@ -256,7 +270,7 @@ class OptimizationStrategy(BaseStrategy):
                 continue
             working_copies.append(self.markt.get_working_copy())
             self.fill_fridge_with_soll_with_anywhere(exclude_ondernemer=ondernemer)
-            self.optimize_expansion(ondernemer)
+            self.optimize_assignment(ondernemer)
             all_allocated = self.reassign_ondernemers_from_the_fridge()
             if not all_allocated:
                 self.markt.report_indeling()
