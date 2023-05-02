@@ -72,6 +72,7 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
     markt.report_branches()
     stop = datetime.datetime.now()
     trace.set_phase(epic='end', story='meta', task='time')
+    trace.log(f"Allocation hash: {markt.kramen.calculate_custom_allocation_hash()}")
     trace.log(f"{stop} - duration {stop - start}")
 
     allocations, rejections = markt.get_allocations()
