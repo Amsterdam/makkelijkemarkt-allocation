@@ -137,6 +137,7 @@ class Markt(TraceMixin):
         }
 
     def get_allocations(self):
+        self.trace.set_report_phase(story='get_allocations', task='log')
         allocations = []
         rejections = []
         for ondernemer in self.ondernemers.all():
@@ -144,7 +145,9 @@ class Markt(TraceMixin):
             if ondernemer.kramen:
                 allocations.append(allocation)
             else:
+                self.trace.log(f"Ondernemer without kramen: {ondernemer}")
                 if not ondernemer.is_rejected:
+                    self.trace.log(f"Ondernemer not rejected yet, rejecting now: {ondernemer}")
                     ondernemer.reject(RejectionReason.UNKNOWN)
                 rejection = {
                     **allocation,

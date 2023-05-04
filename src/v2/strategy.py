@@ -306,6 +306,7 @@ class OptimizationStrategy(BaseStrategy):
             self.markt.report_indeling()
 
         for ondernemer, partner in swappers:
+            self.trace.set_phase(task='swap_ondernemers', group=ondernemer.status, agent=ondernemer.rank)
             self.trace.log(f"Swapping kramen from {ondernemer} and {partner}")
             all_kramen = [self.markt.kramen.kramen_map[kraam_id] for kraam_id in [*ondernemer.kramen, *partner.kramen]]
             verplichte_branche_diversity = set([kraam.has_verplichte_branche for kraam in all_kramen])
