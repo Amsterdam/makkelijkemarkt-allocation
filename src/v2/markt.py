@@ -74,16 +74,19 @@ class Markt(TraceMixin):
 
     def report_indeling(self):
         if self.trace.local:
+            ondernemer_map = self.ondernemers.ondernemers_map
             dataframes = []
             rows = sorted(self.kramen.as_rows(), key=lambda row: int(row[0].id))
             for row in rows:
                 display_row = []
                 for kraam in row:
+                    ondernemer = ondernemer_map[kraam.ondernemer] if kraam.ondernemer else None
+                    ondernemer_code = 'v' if ondernemer and ondernemer.is_vph else ''
                     kraam_data = {
                         'id': kraam.id,
                         'kraam_type': kraam.kraam_type,
                         'branche': kraam.branche.id[:4] if kraam.branche and kraam.branche.verplicht else '',
-                        'ondernemer': kraam.ondernemer if kraam.ondernemer else '',
+                        'ondernemer': f"{ondernemer_code}{kraam.ondernemer}" if kraam.ondernemer else '',
                     }
                     display_row.append(kraam_data)
                 display_row.append({'id': '|', 'ondernemer': '|', 'branche': '|', 'kraam_type': '|'})
