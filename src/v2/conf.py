@@ -193,3 +193,7 @@ class TraceMixin:
 class PhaseValue:
     unknown = Status.UNKNOWN
     event = 'event'
+
+
+class HaltOptimizationException(Exception):
+    pass

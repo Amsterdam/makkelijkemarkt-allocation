@@ -1,7 +1,7 @@
 from collections import deque
 from operator import attrgetter, sub
 
-from v2.conf import TraceMixin, Status, ALL_VPH_STATUS, PhaseValue
+from v2.conf import TraceMixin, Status, ALL_VPH_STATUS, PhaseValue, HaltOptimizationException
 from v2.allocations.vpl import VplAllocation
 from v2.allocations.soll import SollAllocation
 
@@ -189,9 +189,13 @@ class OptimizationStrategy(BaseStrategy):
 
     def run(self):
         self.trace.set_phase(story='optimize_all')
-        self.optimize_all_assignments()
-        self.optimize_all_assignments()
-        # This could be rewritten to a loop, but for now running it twice is more than good enough
+        try:
+            for limit in range(1, self.markt.max_aantal_kramen_per_ondernemer + 1):
+                self.optimize_all_assignments(limit=limit)
+        except HaltOptimizationException:
+            self.trace.log(f"Optimization of assignments halted")
+
+        self.trace.set_cycle()
         self.swap_ondernemers()
         self.finish()
 
@@ -231,12 +235,12 @@ class OptimizationStrategy(BaseStrategy):
                 self.trace.log(f"Could not reassign ondernemer from fridge: {soll}")
         return all_allocated
 
-    def optimize_assignment(self, ondernemer):
+    def optimize_assignment(self, ondernemer, limit):
         self.trace.set_phase(task='optimize_assignment', group=ondernemer.status, agent=ondernemer.rank)
-        current_amount_kramen = len(ondernemer.kramen)
+        self.trace.set_cycle(limit)
+        current_amount_kramen = ondernemer.kramen_count
         self.trace.log(f"Optimize assignment {ondernemer}")
-        self.markt.report_indeling()
-        size = min(current_amount_kramen + 1, self.markt.kramen_per_ondernemer)
+        size = min(limit, self.markt.max_aantal_kramen_per_ondernemer)
         branche = ondernemer.branche
         if branche.max:
             available = branche.max - branche.assigned_count
@@ -257,26 +261,31 @@ class OptimizationStrategy(BaseStrategy):
         if cluster:
             self.markt.report_indeling()
 
-    def optimize_all_assignments(self):
+    def optimize_all_assignments(self, limit):
         working_copies = []
         ondernemers = self.markt.ondernemers.select(status__in=[*ALL_VPH_STATUS, Status.SOLL], kraam_type=None)
-        for _ondernemer in sorted(ondernemers, key=attrgetter('kramen_count', 'seniority')):
+        for _ondernemer in sorted(ondernemers, key=attrgetter('seniority')):
             ondernemer = self.markt.ondernemers.ondernemers_map[_ondernemer.rank]
-            self.trace.set_phase(task='optimize_expansion', group=ondernemer.status, agent=ondernemer.rank)
+            self.trace.set_phase(task='optimize_assignment', group=ondernemer.status, agent=ondernemer.rank)
             if ondernemer.has_verplichte_branche:
+                self.trace.log(f"Ondernemer has verplichte branche, skipping {ondernemer}")
                 continue
-            if len(ondernemer.kramen) >= ondernemer.max:
-                self.trace.log(f"Ondernemer already at max {ondernemer}")
+            if ondernemer.kramen_count >= limit:
+                self.trace.log(f"Ondernemer already at limit {limit}, skipping {ondernemer}")
+                continue
+            if ondernemer.kramen_count >= ondernemer.max:
+                self.trace.log(f"Ondernemer already at max, skipping {ondernemer}")
                 continue
             working_copies.append(self.markt.get_working_copy())
             self.fill_fridge_with_soll_with_anywhere(exclude_ondernemer=ondernemer)
-            self.optimize_assignment(ondernemer)
+            self.optimize_assignment(ondernemer, limit)
             all_allocated = self.reassign_ondernemers_from_the_fridge()
             if not all_allocated:
                 self.markt.report_indeling()
-                self.trace.log(f"Could not optimize expansion for {ondernemer}, fallback to previous markt state")
+                self.trace.log(f"Could not optimize assignment for {ondernemer}, fallback to previous markt state")
                 self.markt.restore_working_copy(working_copies[-1])
                 self.markt.report_indeling()
+                raise HaltOptimizationException()
             else:
                 self.markt.report_indeling()
 
