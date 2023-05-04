@@ -74,16 +74,19 @@ class Markt(TraceMixin):
 
     def report_indeling(self):
         if self.trace.local:
+            ondernemer_map = self.ondernemers.ondernemers_map
             dataframes = []
             rows = sorted(self.kramen.as_rows(), key=lambda row: int(row[0].id))
             for row in rows:
                 display_row = []
                 for kraam in row:
+                    ondernemer = ondernemer_map[kraam.ondernemer] if kraam.ondernemer else None
+                    ondernemer_code = 'v' if ondernemer and ondernemer.is_vph else ''
                     kraam_data = {
                         'id': kraam.id,
                         'kraam_type': kraam.kraam_type,
                         'branche': kraam.branche.id[:4] if kraam.branche and kraam.branche.verplicht else '',
-                        'ondernemer': kraam.ondernemer if kraam.ondernemer else '',
+                        'ondernemer': f"{ondernemer_code}{kraam.ondernemer}" if kraam.ondernemer else '',
                     }
                     display_row.append(kraam_data)
                 display_row.append({'id': '|', 'ondernemer': '|', 'branche': '|', 'kraam_type': '|'})
@@ -137,6 +140,7 @@ class Markt(TraceMixin):
         }
 
     def get_allocations(self):
+        self.trace.set_report_phase(story='get_allocations', task='log')
         allocations = []
         rejections = []
         for ondernemer in self.ondernemers.all():
@@ -144,7 +148,9 @@ class Markt(TraceMixin):
             if ondernemer.kramen:
                 allocations.append(allocation)
             else:
+                self.trace.log(f"Ondernemer without kramen: {ondernemer}")
                 if not ondernemer.is_rejected:
+                    self.trace.log(f"Ondernemer not rejected yet, rejecting now: {ondernemer}")
                     ondernemer.reject(RejectionReason.UNKNOWN)
                 rejection = {
                     **allocation,
