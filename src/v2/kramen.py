@@ -268,7 +268,10 @@ class Kramen(TraceMixin):
         allocation = []
         for kraam in self.kramen_map.values():
             allocation.append((kraam.id, kraam.ondernemer))
-        return sum(mul(index + 1, ondernemer or 0) for index, (_, ondernemer) in enumerate(allocation))
+        try:
+            return sum(mul(index + 1, ondernemer or 0) for index, (_, ondernemer) in enumerate(allocation))
+        except Exception as e:
+            self.trace.log(f'Exception {e} while calculating custom hash')
 
     def unassign_ondernemer(self, ondernemer):
         for kraam in self.kramen_map.values():
