@@ -11,7 +11,7 @@ class VplAllocation(BaseAllocation):
             self.trace.set_phase(agent=ondernemer.rank)
             for kraam_id in ondernemer.own:
                 kraam = self.markt.kramen.get_kraam_by_id(kraam_id=kraam_id)
-                if not kraam:
+                if not kraam or kraam.is_blocked:
                     self.trace.log(f"Kraam {kraam_id} does not exist or is blocked")
                     ondernemer.reject(RejectionReason.KRAAM_DOES_NOT_EXIST)
                 else:
