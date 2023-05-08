@@ -59,10 +59,11 @@ class KraamType:
 
 
 class Kraam(TraceMixin):
-    def __init__(self, id, ondernemer=None, branche=None, **kwargs):
+    def __init__(self, id, ondernemer=None, branche=None, is_blocked=False, **kwargs):
         self.id = id
         self.ondernemer = ondernemer
         self.branche = branche
+        self.is_blocked = is_blocked
         self.kraam_type = KraamType(**kwargs)
 
     def __str__(self):
@@ -104,6 +105,8 @@ class Kraam(TraceMixin):
         return self.does_allow_ondernemer_branche(ondernemer) and self.does_allow_ondernemer_kraam_type(ondernemer)
 
     def assign(self, ondernemer):
+        if self.is_blocked:
+            return
         if self.ondernemer:
             if self.ondernemer == ondernemer.rank:
                 self.trace.log(f"Kraam {self.id} already assigned to own")
@@ -167,6 +170,9 @@ class Cluster(TraceMixin):
                 return False
         return True
 
+    def contains_blocked_kramen(self):
+        return any(kraam.is_blocked for kraam in self.kramen)
+
     def is_available(self, ondernemer=None):
         available_status = [None]
         if ondernemer:
@@ -179,9 +185,7 @@ class Cluster(TraceMixin):
     def suits_ondernemer_type(self, ondernemer):
         if ondernemer.status == Status.EB:
             contains_own_kramen = bool(set(ondernemer.own).intersection(self.kramen_list))
-            contains_prefs = bool(set(ondernemer.prefs).intersection(self.kramen_list))
-            is_suitable = contains_own_kramen and contains_prefs
-            self.trace.log(f"contains_own_kramen: {contains_own_kramen}, contains_prefs: {contains_prefs}")
+            is_suitable = contains_own_kramen
             self.trace.log(f"Suits ondernemer status {ondernemer.status}: {is_suitable}")
             return is_suitable
         return True
@@ -346,6 +350,8 @@ class Kramen(TraceMixin):
     def find_clusters(self, size=1, ondernemer=None, **filter_kwargs):
         clusters = []
         for cluster in self.make_clusters(size):
+            if cluster.contains_blocked_kramen():
+                continue
             if cluster.is_available(ondernemer) and cluster.has_props(**filter_kwargs):
                 clusters.append(cluster)
         if ondernemer:

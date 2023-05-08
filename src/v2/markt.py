@@ -83,7 +83,7 @@ class Markt(TraceMixin):
                     ondernemer = ondernemer_map[kraam.ondernemer] if kraam.ondernemer else None
                     ondernemer_code = 'v' if ondernemer and ondernemer.is_vph else ''
                     kraam_data = {
-                        'id': kraam.id,
+                        'id': f"{kraam.id}{'X' if kraam.is_blocked else ''}",
                         'kraam_type': kraam.kraam_type,
                         'branche': kraam.branche.id[:4] if kraam.branche and kraam.branche.verplicht else '',
                         'ondernemer': f"{ondernemer_code}{kraam.ondernemer}" if kraam.ondernemer else '',

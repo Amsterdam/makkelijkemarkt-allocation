@@ -56,8 +56,9 @@ class Parse(TraceMixin):
         for input_row in self.input_data['rows']:
             row = []
             for kraam in input_row:
+                is_blocked = False
                 if kraam['plaatsId'] in self.blocked_kramen:
-                    continue
+                    is_blocked = True
                 kraam_props = {}
 
                 branche_id = next(iter(kraam.get('branches')), None)
@@ -77,6 +78,7 @@ class Parse(TraceMixin):
                 row.append(Kraam(
                     id=kraam['plaatsId'],
                     branche=branche,
+                    is_blocked=is_blocked,
                     **kraam_props,
                 ))
             self.rows.append(row)

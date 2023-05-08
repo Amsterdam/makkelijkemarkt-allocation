@@ -67,6 +67,7 @@ def allocate(markt_meta, rows, branches, ondernemers, *args, **kwargs):
     fill_up_strategy_b_list = FillUpStrategyBList(markt, **remaining_query)
     fill_up_strategy_b_list.run()
 
+    markt.report_indeling()
     markt.report_ondernemers()
     markt.report_rejections()
     markt.report_branches()
