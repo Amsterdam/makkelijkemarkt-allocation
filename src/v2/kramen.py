@@ -185,7 +185,9 @@ class Cluster(TraceMixin):
     def suits_ondernemer_type(self, ondernemer):
         if ondernemer.status == Status.EB:
             contains_own_kramen = bool(set(ondernemer.own).intersection(self.kramen_list))
-            is_suitable = contains_own_kramen
+            contains_prefs = bool(set(ondernemer.prefs).intersection(self.kramen_list))
+            is_suitable = contains_own_kramen and contains_prefs
+            self.trace.log(f"contains_own_kramen: {contains_own_kramen}, contains_prefs: {contains_prefs}")
             self.trace.log(f"Suits ondernemer status {ondernemer.status}: {is_suitable}")
             return is_suitable
         return True
