@@ -256,7 +256,11 @@ class OptimizationStrategy(BaseStrategy):
                                                     should_include=ondernemer.kramen,
                                                     peer_prefs=peer_prefs,
                                                     **self.kramen_filter_kwargs)
-        self.markt.kramen.move_ondernemer_to_new_cluster(ondernemer, cluster)
+
+        if ondernemer.can_move:
+            self.markt.kramen.move_ondernemer_to_new_cluster(ondernemer, cluster)
+        else:
+            cluster.assign(ondernemer)
 
         if cluster:
             self.markt.report_indeling()
