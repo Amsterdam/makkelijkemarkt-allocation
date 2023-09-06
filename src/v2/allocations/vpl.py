@@ -24,7 +24,7 @@ class VplAllocation(BaseAllocation):
         """
         TVPLZ: a TVPL with no vaste kraam (Zonder) from Mercato.
         Typically, purposefully non-existent vaste kramen are assigned to them in Mercato.
-        Because these are not available, they receive kramen before soll and uitbreiders.
+        Because these are not available, they receive kramen before soll.
         Prefs are given as much as possible, and they need to have anywhere=True in case prefs are not available
         """
         ondernemers = self.markt.ondernemers.select(status=Status.TVPLZ, allocated=False,
@@ -32,7 +32,7 @@ class VplAllocation(BaseAllocation):
         for ondernemer in ondernemers:
             self.trace.set_phase(agent=ondernemer.rank)
             self.trace.log(f"Trying to allocate TVPLZ {ondernemer}")
-            size = min(ondernemer.max, self.markt.kramen_per_ondernemer)
+            size = len(ondernemer.own)
             peer_prefs = self.markt.ondernemers.get_prefs_from_unallocated_peers(peer_status=ondernemer.status,
                                                                                  **self.ondernemer_filter_kwargs)
             cluster = self.markt.kramen.get_cluster(size=size, ondernemer=ondernemer, peer_prefs=peer_prefs,

@@ -118,7 +118,6 @@ class HierarchyStrategy(BaseStrategy):
             self.markt.restore_working_copy(self.working_copies[0])  # fallback to the initial state
             self.markt.report_indeling()
 
-            vpl_allocation.allocate_tvplz()
             # first expand
             vpl_allocation.vph_uitbreiding(vph_status=Status.EB)
             vpl_allocation.vph_uitbreiding(vph_status=Status.VPL)
@@ -141,6 +140,8 @@ class HierarchyStrategy(BaseStrategy):
             vpl_allocation.vph_uitbreiding(vph_status=Status.TVPL)
             vpl_allocation.vph_uitbreiding(vph_status=Status.EXP)
             vpl_allocation.vph_uitbreiding(vph_status=Status.EXPF)
+            # tvplz have anywhere so they are last vph to be allocated
+            vpl_allocation.allocate_tvplz()
 
             soll_allocation = SollAllocation(self.markt)
             soll_allocation.set_ondernemer_filter_kwargs(**self.ondernemer_filter_kwargs)
