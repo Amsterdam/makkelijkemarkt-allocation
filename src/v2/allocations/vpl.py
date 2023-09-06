@@ -24,7 +24,7 @@ class VplAllocation(BaseAllocation):
         """
         TVPLZ: a TVPL with no vaste kraam (Zonder) from Mercato.
         Typically, purposefully non-existent vaste kramen are assigned to them in Mercato.
-        Because these are not available, they receive kramen before soll and uitbreiders.
+        Because these are not available, they receive kramen before soll.
         Prefs are given as much as possible, and they need to have anywhere=True in case prefs are not available
         """
         ondernemers = self.markt.ondernemers.select(status=Status.TVPLZ, allocated=False,
