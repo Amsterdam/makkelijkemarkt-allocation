@@ -196,13 +196,14 @@ class Parse(TraceMixin):
             if anywhere is None:
                 anywhere = False
                 self.trace.log(f"{log_entry} is missing anywhere value in profile, so defaulting to False")
-            if status == Status.TVPLZ and not anywhere:
-                self.trace.log(f"{log_entry} is {status.value} but anywhere not True, setting to True")
-                anywhere = True
 
             if status in ALL_VPH_STATUS and anywhere:
                 self.trace.log(f"{log_entry} is {status.value} with anywhere True, setting to False")
                 anywhere = False
+
+            if status == Status.TVPLZ and not anywhere:
+                self.trace.log(f"{log_entry} is {status.value} but anywhere not True, setting to True")
+                anywhere = True
 
             self.trace.set_phase(task='check_vph_has_kramen')
             if status in ALL_VPH_STATUS and not ondernemer_data['plaatsen']:
