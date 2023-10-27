@@ -1,0 +1,21 @@
+image:
+  registry: 127.0.0.1:5001
+  imagePullPolicy: Always
+
+host: localhost
+
+securityContext:
+  container:
+    readOnlyRootFilesystem: true
+
+secrets:
+  certificate:
+    enabled: false
+
+deployments:
+  allocation:
+    env:
+      APP_ENV: dev
+      REDIS_HOST: redis-master
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: insecure
