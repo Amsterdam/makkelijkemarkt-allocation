@@ -1,0 +1,37 @@
+name: allocation
+
+labels:
+  app: allocation
+
+image:
+  registry: saks01weuacrpgpgo5qvmwo.azurecr.io
+  tag: latest
+
+network:
+  allow-ingress:
+    selector: app == 'allocation'
+    ingress:
+      - action: Deny
+    egress:
+      - action: Allow
+
+serviceAccount: app
+serviceAccounts:
+  app: {}
+
+secrets:
+  certificate:
+    type: keyvault
+    tls: allocation
+
+deployments:
+  allocation:
+    image:
+      repository: salmagundi/allocation
+    # securityContext:
+    #   runAsUser: 82
+    selectorLabels:
+      component: allocation
+    containers:
+      - name: main
+
