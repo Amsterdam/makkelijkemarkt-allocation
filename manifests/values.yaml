@@ -28,8 +28,6 @@ deployments:
   allocation:
     image:
       repository: salmagundi/allocation
-    # securityContext:
-    #   runAsUser: 82
     selectorLabels:
       component: allocation
     containers:
