@@ -1,0 +1,6 @@
+version: "3"
+services:
+  allocation:
+    build:
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-salmagundi/allocation}:${VERSION:-latest}
